@@ -1,0 +1,1 @@
+upx --best --compress-icons=0 rebuild.exe

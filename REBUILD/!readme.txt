@@ -1,0 +1,1 @@
+This is for the rebuild tool to fix corrupted scripts for the games.
