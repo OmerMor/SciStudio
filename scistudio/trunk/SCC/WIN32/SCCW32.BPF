@@ -1,0 +1,12 @@
+USEUNIT("win32main.c");
+USEUNIT("..\code.c");
+USEUNIT("..\data.c");
+USEUNIT("..\scc.c");
+USEUNIT("..\strhndlr.c");
+USEUNIT("..\vocab.c");
+USEUNIT("..\dirlist.c");
+//---------------------------------------------------------------------------
+This file is used by the project manager only and should be treated like the project file
+
+
+main
