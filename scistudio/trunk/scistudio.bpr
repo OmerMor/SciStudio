@@ -4,22 +4,22 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="bin\scistudio.exe"/>
-    <OBJFILES value="immediate\scistudio.obj immediate\main.obj immediate\ssalloc.obj 
-      immediate\ssfileio.obj immediate\ssgame.obj immediate\ssmessage.obj 
-      immediate\ssres.obj immediate\explorer.obj immediate\sseditors.obj 
-      immediate\addresource.obj immediate\properties.obj immediate\about.obj 
-      immediate\resrebuild.obj immediate\dirdialog.obj immediate\ssresdecode.obj 
-      immediate\textedit.obj immediate\vocabedit.obj immediate\vocabfind.obj 
-      immediate\viewedit.obj immediate\gfxedits.obj immediate\scriptedit.obj 
-      immediate\config.obj immediate\settings.obj immediate\newroom.obj 
-      immediate\splash.obj immediate\picrender.obj immediate\picedit.obj 
-      immediate\colourselect.obj immediate\piccommand.obj immediate\wait.obj 
-      immediate\viewani.obj immediate\fonttest.obj immediate\viewfont.obj 
-      immediate\checkversion.obj immediate\expcels.obj immediate\printprev.obj 
-      immediate\editorprops.obj immediate\makefile.obj immediate\newgame.obj 
-      immediate\welcome.obj immediate\paledit.obj immediate\addword.obj 
-      immediate\lzs.obj immediate\pkdcl.obj immediate\StdAfx.obj 
-      immediate\impbitmap.obj"/>
+    <OBJFILES value="immediate\MENUBAR.obj immediate\scistudio.obj immediate\main.obj 
+      immediate\ssalloc.obj immediate\ssfileio.obj immediate\ssgame.obj 
+      immediate\ssmessage.obj immediate\ssres.obj immediate\explorer.obj 
+      immediate\sseditors.obj immediate\addresource.obj immediate\properties.obj 
+      immediate\about.obj immediate\resrebuild.obj immediate\dirdialog.obj 
+      immediate\ssresdecode.obj immediate\textedit.obj immediate\vocabedit.obj 
+      immediate\vocabfind.obj immediate\viewedit.obj immediate\gfxedits.obj 
+      immediate\scriptedit.obj immediate\config.obj immediate\settings.obj 
+      immediate\newroom.obj immediate\splash.obj immediate\picrender.obj 
+      immediate\picedit.obj immediate\colourselect.obj immediate\piccommand.obj 
+      immediate\wait.obj immediate\viewani.obj immediate\fonttest.obj 
+      immediate\viewfont.obj immediate\checkversion.obj immediate\expcels.obj 
+      immediate\printprev.obj immediate\editorprops.obj immediate\makefile.obj 
+      immediate\newgame.obj immediate\welcome.obj immediate\paledit.obj 
+      immediate\addword.obj immediate\lzs.obj immediate\pkdcl.obj 
+      immediate\StdAfx.obj immediate\impbitmap.obj"/>
     <RESFILES value="scistudio.res cursors.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -37,13 +37,13 @@
       VCLBDE50.bpi VCLDBX50.bpi QRPT50.bpi TEEUI50.bpi TEEDB50.bpi TEE50.bpi 
       DSS50.bpi TEEQR50.bpi VCLIB50.bpi"/>
     <PATHCPP value=".;"/>
-    <PATHPAS value=".;"/>
+    <PATHPAS value=".;Components"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
     <LINKER value="tlink32"/>
-    <USERDEFINES value="SCC_SCISTUDIO_WIN32;_DEBUG"/>
+    <USERDEFINES value="SCC_SCISTUDIO_WIN32;NO_WIN32_LEAN_AND_MEAN"/>
     <SYSDEFINES value="NO_STRICT"/>
     <MAINSOURCE value="scistudio.cpp"/>
     <INCLUDEPATH value="components;scc;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source"/>
@@ -55,12 +55,12 @@
     <IDLCFLAGS value="-Icomponents -Iscc -I&quot;C:\Program Files\Borland\CBuilder5\Projects\.&quot; 
       -I$(BCB)\include -I$(BCB)\include\vcl -Icomponents\synedit\source 
       -src_suffix cpp -DSCC_SCISTUDIO_WIN32 -D_DEBUG -boa"/>
-    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -xp -X- -r- -a8 -b- -k -y -v -vi- 
-      -c -tW -tWM"/>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Q -Vx -Ve -xp -RT- -X- -r- -a8 -b- -k -y 
+      -v -vi- -c -tW -tWM"/>
     <PFLAGS value="-N2immediate -N0immediate -$Y+ -$W -$O- -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zi"/>
-    <LFLAGS value="-l&quot;E:\scistudio3\immediate\&quot; -Iimmediate -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+    <LFLAGS value="-l&quot;C:\Dev\scidev\scistudio\immediate\&quot; -Iimmediate -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
   </OPTIONS>
   <LINKER>
     <ALLOBJ value="c0w32.obj sysinit.obj $(OBJFILES)"/>
@@ -72,9 +72,9 @@
 IncludeVerInfo=1
 AutoIncBuild=0
 MajorVer=3
-MinorVer=1
+MinorVer=2
 Release=0
-Build=36
+Build=0
 Debug=0
 PreRelease=1
 Special=0
@@ -84,16 +84,16 @@ Locale=4105
 CodePage=1252
 
 [Version Info Keys]
-CompanyName=Brian Provinciano
-FileDescription=SCI Studio 3+ Program
-FileVersion=3.1.0.36
-InternalName=SCI Studio 3+
+CompanyName=Omni+
+FileDescription=SCI Studio 3.2 Program
+FileVersion=3.2.0.0
+InternalName=SCI Studio 3.2
 LegalCopyright=© 1999-2003 Brian Provinciano
 LegalTrademarks=
 OriginalFilename=scistudio.exe
 ProductName=SCI Studio
-ProductVersion=3.+
-Comments=Brian Provinciano!
+ProductVersion=3.2
+Comments=Omni!
 
 [HistoryLists\hlIncludePath]
 Count=9
@@ -123,10 +123,11 @@ Count=1
 Item0=$(BCB)\source\vcl
 
 [HistoryLists\hlConditionals]
-Count=3
-Item0=SCC_SCISTUDIO_WIN32;_DEBUG
+Count=4
+Item0=SCC_SCISTUDIO_WIN32;NO_WIN32_LEAN_AND_MEAN
 Item1=SCC_SCISTUDIO_WIN32
-Item2=_DEBUG
+Item2=SCC_SCISTUDIO_WIN32;_DEBUG
+Item3=_DEBUG
 
 [HistoryLists\hlIntOutputDir]
 Count=2
@@ -139,11 +140,12 @@ Item0=bin\
 Item1=bin
 
 [HistoryLists\hIBPIOutputDir]
-Count=4
-Item0=E:\scistudio3\immediate\
-Item1=immediate\
-Item2=C:\Brian Stuff\scistudio3\immediate\
-Item3=immediate
+Count=5
+Item0=C:\Dev\scidev\scistudio\immediate\
+Item1=E:\scistudio3\immediate\
+Item2=immediate\
+Item3=C:\Brian Stuff\scistudio3\immediate\
+Item4=immediate
 
 [Debugging]
 DebugSourceDirs=$(BCB)\source\vcl
@@ -158,10 +160,5 @@ RemoteDebug=0
 [Compiler]
 ShowInfoMsgs=0
 LinkDebugVcl=0
-
-[CORBA]
-AddServerUnit=1
-AddClientUnit=1
-PrecompiledHeaders=1
   </IDEOPTIONS>
 </PROJECT>
