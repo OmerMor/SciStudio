@@ -99,8 +99,7 @@ int main(int argc, char *argv[])
 
 	printf(
 		"SCI Script Compiler\n"
-		"Version %d.%d.%d - (%s)\n"
-		"By Brian Provinciano\n\n",
+		"Version %d.%d.%d - (%s)\n",
 		VERSION.Major,VERSION.Minor,VERSION.Build,
 		PLATFORM_NAME
 	);          /*
