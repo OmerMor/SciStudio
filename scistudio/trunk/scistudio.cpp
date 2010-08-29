@@ -49,6 +49,7 @@ USEUNIT("lzs.cpp");
 USEUNIT("pkdcl.cpp");
 USEUNIT("StdAfx.cpp");
 USEFORM("impbitmap.cpp", DlgImpBitmap);
+USEUNIT("Components\MENUBAR.PAS");
 //---------------------------------------------------------------------------
 char sCmdLine[1024];
 //---------------------------------------------------------------------------
@@ -61,7 +62,7 @@ WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR CmdLn, int)
 		Application->Initialize();
 		Application->Title = "SCI Studio 3+";
 		Application->CreateForm(__classid(TWndMain), &WndMain);
-		Application->Run();
+                 Application->Run();
 	}
 	catch (Exception &exception)
 	{
