@@ -1461,7 +1461,7 @@ object DlgAbout: TDlgAbout
     Width = 111
     Height = 13
     Cursor = crHandPoint
-    Caption = 'http://scistudio.sourceforge.net/'
+    Caption = 'http://scistudio.sf.net/'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
     Font.Height = -11
@@ -1919,7 +1919,7 @@ object DlgAbout: TDlgAbout
       
         '    -the SCI11 and SCI32 decompression routines (dcl_unpack, lzs' +
         '_unpack)'
-      'The mwEdit and SynEdit team (http://synedit.sourceforge.net):'
+      'The mwEdit and SynEdit team (http://synedit.sf.net):'
       '    -syntax highlighting code')
     ParentFont = False
     ReadOnly = True

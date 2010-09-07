@@ -38,7 +38,7 @@ void __fastcall TDlgAbout::OKBtnClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TDlgAbout::Label8Click(TObject *Sender)
 {
-    ShellExecute(Handle, 0, "http://scistudio.sourceforge.net/", 0, 0, SW_NORMAL);
+    ShellExecute(Handle, 0, "http://scistudio.sf.net/", 0, 0, SW_NORMAL);
 }
 //---------------------------------------------------------------------------
 void __fastcall TDlgAbout::FormClose(TObject *Sender, TCloseAction &Action)

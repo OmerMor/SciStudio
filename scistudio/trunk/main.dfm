@@ -9166,11 +9166,6 @@ object WndMain: TWndMain
     end
     object Web1: TMenuItem
       Caption = 'W&eb'
-      object CheckforLatestVersion1: TMenuItem
-        Caption = '&Check for Latest Version'
-        ImageIndex = 102
-        OnClick = CheckforLatestVersion1Click
-      end
       object GotoSCIStudiosWebSite1: TMenuItem
         Caption = 'Go to SCI Studio'#39's Official Web Site'
         ImageIndex = 101

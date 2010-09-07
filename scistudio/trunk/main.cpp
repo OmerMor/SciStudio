@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 // SCI Studio 3.0
-// http://scistudio.sourceforge.net/
+// http://scistudio.sf.net/
 //---------------------------------------------------------------------------
 
 #include <vcl.h>     
@@ -564,54 +564,54 @@ void __fastcall TWndMain::SCIVersionDetector1Click(TObject *Sender)
 //---------------------------------------------------------------------------
 
 
-void __fastcall TWndMain::CheckforLatestVersion1Click(TObject *Sender)
-{
-    HINTERNET hSession;
-    hSession = InternetOpen(PROGRAM_NAME, INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
-    if(!hSession) ShowMessage("Error obtaining latest version information!");
-
-    DWORD dwSize;
-    CHAR   szHead[] = "Accept: */*\r\n\r\n";
-    char szTemp[21];
-    HINTERNET  hConnect;
-
-    TDlgCheckVersion *VersionDlg=new TDlgCheckVersion(this);
-    VersionDlg->Label2->Caption = " Checking for the latest version...";
-	VersionDlg->Label3->Caption = ("Connecting...");
-    VersionDlg->Show();
-    VersionDlg->Repaint();
-    VersionDlg->Animate();
-    hConnect = InternetOpenUrl((HINTERNET)hSession, (LPCTSTR)"http://scistudio.sourceforge.net/", (LPCTSTR)szHead, (DWORD) lstrlen(szHead),
-       (DWORD )INTERNET_FLAG_DONT_CACHE, NULL);  
-    VersionDlg->Animate();
-    if(!hConnect) {
-        VersionDlg->Label3->Caption = ("Error obtaining latest version information!");
-        return;
-    }
-    for(int i=0;i<20;i++) {
-		VersionDlg->Animate();
-    	if(!InternetReadFile (hConnect, szTemp+i, 1,  &dwSize) || dwSize>1) {
-        	VersionDlg->Label3->Caption = ("Error obtaining latest version information!");
-        	return;
-    	}
-    }
-    VersionDlg->Animate();
-    VersionDlg->Label2->Caption = " Checking for the latest version...done";
-    if(strcmp(PROGRAM_VERSION,szTemp)==0)
-        VersionDlg->Label3->Caption = ("There is currently no newer version available.");
-    else {
-    	VersionDlg->Label3->Font->Style = TFontStyles()<< fsBold;
-        VersionDlg->Label3->Caption = ("There is a newer version available!");
-        VersionDlg->Label4->Caption = (
-                                       "You are using "+AnsiString(PROGRAM_VERSION)+"."
-                                       "\nThe latest version is "+AnsiString(szTemp)+".");
-    }
-}
+//void __fastcall TWndMain::CheckforLatestVersion1Click(TObject *Sender)
+//{
+//  HINTERNET hSession;
+//    hSession = InternetOpen(PROGRAM_NAME, INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
+//    if(!hSession) ShowMessage("Error obtaining latest version information!");
+//
+//    DWORD dwSize;
+//    CHAR   szHead[] = "Accept: */*\r\n\r\n";
+//    char szTemp[21];
+//    HINTERNET  hConnect;
+//
+//    TDlgCheckVersion *VersionDlg=new TDlgCheckVersion(this);
+//    VersionDlg->Label2->Caption = " Checking for the latest version...";
+//	VersionDlg->Label3->Caption = ("Connecting...");
+//    VersionDlg->Show();
+//    VersionDlg->Repaint();
+//    VersionDlg->Animate();
+//    hConnect = InternetOpenUrl((HINTERNET)hSession, (LPCTSTR)"http://scistudio.sf.net/", (LPCTSTR)szHead, (DWORD) lstrlen(szHead),
+//       (DWORD )INTERNET_FLAG_DONT_CACHE, NULL);  
+//    VersionDlg->Animate();
+//    if(!hConnect) {
+//        VersionDlg->Label3->Caption = ("Error obtaining latest version information!");
+//        return;
+//}
+//    for(int i=0;i<20;i++) {
+//		VersionDlg->Animate();
+//   	if(!InternetReadFile (hConnect, szTemp+i, 1,  &dwSize) || dwSize>1) {
+//        	VersionDlg->Label3->Caption = ("Error obtaining latest version information!");
+//        	return;
+//    	}
+//    }
+//    VersionDlg->Animate();
+//    VersionDlg->Label2->Caption = " Checking for the latest version...done";
+//    if(strcmp(PROGRAM_VERSION,szTemp)==0)
+//        VersionDlg->Label3->Caption = ("There is currently no newer version available.");
+//    else {
+//    	VersionDlg->Label3->Font->Style = TFontStyles()<< fsBold;
+//       VersionDlg->Label3->Caption = ("There is a newer version available!");
+//        VersionDlg->Label4->Caption = (
+//                                       "You are using "+AnsiString(PROGRAM_VERSION)+"."
+//                                       "\nThe latest version is "+AnsiString(szTemp)+".");
+//    }
+//} 
 //---------------------------------------------------------------------------
 
 void __fastcall TWndMain::GotoSCIStudiosWebSite1Click(TObject *Sender)
 {
-    ShellExecute(Handle, 0, "http://scistudio.sourceforge.net/", 0, 0, SW_NORMAL);
+    ShellExecute(Handle, 0, "http://scistudio.sf.net/", 0, 0, SW_NORMAL);
 }
 //---------------------------------------------------------------------------
 

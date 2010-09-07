@@ -104,7 +104,7 @@ __published:	// IDE-managed Components
 	TMenuItem *WindowMinimizeItem;
 	TMenuItem *WindowArrangeItem;
 	TMenuItem *Web1;
-	TMenuItem *CheckforLatestVersion1;
+	//TMenuItem *CheckforLatestVersion1;
 	TMenuItem *GotoSCIStudiosWebSite1;
 	TMenuItem *Help1;
 	TMenuItem *Contents1;
@@ -181,7 +181,7 @@ __published:	// IDE-managed Components
 	void __fastcall StatusBar2Click(TObject *Sender);
 	void __fastcall FullScreen1Click(TObject *Sender);
 	void __fastcall SCIVersionDetector1Click(TObject *Sender);
-	void __fastcall CheckforLatestVersion1Click(TObject *Sender);
+	//void __fastcall CheckforLatestVersion1Click(TObject *Sender);
 	void __fastcall GotoSCIStudiosWebSite1Click(TObject *Sender);
 	void __fastcall Contents1Click(TObject *Sender);
 	void __fastcall Index1Click(TObject *Sender);
