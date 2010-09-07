@@ -2418,7 +2418,7 @@ object DlgSplash: TDlgSplash
     Width = 229
     Height = 17
     AutoSize = False
-    Caption = '© 1999-2003 Brian Provinciano'
+    Caption = ''
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clYellow
     Font.Height = -11

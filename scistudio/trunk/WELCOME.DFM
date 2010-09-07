@@ -475,7 +475,7 @@ object DlgWelcome: TDlgWelcome
         Height = 14
         Cursor = crHandPoint
         Alignment = taCenter
-        Caption = 'http://www.bripro.com'
+        Caption = 'http://scistudio.sourceforge.net/'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clBlue
         Font.Height = -12

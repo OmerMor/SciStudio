@@ -1,7 +1,6 @@
 //---------------------------------------------------------------------------
 // SCI Studio 3.0
-// By Brian Provinciano
-// (c) 1999-2003 Brian Provinciano
+// http://scistudio.sourceforge.net/
 //---------------------------------------------------------------------------
 
 #include <vcl.h>     
@@ -30,7 +29,7 @@ ssPGM Program = {
  	PROGRAM_TITLE,
     PROGRAM_VERSION,
     PROGRAM_BUILDDATE,
- 	"Brian Provinciano",
+ 	"",
 	""
 };
 //---------------------------------------------------------------------------
@@ -582,7 +581,7 @@ void __fastcall TWndMain::CheckforLatestVersion1Click(TObject *Sender)
     VersionDlg->Show();
     VersionDlg->Repaint();
     VersionDlg->Animate();
-    hConnect = InternetOpenUrl((HINTERNET)hSession, (LPCTSTR)"http://www.bripro.com/scistudio/version.x", (LPCTSTR)szHead, (DWORD) lstrlen(szHead),
+    hConnect = InternetOpenUrl((HINTERNET)hSession, (LPCTSTR)"http://scistudio.sourceforge.net/", (LPCTSTR)szHead, (DWORD) lstrlen(szHead),
        (DWORD )INTERNET_FLAG_DONT_CACHE, NULL);  
     VersionDlg->Animate();
     if(!hConnect) {
@@ -612,7 +611,7 @@ void __fastcall TWndMain::CheckforLatestVersion1Click(TObject *Sender)
 
 void __fastcall TWndMain::GotoSCIStudiosWebSite1Click(TObject *Sender)
 {
-    ShellExecute(Handle, 0, "http://www.bripro.com/scistudio", 0, 0, SW_NORMAL);
+    ShellExecute(Handle, 0, "http://scistudio.sourceforge.net/", 0, 0, SW_NORMAL);
 }
 //---------------------------------------------------------------------------
 

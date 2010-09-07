@@ -34,7 +34,7 @@ void __fastcall TDlgWelcome::Button2Click(TObject *Sender)
 
 void __fastcall TDlgWelcome::Label7Click(TObject *Sender)
 {
-    ShellExecute(Handle, 0, "http://www.bripro.com/scistudio", 0, 0, SW_NORMAL);
+    ShellExecute(Handle, 0, "http://scistudio.sourceforge.net/", 0, 0, SW_NORMAL);
 }
 //---------------------------------------------------------------------------
 

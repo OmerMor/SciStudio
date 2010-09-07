@@ -6,20 +6,25 @@
     <PROJECT value="bin\scistudio.exe"/>
     <OBJFILES value="intermediate\MENUBAR.obj intermediate\scistudio.obj intermediate\main.obj 
       intermediate\ssalloc.obj intermediate\ssfileio.obj intermediate\ssgame.obj 
-      intermediate\ssmessage.obj intermediate\ssres.obj intermediate\explorer.obj 
-      intermediate\sseditors.obj intermediate\addresource.obj intermediate\properties.obj 
-      intermediate\about.obj intermediate\resrebuild.obj intermediate\dirdialog.obj 
-      intermediate\ssresdecode.obj intermediate\textedit.obj intermediate\vocabedit.obj 
-      intermediate\vocabfind.obj intermediate\viewedit.obj intermediate\gfxedits.obj 
-      intermediate\scriptedit.obj intermediate\config.obj intermediate\settings.obj 
-      intermediate\newroom.obj intermediate\splash.obj intermediate\picrender.obj 
-      intermediate\picedit.obj intermediate\colourselect.obj intermediate\piccommand.obj 
-      intermediate\wait.obj intermediate\viewani.obj intermediate\fonttest.obj 
-      intermediate\viewfont.obj intermediate\checkversion.obj intermediate\expcels.obj 
-      intermediate\printprev.obj intermediate\editorprops.obj intermediate\makefile.obj 
-      intermediate\newgame.obj intermediate\welcome.obj intermediate\paledit.obj 
-      intermediate\addword.obj intermediate\lzs.obj intermediate\pkdcl.obj 
-      intermediate\StdAfx.obj intermediate\impbitmap.obj"/>
+      intermediate\ssmessage.obj intermediate\ssres.obj 
+      intermediate\explorer.obj intermediate\sseditors.obj 
+      intermediate\addresource.obj intermediate\properties.obj 
+      intermediate\about.obj intermediate\resrebuild.obj 
+      intermediate\dirdialog.obj intermediate\ssresdecode.obj 
+      intermediate\textedit.obj intermediate\vocabedit.obj 
+      intermediate\vocabfind.obj intermediate\viewedit.obj 
+      intermediate\gfxedits.obj intermediate\scriptedit.obj 
+      intermediate\config.obj intermediate\settings.obj intermediate\newroom.obj 
+      intermediate\splash.obj intermediate\picrender.obj 
+      intermediate\picedit.obj intermediate\colourselect.obj 
+      intermediate\piccommand.obj intermediate\wait.obj intermediate\viewani.obj 
+      intermediate\fonttest.obj intermediate\viewfont.obj 
+      intermediate\checkversion.obj intermediate\expcels.obj 
+      intermediate\printprev.obj intermediate\editorprops.obj 
+      intermediate\makefile.obj intermediate\newgame.obj 
+      intermediate\welcome.obj intermediate\paledit.obj intermediate\addword.obj 
+      intermediate\lzs.obj intermediate\pkdcl.obj intermediate\StdAfx.obj 
+      intermediate\impbitmap.obj"/>
     <RESFILES value="scistudio.res cursors.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -60,8 +65,8 @@
     <PFLAGS value="-N2intermediate -N0intermediate -$Y- -$L- -$D- -$C- -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zi"/>
-    <LFLAGS value="-l&quot;intermediate\&quot; -Iintermediate -D&quot;&quot; -aa -Tpe 
-      -x -Gn"/>
+    <LFLAGS value="-l&quot;C:\Documents and Settings\Omni\Desktop\NEWSCIFOLDER\scistudio\trunk\intermediate\&quot; 
+      -Iintermediate -D&quot;&quot; -aa -Tpe -x -Gn"/>
   </OPTIONS>
   <LINKER>
     <ALLOBJ value="c0w32.obj sysinit.obj $(OBJFILES)"/>
@@ -77,7 +82,7 @@ MinorVer=1
 Release=0
 Build=0
 Debug=0
-PreRelease=1
+PreRelease=0
 Special=0
 Private=0
 DLL=0
@@ -85,13 +90,16 @@ Locale=4105
 CodePage=1252
 
 [Version Info Keys]
+CompanyName=
 FileDescription=SCI Studio 3+ Program
 FileVersion=3.1.0.0
 InternalName=SCI Studio 3+
+LegalCopyright=
 LegalTrademarks=
 OriginalFilename=scistudio.exe
 ProductName=SCI Studio
-ProductVersion=3.1
+ProductVersion=3.+
+Comments=
 
 [HistoryLists\hlIncludePath]
 Count=5
@@ -102,11 +110,12 @@ Item3=components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include
 Item4=C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=4
-Item0=$env(owlroot)\lib;$env(bc5root)\lib;$(BCB)\Projects\Lib;components;scc;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source;$(BCB)\Projects\
-Item2=$(BCB)\Projects\Lib;components;scc;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source;$(BCB)\Projects\
-Item3=$(BCB)\Projects\Lib;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source
-Item4=C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib
+Count=5
+Item0=$env(owlroot)\lib;$env(bc5root)\lib;$(BCB)\Projects\Lib;components;scc;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source;$(BCB)\Projects
+Item1=$env(owlroot)\lib;$env(bc5root)\lib;$(BCB)\Projects\Lib;components;scc;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source;$(BCB)\Projects\
+Item2=
+Item3=$(BCB)\Projects\Lib;components;scc;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source;$(BCB)\Projects\
+Item4=$(BCB)\Projects\Lib;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source
 
 [HistoryLists\hlDebugSourcePath]
 Count=1
@@ -118,17 +127,18 @@ Item0=SCC_SCISTUDIO_WIN32;NO_WIN32_LEAN_AND_MEAN
 Item1=SCC_SCISTUDIO_WIN32;_DEBUG
 
 [HistoryLists\hlIntOutputDir]
-Count=1
-Item0=intermediate\
+Count=2
+Item0=intermediate
+Item1=intermediate\
 
 [HistoryLists\hlFinalOutputDir]
 Count=1
 Item0=bin\
 
 [HistoryLists\hIBPIOutputDir]
-Count=1
-Item0=intermediate\BPI\
-
+Count=2
+Item0=intermediate\
+Item1=intermediate\BPI\
 
 [Debugging]
 DebugSourceDirs=$(BCB)\source\vcl
@@ -138,7 +148,7 @@ RunParams=
 HostApplication=
 RemoteHost=
 RemotePath=
-RemoteDebug=
+RemoteDebug=0
 
 [Compiler]
 ShowInfoMsgs=0

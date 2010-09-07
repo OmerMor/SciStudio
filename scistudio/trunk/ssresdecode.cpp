@@ -1,8 +1,6 @@
 //---------------------------------------------------------------------------
 // SCI Studio 3+
-// By Brian Provinciano
-// www.bripro.com
-// (c) 1999-2003 Brian Provinciano
+// http://scistudio.sourceforge.net/
 //---------------------------------------------------------------------------
 #include "scihdr.h"
 #include "scc\scc.h"   
