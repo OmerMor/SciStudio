@@ -16,10 +16,10 @@ __fastcall TDlgAbout::TDlgAbout(TComponent* Owner)
     Label2->Caption = AnsiString(Program.name);
     Label3->Caption = "Version "+AnsiString(Program.version)+"   "+AnsiString(Program.buildDate);
 
-    Memo1->Lines->Add((AnsiString)"This program is FREEWARE. You are encouraged to share it with everyone and use it for free forever. However, you can not sell it, not even for the cost of the disks! It comes with no warranty!");
     Memo1->Lines->Add((AnsiString)"");
     Memo1->Lines->Add((AnsiString)"Special Thanks to...");
-    Memo1->Lines->Add((AnsiString)"...Yannick Bertrand, Ravi Iyengar, Carl Muckenhoupt, Christoph Reichenbach, Lars Skovlund and Rink Springer for all the help they have given me with SCI resource decoding.");
+    Memo1->Lines->Add((AnsiString)"...Brian Provinciano the origional creator.");
+    Memo1->Lines->Add((AnsiString)"...Yannick Bertrand, Ravi Iyengar, Carl Muckenhoupt, Christoph Reichenbach, Lars Skovlund and Rink Springer.");
     Memo1->Lines->Add((AnsiString)"...Ravi Iyengar and Juha Terho for proof reading the tutorial.");
     Memo1->Lines->Add((AnsiString)"...The Beta Testers: Ravi Iyengar, Matt Hargett.");
 
@@ -38,7 +38,7 @@ void __fastcall TDlgAbout::OKBtnClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TDlgAbout::Label8Click(TObject *Sender)
 {
-    ShellExecute(Handle, 0, "http://www.bripro.com/scistudio", 0, 0, SW_NORMAL);
+    ShellExecute(Handle, 0, "http://scistudio.sourceforge.net/", 0, 0, SW_NORMAL);
 }
 //---------------------------------------------------------------------------
 void __fastcall TDlgAbout::FormClose(TObject *Sender, TCloseAction &Action)

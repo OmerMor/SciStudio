@@ -1407,7 +1407,7 @@ object DlgAbout: TDlgAbout
     Top = 112
     Width = 200
     Height = 13
-    Caption = 'Copyright © 1999-2004 Brian Provinciano'
+    Caption = ''
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -1423,10 +1423,7 @@ object DlgAbout: TDlgAbout
     Height = 22
     Alignment = taCenter
     AutoSize = False
-    Caption = 
-      'SCI Studio is dedicated to Al Lowe, Ken Williams, Roberta Willia' +
-      'ms, Scott Murphy and the rest of Sierra. Thank you for producing' +
-      ' so many excellent SCI games!'
+    Caption = ''
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -9
@@ -1447,7 +1444,7 @@ object DlgAbout: TDlgAbout
     Top = 370
     Width = 107
     Height = 16
-    Caption = 'Made in Canada!'
+    Caption = ''
     Color = clBtnFace
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWhite
@@ -1464,7 +1461,7 @@ object DlgAbout: TDlgAbout
     Width = 111
     Height = 13
     Cursor = crHandPoint
-    Caption = 'http://www.bripro.com'
+    Caption = 'http://scistudio.sourceforge.net/'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
     Font.Height = -11
@@ -1493,7 +1490,7 @@ object DlgAbout: TDlgAbout
     Top = 112
     Width = 97
     Height = 13
-    Caption = 'By Brian Provinciano'
+    Caption = 'Created by Brian Provinciano'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -1849,7 +1846,7 @@ object DlgAbout: TDlgAbout
     Top = 198
     Width = 353
     Height = 13
-    Caption = 'Special Thanks To The Following For Their Generous Donations:'
+    Caption = 'Special Thanks To The Following:'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11

@@ -4,22 +4,22 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="bin\scistudio.exe"/>
-    <OBJFILES value="immediate\MENUBAR.obj immediate\scistudio.obj immediate\main.obj 
-      immediate\ssalloc.obj immediate\ssfileio.obj immediate\ssgame.obj 
-      immediate\ssmessage.obj immediate\ssres.obj immediate\explorer.obj 
-      immediate\sseditors.obj immediate\addresource.obj immediate\properties.obj 
-      immediate\about.obj immediate\resrebuild.obj immediate\dirdialog.obj 
-      immediate\ssresdecode.obj immediate\textedit.obj immediate\vocabedit.obj 
-      immediate\vocabfind.obj immediate\viewedit.obj immediate\gfxedits.obj 
-      immediate\scriptedit.obj immediate\config.obj immediate\settings.obj 
-      immediate\newroom.obj immediate\splash.obj immediate\picrender.obj 
-      immediate\picedit.obj immediate\colourselect.obj immediate\piccommand.obj 
-      immediate\wait.obj immediate\viewani.obj immediate\fonttest.obj 
-      immediate\viewfont.obj immediate\checkversion.obj immediate\expcels.obj 
-      immediate\printprev.obj immediate\editorprops.obj immediate\makefile.obj 
-      immediate\newgame.obj immediate\welcome.obj immediate\paledit.obj 
-      immediate\addword.obj immediate\lzs.obj immediate\pkdcl.obj 
-      immediate\StdAfx.obj immediate\impbitmap.obj"/>
+    <OBJFILES value="intermediate\MENUBAR.obj intermediate\scistudio.obj intermediate\main.obj 
+      intermediate\ssalloc.obj intermediate\ssfileio.obj intermediate\ssgame.obj 
+      intermediate\ssmessage.obj intermediate\ssres.obj intermediate\explorer.obj 
+      intermediate\sseditors.obj intermediate\addresource.obj intermediate\properties.obj 
+      intermediate\about.obj intermediate\resrebuild.obj intermediate\dirdialog.obj 
+      intermediate\ssresdecode.obj intermediate\textedit.obj intermediate\vocabedit.obj 
+      intermediate\vocabfind.obj intermediate\viewedit.obj intermediate\gfxedits.obj 
+      intermediate\scriptedit.obj intermediate\config.obj intermediate\settings.obj 
+      intermediate\newroom.obj intermediate\splash.obj intermediate\picrender.obj 
+      intermediate\picedit.obj intermediate\colourselect.obj intermediate\piccommand.obj 
+      intermediate\wait.obj intermediate\viewani.obj intermediate\fonttest.obj 
+      intermediate\viewfont.obj intermediate\checkversion.obj intermediate\expcels.obj 
+      intermediate\printprev.obj intermediate\editorprops.obj intermediate\makefile.obj 
+      intermediate\newgame.obj intermediate\welcome.obj intermediate\paledit.obj 
+      intermediate\addword.obj intermediate\lzs.obj intermediate\pkdcl.obj 
+      intermediate\StdAfx.obj intermediate\impbitmap.obj"/>
     <RESFILES value="scistudio.res cursors.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -46,8 +46,8 @@
     <USERDEFINES value="SCC_SCISTUDIO_WIN32;NO_WIN32_LEAN_AND_MEAN"/>
     <SYSDEFINES value="NO_STRICT"/>
     <MAINSOURCE value="scistudio.cpp"/>
-    <INCLUDEPATH value="components;scc;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source"/>
-    <LIBPATH value="$(BCB)\Projects\Lib;components;scc;&quot;C:\Program Files\Borland\CBuilder5\Projects\&quot;;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source"/>
+    <INCLUDEPATH value="$env(owlroot)\include;$env(bc5root)\include;components;scc;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source"/>
+    <LIBPATH value="$env(owlroot)\lib;$env(bc5root)\lib;$(BCB)\Projects\Lib;components;scc;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source;$(BCB)\Projects"/>
     <WARNINGS value="-w8092 -w8091 -w8090 -w8089 -w8087 -wprc -wuse -wucp -wstv -wstu -wpin 
       -w-par -wnod -wnak -wdef -wcln -wbbf -wasm -wamp -wamb"/>
   </MACROS>
@@ -55,12 +55,13 @@
     <IDLCFLAGS value="-Icomponents -Iscc -I&quot;C:\Program Files\Borland\CBuilder5\Projects\.&quot; 
       -I$(BCB)\include -I$(BCB)\include\vcl -Icomponents\synedit\source 
       -src_suffix cpp -DSCC_SCISTUDIO_WIN32 -D_DEBUG -boa"/>
-    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Q -Vx -Ve -xp -RT- -X- -r- -a8 -b- -k -y 
-      -v -vi- -c -tW -tWM"/>
-    <PFLAGS value="-N2immediate -N0immediate -$Y+ -$W -$O- -v -JPHNE -M"/>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -xp -RT- -X- -a8 -b- -k- -vi -c 
+      -tW -tWM"/>
+    <PFLAGS value="-N2intermediate -N0intermediate -$Y- -$L- -$D- -$C- -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zi"/>
-    <LFLAGS value="-l&quot;C:\Dev\scidev\scistudio\immediate\&quot; -Iimmediate -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+    <LFLAGS value="-l&quot;intermediate\&quot; -Iintermediate -D&quot;&quot; -aa -Tpe 
+      -x -Gn"/>
   </OPTIONS>
   <LINKER>
     <ALLOBJ value="c0w32.obj sysinit.obj $(OBJFILES)"/>
@@ -72,7 +73,7 @@
 IncludeVerInfo=1
 AutoIncBuild=0
 MajorVer=3
-MinorVer=2
+MinorVer=1
 Release=0
 Build=0
 Debug=0
@@ -84,68 +85,50 @@ Locale=4105
 CodePage=1252
 
 [Version Info Keys]
-CompanyName=Omni+
-FileDescription=SCI Studio 3.2 Program
-FileVersion=3.2.0.0
-InternalName=SCI Studio 3.2
-LegalCopyright=© 1999-2003 Brian Provinciano
+FileDescription=SCI Studio 3+ Program
+FileVersion=3.1.0.0
+InternalName=SCI Studio 3+
 LegalTrademarks=
 OriginalFilename=scistudio.exe
 ProductName=SCI Studio
-ProductVersion=3.2
-Comments=Omni!
+ProductVersion=3.1
 
 [HistoryLists\hlIncludePath]
-Count=9
-Item0=components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source
-Item1=E:\Copy of scistudio3\;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source
-Item2=E:\Copy of scistudio3;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source
-Item3=e:\agisci\ss214s\components\;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source
-Item4=e:\agisci\ss214s\components;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source
-Item5=components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
-Item6=e:\agisci\ss214s\components\;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
-Item7=e:\agisci\ss214s\components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
-Item8=C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
+Count=5
+Item0=$env(owlroot)\include;$env(bc5root)\include;components;scc;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source
+Item1=components;scc;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source
+Item2=components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl;components\synedit\source
+Item3=components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
+Item4=C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=8
-Item0=$(BCB)\Projects\Lib;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source
-Item1=E:\Copy of scistudio3\;$(BCB)\Projects\Lib;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source
-Item2=E:\Copy of scistudio3;$(BCB)\Projects\Lib;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source
-Item3=e:\agisci\ss214s\components\;$(BCB)\Projects\Lib;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source
-Item4=e:\agisci\ss214s\components;$(BCB)\Projects\Lib;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source
-Item5=$(BCB)\Projects\Lib;e:\agisci\ss214s\components\;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib
-Item6=$(BCB)\Projects\Lib;e:\agisci\ss214s\components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib
-Item7=C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib
+Count=4
+Item0=$env(owlroot)\lib;$env(bc5root)\lib;$(BCB)\Projects\Lib;components;scc;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source;$(BCB)\Projects\
+Item2=$(BCB)\Projects\Lib;components;scc;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source;$(BCB)\Projects\
+Item3=$(BCB)\Projects\Lib;components;scc;C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib;Components\SynEdit\Source
+Item4=C:\Program Files\Borland\CBuilder5\Projects\;$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1
 Item0=$(BCB)\source\vcl
 
 [HistoryLists\hlConditionals]
-Count=4
+Count=2
 Item0=SCC_SCISTUDIO_WIN32;NO_WIN32_LEAN_AND_MEAN
-Item1=SCC_SCISTUDIO_WIN32
-Item2=SCC_SCISTUDIO_WIN32;_DEBUG
-Item3=_DEBUG
+Item1=SCC_SCISTUDIO_WIN32;_DEBUG
 
 [HistoryLists\hlIntOutputDir]
-Count=2
-Item0=immediate
-Item1=immediate 
+Count=1
+Item0=intermediate\
 
 [HistoryLists\hlFinalOutputDir]
-Count=2
+Count=1
 Item0=bin\
-Item1=bin
 
 [HistoryLists\hIBPIOutputDir]
-Count=5
-Item0=C:\Dev\scidev\scistudio\immediate\
-Item1=E:\scistudio3\immediate\
-Item2=immediate\
-Item3=C:\Brian Stuff\scistudio3\immediate\
-Item4=immediate
+Count=1
+Item0=intermediate\BPI\
+
 
 [Debugging]
 DebugSourceDirs=$(BCB)\source\vcl
@@ -155,7 +138,7 @@ RunParams=
 HostApplication=
 RemoteHost=
 RemotePath=
-RemoteDebug=0
+RemoteDebug=
 
 [Compiler]
 ShowInfoMsgs=0
