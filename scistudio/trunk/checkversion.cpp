@@ -42,7 +42,7 @@ void __fastcall TDlgCheckVersion::Button1Click(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TDlgCheckVersion::Label1Click(TObject *Sender)
 {
-    ShellExecute(Handle, 0, "http://www.bripro.com/scistudio/download.php", 0, 0, SW_NORMAL);
+    ShellExecute(Handle, 0, "http://scistudio.sourceforge.net/", 0, 0, SW_NORMAL);
 }
 //---------------------------------------------------------------------------
 void __fastcall TDlgCheckVersion::FormClose(TObject *Sender,
