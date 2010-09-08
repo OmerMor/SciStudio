@@ -55,7 +55,7 @@
                         Added BaseStyle property to TheFontFont class.
  ==============================================================================}
 
-// $Id: SynTextDrawer.pas,v 1.2 2001/05/31 12:07:07 claplace Exp $
+// $Id$
 
 // SynEdit note: The name had to be changed to get SynEdit to install 
 //   together with mwEdit into the same Delphi installation
@@ -65,8 +65,7 @@ unit SynTextDrawer;
 interface
 
 uses
-  SysUtils, Classes,
-  Windows, Graphics;
+  Windows, SysUtils, Classes, Graphics;
 
 type
   TheStockFontPatterns = 0..(1 shl (1 + Ord(High(TFontStyle))));

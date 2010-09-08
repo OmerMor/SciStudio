@@ -29,7 +29,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditExport.pas,v 1.5 2001/05/31 12:07:07 claplace Exp $
+$Id: SynEditExport.pas,v 1.4 2000/10/13 18:46:40 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -47,12 +47,7 @@ unit SynEditExport;
 interface
 
 uses
-  Classes, SysUtils, SynEditHighlighter,
-  {$IFDEF SYN_KYLIX}
-  Qt, QGraphics, Types, QClipbrd, Libc;
-  {$ELSE}
-  Windows, Graphics, Clipbrd;
-  {$ENDIF}
+  Classes, Windows, Graphics, SynEditHighlighter;
 
 type
   PSynReplaceCharsArray = ^TSynReplaceCharsArray;
@@ -197,7 +192,7 @@ type
 implementation
 
 uses
-  SynEditMiscProcs, SynEditStrConst;
+  SysUtils, SynEditMiscProcs, SynEditStrConst, Clipbrd;
 
 { TSynCustomExporter }
 
@@ -205,10 +200,7 @@ constructor TSynCustomExporter.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   fBuffer := TMemoryStream.Create;
-  {*****************}
-  {$IFNDEF SYN_KYLIX}
   fClipboardFormat := CF_TEXT;
-  {$ENDIF}
   fFont := TFont.Create;
   fBackgroundColor := clWindow;
   AssignFont(nil);
@@ -267,11 +259,7 @@ end;
 procedure TSynCustomExporter.CopyToClipboard;
 begin
   if fExportAsText then
-    {$IFDEF SYN_KYLIX}
-    CopyToClipboardFormat(0)
-    {$ELSE}
     CopyToClipboardFormat(CF_TEXT)
-    {$ENDIF}
   else
     CopyToClipboardFormat(GetClipboardFormat);
 end;
@@ -282,7 +270,6 @@ var
   hDataSize: UINT;
   PtrData: PChar;
 begin
-  {$IFNDEF SYN_KYLIX}
   hDataSize := GetBufferSize + 1;
   hData := GlobalAlloc(GMEM_MOVEABLE or GMEM_ZEROINIT or GMEM_SHARE, hDataSize);
   if hData <> 0 then try
@@ -301,7 +288,6 @@ begin
     GlobalFree(hData);
     OutOfMemoryError;
   end;
-  {$ENDIF}
 end;
 
 procedure TSynCustomExporter.ExportAll(ALines: TStrings);
@@ -320,20 +306,12 @@ begin
   if not Assigned(ALines) or not Assigned(Highlighter) or (ALines.Count = 0)
     or (Start.Y > ALines.Count) or (Start.Y > Stop.Y)
   then
-    {$IFDEF SYN_KYLIX}
-    exit;
-    {$ELSE}
     Abort;
-    {$ENDIF}
   Stop.Y := Max(1, Min(Stop.Y, ALines.Count));
   Stop.X := Max(1, Min(Stop.X, Length(ALines[Stop.Y - 1]) + 1));
   Start.X := Max(1, Min(Start.X, Length(ALines[Start.Y - 1]) + 1));
   if (Start.Y = Stop.Y) and (Start.X >= Stop.X) then
-    {$IFDEF SYN_KYLIX}
-    exit;
-    {$ELSE}
     Abort;
-    {$ENDIF}
   // initialization
   fBuffer.Position := 0;
   // Size is ReadOnly in Delphi 2

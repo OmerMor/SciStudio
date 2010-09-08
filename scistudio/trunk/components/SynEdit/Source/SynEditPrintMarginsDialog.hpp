@@ -13,6 +13,7 @@
 #include <SynEditPrintMargins.hpp>	// Pascal unit
 #include <SynEditPrintTypes.hpp>	// Pascal unit
 #include <SynEditPrint.hpp>	// Pascal unit
+#include <DsgnIntf.hpp>	// Pascal unit
 #include <Dialogs.hpp>	// Pascal unit
 #include <ExtCtrls.hpp>	// Pascal unit
 #include <Buttons.hpp>	// Pascal unit
@@ -20,9 +21,9 @@
 #include <Controls.hpp>	// Pascal unit
 #include <Forms.hpp>	// Pascal unit
 #include <Graphics.hpp>	// Pascal unit
-#include <Windows.hpp>	// Pascal unit
 #include <Classes.hpp>	// Pascal unit
 #include <SysUtils.hpp>	// Pascal unit
+#include <Windows.hpp>	// Pascal unit
 #include <SysInit.hpp>	// Pascal unit
 #include <System.hpp>	// Pascal unit
 

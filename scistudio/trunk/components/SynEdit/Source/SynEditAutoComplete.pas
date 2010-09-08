@@ -29,7 +29,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditAutoComplete.pas,v 1.4 2001/10/15 13:00:11 plpolak Exp $
+$Id: SynEditAutoComplete.pas,v 1.2 2000/11/08 23:07:35 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -44,12 +44,7 @@ unit SynEditAutoComplete;
 interface
 
 uses
-  Classes, SynEdit, SynEditKeyCmds,
-  {$IFDEF SYN_KYLIX}
-   Qt, QMenus, Types;
-  {$ELSE}
-   Windows, Menus;
-  {$ENDIF}
+  Windows, Classes, SynEdit, SynEditKeyCmds;
 
 type
   TCustomSynAutoComplete = class(TComponent)
@@ -112,7 +107,7 @@ type
 implementation
 
 uses
-  SysUtils;
+  SysUtils, Menus;
 
 { TCustomSynAutoComplete }
 
@@ -346,8 +341,7 @@ var
   i: integer;
 begin
   inherited Notification(AComponent, Operation);
-  if Operation = opRemove then
-  begin
+  if Operation = opRemove then begin
     i := fEditors.IndexOf(AComponent);
     if i > -1 then
       RemoveEditor(AComponent as TCustomSynEdit);
@@ -435,11 +429,9 @@ function TCustomSynAutoComplete.RemoveEditor(AEditor: TCustomSynEdit): boolean;
 var
   i: integer;
 begin
-  if AEditor <> nil then
-  begin
+  if AEditor <> nil then begin
     i := fEditors.IndexOf(AEditor);
-    if (i > -1) then
-    begin
+    if i > -1 then begin
       if fEditor = AEditor then
         fEditor := nil;
       fEditors.Delete(i);
@@ -447,7 +439,7 @@ begin
         AEditor.UnregisterCommandHandler(SynEditCommandHandler);
     end;
   end;
-  Result := False;
+  Result := FALSE;
 end;
 
 procedure TCustomSynAutoComplete.SetAutoCompleteList(Value: TStrings);
@@ -458,8 +450,7 @@ end;
 
 procedure TCustomSynAutoComplete.SetEditor(Value: TCustomSynEdit);
 begin
-  if Value <> fEditor then
-  begin
+  if Value <> fEditor then begin
     if fEditor <> nil then
       RemoveEditor(fEditor);
     fEditor := nil;

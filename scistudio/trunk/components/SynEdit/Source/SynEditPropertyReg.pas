@@ -26,7 +26,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditPropertyReg.pas,v 1.3 2001/08/01 17:54:51 jrx Exp $
+$Id: SynEditPropertyReg.pas,v 1.1.1.1 2000/07/08 15:54:05 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -40,20 +40,15 @@ unit SynEditPropertyReg;
 
 interface
 
-{*****************}
-{$IFNDEF SYN_KYLIX}
 procedure Register;
-{$ENDIF}
 
 implementation
 
 uses
-  Classes,DsgnIntf,Dialogs, Forms, Graphics, Controls,
+  Classes, DsgnIntf, Dialogs, Forms, Graphics, Controls,
   SynEditKeyCmds, SynEditKeyCmdsEditor, SynEdit,
   SynEditPrint, SynEditPrintMargins, SynEditPrintMarginsDialog;
 
-{**************}
-{$IFNDEF SYN_KYLIX}
 type
   TSynEditFontProperty = class(TFontProperty)
   public
@@ -197,7 +192,6 @@ begin
   RegisterPropertyEditor(TypeInfo(TSynEditPrintMargins), NIL, '',
      TSynEditPrintMarginsProperty);
 end;
-{$ENDIF}
 
 end.
 

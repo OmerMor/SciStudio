@@ -232,7 +232,6 @@ static const Word ecSetMarker6 = 0x165;
 static const Word ecSetMarker7 = 0x166;
 static const Word ecSetMarker8 = 0x167;
 static const Word ecSetMarker9 = 0x168;
-static const Word ecContextHelp = 0x1ea;
 static const Word ecDeleteLastChar = 0x1f5;
 static const Word ecDeleteChar = 0x1f6;
 static const Word ecDeleteWord = 0x1f7;
@@ -254,24 +253,12 @@ static const Word ecBlockUnindent = 0x263;
 static const Word ecTab = 0x264;
 static const Word ecShiftTab = 0x265;
 static const Word ecAutoCompletion = 0x28a;
-static const Word ecUpperCase = 0x26c;
-static const Word ecLowerCase = 0x26d;
-static const Word ecToggleCase = 0x26e;
-static const Word ecTitleCase = 0x26f;
-static const Word ecString = 0x276;
-static const Word ecGotFocus = 0x2bc;
-static const Word ecLostFocus = 0x2bd;
 static const Word ecUserFirst = 0x3e9;
 extern PACKAGE void __fastcall GetEditorCommandValues(Classes::TGetStrProc Proc);
-extern PACKAGE void __fastcall GetEditorCommandExtended(Classes::TGetStrProc Proc);
 extern PACKAGE bool __fastcall IdentToEditorCommand(const AnsiString Ident, int &Cmd);
 extern PACKAGE bool __fastcall EditorCommandToIdent(int Cmd, AnsiString &Ident);
 extern PACKAGE AnsiString __fastcall EditorCommandToDescrString(TSynEditorCommand Cmd);
 extern PACKAGE AnsiString __fastcall EditorCommandToCodeString(TSynEditorCommand Cmd);
-extern PACKAGE AnsiString __fastcall ConvertCodeStringToExtended(AnsiString AString);
-extern PACKAGE AnsiString __fastcall ConvertExtendedToCodeString(AnsiString AString);
-extern PACKAGE int __fastcall IndexToEditorCommand(const int AIndex);
-extern PACKAGE TSynEditorCommand __fastcall ConvertExtendedToCommand(AnsiString AString);
 
 }	/* namespace Syneditkeycmds */
 #if !defined(NO_IMPLICIT_NAMESPACE_USE)

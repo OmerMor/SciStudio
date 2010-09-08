@@ -11,11 +11,9 @@
 #pragma option push -w-
 #pragma option push -Vx
 #include <SysUtils.hpp>	// Pascal unit
-#include <Classes.hpp>	// Pascal unit
-#include <Menus.hpp>	// Pascal unit
-#include <StdCtrls.hpp>	// Pascal unit
 #include <Controls.hpp>	// Pascal unit
 #include <Graphics.hpp>	// Pascal unit
+#include <Classes.hpp>	// Pascal unit
 #include <Windows.hpp>	// Pascal unit
 #include <SysInit.hpp>	// Pascal unit
 #include <System.hpp>	// Pascal unit
@@ -39,7 +37,6 @@ private:
 	
 public:
 	__fastcall TSynSelectedColor(void);
-	virtual void __fastcall Assign(Classes::TPersistent* Source);
 	
 __published:
 	__property Graphics::TColor Background = {read=fBG, write=SetBG, default=-2147483635};
@@ -59,7 +56,6 @@ class PASCALIMPLEMENTATION TSynGutter : public Classes::TPersistent
 	typedef Classes::TPersistent inherited;
 	
 private:
-	Graphics::TFont* fFont;
 	Graphics::TColor fColor;
 	int fWidth;
 	bool fShowLineNumbers;
@@ -85,12 +81,9 @@ private:
 	void __fastcall SetVisible(bool Value);
 	void __fastcall SetWidth(int Value);
 	void __fastcall SetZeroStart(const bool Value);
-	void __fastcall SetFont(Graphics::TFont* Value);
-	void __fastcall OnFontChange(System::TObject* Sender);
 	
 public:
 	__fastcall TSynGutter(void);
-	__fastcall virtual ~TSynGutter(void);
 	virtual void __fastcall Assign(Classes::TPersistent* Source);
 	void __fastcall AutoSizeDigitCount(int LinesCount);
 	AnsiString __fastcall FormatLineNumber(int Line);
@@ -101,16 +94,20 @@ __published:
 	__property Graphics::TColor Color = {read=fColor, write=SetColor, default=-2147483633};
 	__property Controls::TCursor Cursor = {read=fCursor, write=fCursor, default=0};
 	__property int DigitCount = {read=fDigitCount, write=SetDigitCount, default=4};
-	__property Graphics::TFont* Font = {read=fFont, write=SetFont};
 	__property bool LeadingZeros = {read=fLeadingZeros, write=SetLeadingZeros, default=0};
 	__property int LeftOffset = {read=fLeftOffset, write=SetLeftOffset, default=16};
 	__property int RightOffset = {read=fRightOffset, write=SetRightOffset, default=2};
 	__property bool ShowLineNumbers = {read=fShowLineNumbers, write=SetShowLineNumbers, default=0};
-	__property bool UseFontStyle = {read=fUseFontStyle, write=SetUseFontStyle, default=1};
+	__property bool UseFontStyle = {read=fUseFontStyle, write=SetUseFontStyle, default=0};
 	__property bool Visible = {read=fVisible, write=SetVisible, default=1};
 	__property int Width = {read=fWidth, write=SetWidth, default=30};
 	__property bool ZeroStart = {read=fZeroStart, write=SetZeroStart, default=0};
 	__property Classes::TNotifyEvent OnChange = {read=fOnChange, write=fOnChange};
+public:
+	#pragma option push -w-inl
+	/* TPersistent.Destroy */ inline __fastcall virtual ~TSynGutter(void) { }
+	#pragma option pop
+	
 };
 
 
@@ -136,7 +133,6 @@ private:
 	
 public:
 	__fastcall TSynBookMarkOpt(Classes::TComponent* AOwner);
-	virtual void __fastcall Assign(Classes::TPersistent* Source);
 	
 __published:
 	__property Controls::TImageList* BookmarkImages = {read=fBookmarkImages, write=SetBookmarkImages};
@@ -271,41 +267,6 @@ public:
 	void __fastcall DrawMark(Graphics::TCanvas* ACanvas, int Number, int X, int Y, int LineHeight);
 	void __fastcall DrawMarkTransparent(Graphics::TCanvas* ACanvas, int Number, int X, int Y, int LineHeight
 		, Graphics::TColor TransparentColor);
-};
-
-
-class DELPHICLASS TSynHotKey;
-class PASCALIMPLEMENTATION TSynHotKey : public Stdctrls::TEdit 
-{
-	typedef Stdctrls::TEdit inherited;
-	
-private:
-	Classes::TShortCut __fastcall GetHotKey(void);
-	void __fastcall SetHotKey(const Classes::TShortCut Value);
-	
-protected:
-	DYNAMIC void __fastcall KeyDown(Word &Key, Classes::TShiftState Shift);
-	DYNAMIC void __fastcall KeyUp(Word &Key, Classes::TShiftState Shift);
-	DYNAMIC void __fastcall KeyPress(char &Key);
-	DYNAMIC void __fastcall DoExit(void);
-	
-__published:
-	__property Classes::TShortCut HotKey = {read=GetHotKey, write=SetHotKey, nodefault};
-public:
-	#pragma option push -w-inl
-	/* TCustomEdit.Create */ inline __fastcall virtual TSynHotKey(Classes::TComponent* AOwner) : Stdctrls::TEdit(
-		AOwner) { }
-	#pragma option pop
-	
-public:
-	#pragma option push -w-inl
-	/* TWinControl.CreateParented */ inline __fastcall TSynHotKey(HWND ParentWindow) : Stdctrls::TEdit(
-		ParentWindow) { }
-	#pragma option pop
-	#pragma option push -w-inl
-	/* TWinControl.Destroy */ inline __fastcall virtual ~TSynHotKey(void) { }
-	#pragma option pop
-	
 };
 
 

@@ -36,20 +36,11 @@ extern PACKAGE System::ResourceString _SYNS_AttrASP;
 extern PACKAGE System::ResourceString _SYNS_AttrAssembler;
 #define Syneditstrconst_SYNS_AttrAssembler System::LoadResourceString(&Syneditstrconst::_SYNS_AttrAssembler)
 	
-extern PACKAGE System::ResourceString _SYNS_AttrAttributeName;
-#define Syneditstrconst_SYNS_AttrAttributeName System::LoadResourceString(&Syneditstrconst::_SYNS_AttrAttributeName)
-	
-extern PACKAGE System::ResourceString _SYNS_AttrAttributeValue;
-#define Syneditstrconst_SYNS_AttrAttributeValue System::LoadResourceString(&Syneditstrconst::_SYNS_AttrAttributeValue)
-	
 extern PACKAGE System::ResourceString _SYNS_AttrBlock;
 #define Syneditstrconst_SYNS_AttrBlock System::LoadResourceString(&Syneditstrconst::_SYNS_AttrBlock)
 	
 extern PACKAGE System::ResourceString _SYNS_AttrBrackets;
 #define Syneditstrconst_SYNS_AttrBrackets System::LoadResourceString(&Syneditstrconst::_SYNS_AttrBrackets)
-	
-extern PACKAGE System::ResourceString _SYNS_AttrCDATASection;
-#define Syneditstrconst_SYNS_AttrCDATASection System::LoadResourceString(&Syneditstrconst::_SYNS_AttrCDATASection)
 	
 extern PACKAGE System::ResourceString _SYNS_AttrCharacter;
 #define Syneditstrconst_SYNS_AttrCharacter System::LoadResourceString(&Syneditstrconst::_SYNS_AttrCharacter)
@@ -74,23 +65,14 @@ extern PACKAGE System::ResourceString _SYNS_AttrDir;
 extern PACKAGE System::ResourceString _SYNS_AttrDirective;
 #define Syneditstrconst_SYNS_AttrDirective System::LoadResourceString(&Syneditstrconst::_SYNS_AttrDirective)
 	
-extern PACKAGE System::ResourceString _SYNS_AttrDOCTYPESection;
-#define Syneditstrconst_SYNS_AttrDOCTYPESection System::LoadResourceString(&Syneditstrconst::_SYNS_AttrDOCTYPESection)
-	
 extern PACKAGE System::ResourceString _SYNS_AttrDocumentation;
 #define Syneditstrconst_SYNS_AttrDocumentation System::LoadResourceString(&Syneditstrconst::_SYNS_AttrDocumentation)
-	
-extern PACKAGE System::ResourceString _SYNS_AttrElementName;
-#define Syneditstrconst_SYNS_AttrElementName System::LoadResourceString(&Syneditstrconst::_SYNS_AttrElementName)
 	
 extern PACKAGE System::ResourceString _SYNS_AttrEmbedSQL;
 #define Syneditstrconst_SYNS_AttrEmbedSQL System::LoadResourceString(&Syneditstrconst::_SYNS_AttrEmbedSQL)
 	
 extern PACKAGE System::ResourceString _SYNS_AttrEmbedText;
 #define Syneditstrconst_SYNS_AttrEmbedText System::LoadResourceString(&Syneditstrconst::_SYNS_AttrEmbedText)
-	
-extern PACKAGE System::ResourceString _SYNS_AttrEntityReference;
-#define Syneditstrconst_SYNS_AttrEntityReference System::LoadResourceString(&Syneditstrconst::_SYNS_AttrEntityReference)
 	
 extern PACKAGE System::ResourceString _SYNS_AttrEscapeAmpersand;
 #define Syneditstrconst_SYNS_AttrEscapeAmpersand System::LoadResourceString(&Syneditstrconst::_SYNS_AttrEscapeAmpersand)
@@ -143,12 +125,6 @@ extern PACKAGE System::ResourceString _SYNS_AttrMessage;
 extern PACKAGE System::ResourceString _SYNS_AttrMiscellaneous;
 #define Syneditstrconst_SYNS_AttrMiscellaneous System::LoadResourceString(&Syneditstrconst::_SYNS_AttrMiscellaneous)
 	
-extern PACKAGE System::ResourceString _SYNS_AttrNamespaceAttrName;
-#define Syneditstrconst_SYNS_AttrNamespaceAttrName System::LoadResourceString(&Syneditstrconst::_SYNS_AttrNamespaceAttrName)
-	
-extern PACKAGE System::ResourceString _SYNS_AttrNamespaceAttrValue;
-#define Syneditstrconst_SYNS_AttrNamespaceAttrValue System::LoadResourceString(&Syneditstrconst::_SYNS_AttrNamespaceAttrValue)
-	
 extern PACKAGE System::ResourceString _SYNS_AttrNonReservedKeyword;
 #define Syneditstrconst_SYNS_AttrNonReservedKeyword System::LoadResourceString(&Syneditstrconst::_SYNS_AttrNonReservedKeyword)
 	
@@ -168,9 +144,6 @@ extern PACKAGE System::ResourceString _SYNS_AttrPragma;
 	
 extern PACKAGE System::ResourceString _SYNS_AttrPreprocessor;
 #define Syneditstrconst_SYNS_AttrPreprocessor System::LoadResourceString(&Syneditstrconst::_SYNS_AttrPreprocessor)
-	
-extern PACKAGE System::ResourceString _SYNS_AttrProcessingInstr;
-#define Syneditstrconst_SYNS_AttrProcessingInstr System::LoadResourceString(&Syneditstrconst::_SYNS_AttrProcessingInstr)
 	
 extern PACKAGE System::ResourceString _SYNS_AttrQualifier;
 #define Syneditstrconst_SYNS_AttrQualifier System::LoadResourceString(&Syneditstrconst::_SYNS_AttrQualifier)
@@ -209,9 +182,6 @@ extern PACKAGE System::ResourceString _SYNS_AttrSpace;
 extern PACKAGE System::ResourceString _SYNS_AttrSpecialVariable;
 #define Syneditstrconst_SYNS_AttrSpecialVariable System::LoadResourceString(&Syneditstrconst::_SYNS_AttrSpecialVariable)
 	
-extern PACKAGE System::ResourceString _SYNS_AttrSQLKey;
-#define Syneditstrconst_SYNS_AttrSQLKey System::LoadResourceString(&Syneditstrconst::_SYNS_AttrSQLKey)
-	
 extern PACKAGE System::ResourceString _SYNS_AttrSQLPlus;
 #define Syneditstrconst_SYNS_AttrSQLPlus System::LoadResourceString(&Syneditstrconst::_SYNS_AttrSQLPlus)
 	
@@ -230,9 +200,6 @@ extern PACKAGE System::ResourceString _SYNS_AttrSystem;
 extern PACKAGE System::ResourceString _SYNS_AttrSystemValue;
 #define Syneditstrconst_SYNS_AttrSystemValue System::LoadResourceString(&Syneditstrconst::_SYNS_AttrSystemValue)
 	
-extern PACKAGE System::ResourceString _SYNS_AttrTerminator;
-#define Syneditstrconst_SYNS_AttrTerminator System::LoadResourceString(&Syneditstrconst::_SYNS_AttrTerminator)
-	
 extern PACKAGE System::ResourceString _SYNS_AttrText;
 #define Syneditstrconst_SYNS_AttrText System::LoadResourceString(&Syneditstrconst::_SYNS_AttrText)
 extern PACKAGE System::ResourceString _SYNS_AttrUnknownWord;
@@ -248,9 +215,6 @@ extern PACKAGE System::ResourceString _SYNS_AttrValue;
 	
 extern PACKAGE System::ResourceString _SYNS_AttrVariable;
 #define Syneditstrconst_SYNS_AttrVariable System::LoadResourceString(&Syneditstrconst::_SYNS_AttrVariable)
-	
-extern PACKAGE System::ResourceString _SYNS_AttrWhitespace;
-#define Syneditstrconst_SYNS_AttrWhitespace System::LoadResourceString(&Syneditstrconst::_SYNS_AttrWhitespace)
 	
 extern PACKAGE System::ResourceString _SYNS_ExporterFormatHTML;
 #define Syneditstrconst_SYNS_ExporterFormatHTML System::LoadResourceString(&Syneditstrconst::_SYNS_ExporterFormatHTML)
@@ -284,12 +248,6 @@ extern PACKAGE System::ResourceString _SYNS_FilterHP48;
 	
 extern PACKAGE System::ResourceString _SYNS_FilterCAClipper;
 #define Syneditstrconst_SYNS_FilterCAClipper System::LoadResourceString(&Syneditstrconst::_SYNS_FilterCAClipper)
-	
-extern PACKAGE System::ResourceString _SYNS_FilterCORBAIDL;
-#define Syneditstrconst_SYNS_FilterCORBAIDL System::LoadResourceString(&Syneditstrconst::_SYNS_FilterCORBAIDL)
-	
-extern PACKAGE System::ResourceString _SYNS_FilterCPM;
-#define Syneditstrconst_SYNS_FilterCPM System::LoadResourceString(&Syneditstrconst::_SYNS_FilterCPM)
 	
 extern PACKAGE System::ResourceString _SYNS_FilterCPP;
 #define Syneditstrconst_SYNS_FilterCPP System::LoadResourceString(&Syneditstrconst::_SYNS_FilterCPP)
@@ -389,25 +347,11 @@ extern PACKAGE System::ResourceString _SYNS_FilterModelica;
 extern PACKAGE System::ResourceString _SYNS_FilterModula3;
 #define Syneditstrconst_SYNS_FilterModula3 System::LoadResourceString(&Syneditstrconst::_SYNS_FilterModula3)
 	
-extern PACKAGE System::ResourceString _SYNS_FilterSDD;
-#define Syneditstrconst_SYNS_FilterSDD System::LoadResourceString(&Syneditstrconst::_SYNS_FilterSDD)
-	
-extern PACKAGE System::ResourceString _SYNS_FilterXML;
-#define Syneditstrconst_SYNS_FilterXML System::LoadResourceString(&Syneditstrconst::_SYNS_FilterXML)
-	
-extern PACKAGE System::ResourceString _SYNS_FilterGWS;
-#define Syneditstrconst_SYNS_FilterGWS System::LoadResourceString(&Syneditstrconst::_SYNS_FilterGWS)
-	
-extern PACKAGE System::ResourceString _SYNS_FilterSynGenMsgfiles;
-#define Syneditstrconst_SYNS_FilterSynGenMsgfiles System::LoadResourceString(&Syneditstrconst::_SYNS_FilterSynGenMsgfiles)
-	
 extern PACKAGE System::ResourceString _SYNS_LangHP48;
 #define Syneditstrconst_SYNS_LangHP48 System::LoadResourceString(&Syneditstrconst::_SYNS_LangHP48)
 extern PACKAGE System::ResourceString _SYNS_LangCAClipper;
 #define Syneditstrconst_SYNS_LangCAClipper System::LoadResourceString(&Syneditstrconst::_SYNS_LangCAClipper)
 	
-extern PACKAGE System::ResourceString _SYNS_LangCPM;
-#define Syneditstrconst_SYNS_LangCPM System::LoadResourceString(&Syneditstrconst::_SYNS_LangCPM)
 extern PACKAGE System::ResourceString _SYNS_LangCPP;
 #define Syneditstrconst_SYNS_LangCPP System::LoadResourceString(&Syneditstrconst::_SYNS_LangCPP)
 extern PACKAGE System::ResourceString _SYNS_LangJava;
@@ -421,9 +365,6 @@ extern PACKAGE System::ResourceString _SYNS_LangDfm;
 #define Syneditstrconst_SYNS_LangDfm System::LoadResourceString(&Syneditstrconst::_SYNS_LangDfm)
 extern PACKAGE System::ResourceString _SYNS_LangAWK;
 #define Syneditstrconst_SYNS_LangAWK System::LoadResourceString(&Syneditstrconst::_SYNS_LangAWK)
-extern PACKAGE System::ResourceString _SYNS_LangCORBAIDL;
-#define Syneditstrconst_SYNS_LangCORBAIDL System::LoadResourceString(&Syneditstrconst::_SYNS_LangCORBAIDL)
-	
 extern PACKAGE System::ResourceString _SYNS_LangHTML;
 #define Syneditstrconst_SYNS_LangHTML System::LoadResourceString(&Syneditstrconst::_SYNS_LangHTML)
 extern PACKAGE System::ResourceString _SYNS_LangVBSScript;
@@ -501,18 +442,6 @@ extern PACKAGE System::ResourceString _SYNS_LangModelica;
 	
 extern PACKAGE System::ResourceString _SYNS_LangModula3;
 #define Syneditstrconst_SYNS_LangModula3 System::LoadResourceString(&Syneditstrconst::_SYNS_LangModula3)
-	
-extern PACKAGE System::ResourceString _SYNS_LangSDD;
-#define Syneditstrconst_SYNS_LangSDD System::LoadResourceString(&Syneditstrconst::_SYNS_LangSDD)
-extern PACKAGE System::ResourceString _SYNS_LangXML;
-#define Syneditstrconst_SYNS_LangXML System::LoadResourceString(&Syneditstrconst::_SYNS_LangXML)
-extern PACKAGE System::ResourceString _SYNS_LangGWS;
-#define Syneditstrconst_SYNS_LangGWS System::LoadResourceString(&Syneditstrconst::_SYNS_LangGWS)
-extern PACKAGE System::ResourceString _SYNS_LangSynGenMsgfiles;
-#define Syneditstrconst_SYNS_LangSynGenMsgfiles System::LoadResourceString(&Syneditstrconst::_SYNS_LangSynGenMsgfiles)
-	
-extern PACKAGE System::ResourceString _SYNS_LangUnreal;
-#define Syneditstrconst_SYNS_LangUnreal System::LoadResourceString(&Syneditstrconst::_SYNS_LangUnreal)
 	
 
 }	/* namespace Syneditstrconst */

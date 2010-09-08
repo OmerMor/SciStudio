@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditTypes.pas,v 1.3 2001/10/21 18:46:55 jrx Exp $
+$Id: SynEditTypes.pas,v 1.1.1.1 2000/07/08 15:54:05 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -41,20 +41,11 @@ unit SynEditTypes;
 
 interface
 
-const
-  TSynSpecialChars = ['À'..'Ö', 'Ø'..'ö', 'ø'..'ÿ'];
-  TSynValidStringChars = ['_', '0'..'9', 'A'..'Z', 'a'..'z'] + TSynSpecialChars;
-
 type
   TSynIdentChars = set of char;
 
-  //NOTE: This will need to be localized and currently will not work will with
-  //      MBCS languages like Japanese or Korean.
-
   PSynSelectionMode = ^TSynSelectionMode;
   TSynSelectionMode = (smNormal, smLine, smColumn);
-
-
 
 implementation
 

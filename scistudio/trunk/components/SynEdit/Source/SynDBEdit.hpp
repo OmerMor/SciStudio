@@ -22,10 +22,10 @@
 #include <DBCtrls.hpp>	// Pascal unit
 #include <Db.hpp>	// Pascal unit
 #include <Controls.hpp>	// Pascal unit
-#include <Messages.hpp>	// Pascal unit
-#include <Windows.hpp>	// Pascal unit
 #include <Classes.hpp>	// Pascal unit
 #include <SysUtils.hpp>	// Pascal unit
+#include <Messages.hpp>	// Pascal unit
+#include <Windows.hpp>	// Pascal unit
 #include <SysInit.hpp>	// Pascal unit
 #include <System.hpp>	// Pascal unit
 

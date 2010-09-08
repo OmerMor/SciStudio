@@ -26,7 +26,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditPrintMargins.pas,v 1.2 2001/05/31 12:07:07 claplace Exp $
+$Id: SynEditPrintMargins.pas,v 1.1.1.1 2000/07/08 15:54:06 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -87,13 +87,7 @@ unit SynEditPrintMargins;
 interface
 
 uses
-  Classes, SysUtils,
-  {$IFDEF LINUX}
-  Qgraphics,
-  {$ELSE}
-  Graphics,
-  {$ENDIF}
-  SynEditPrintTypes, SynEditPrinterInfo;
+  Classes, Graphics, SysUtils, SynEditPrintTypes, SynEditPrinterInfo;
 
 type
   //Margins class - sorting out dimensions of printable area

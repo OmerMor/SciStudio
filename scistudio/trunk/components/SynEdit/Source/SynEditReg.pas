@@ -24,7 +24,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditReg.pas,v 1.13 2001/10/18 09:40:07 plpolak Exp $
+$Id: SynEditReg.pas,v 1.3 2000/11/26 11:54:05 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -45,19 +45,18 @@ uses
 // SynEdit components
   SynEdit,
   SynMemo,
+  SynDBEdit,
   SynExportHTML,
   SynExportRTF,
-//  SynHighlighterMulti,
+  //SynHighlighterMulti,
   SynCompletionProposal,
   SynEditPythonBehaviour,
   SynEditPrint,
   SynEditPrintPreview,
 {$IFDEF SYN_COMPILER_4_UP}
-  {*******************}
-{$IFNDEF SYN_KYLIX}
-//  SynHighlighterManager,
+//SynHighlighterManager,
 {$ENDIF}
-{$ENDIF}
+// SynEdit highlighters
   SynHighlighterSCI,
   SynHighlighterNHA;
 
@@ -67,19 +66,17 @@ implementation
 
 procedure Register;
 begin
-{$IFNDEF SYN_KYLIX}
   SynEditPropertyReg.Register;
-{$ENDIF}
-
 // SynEdit components
-  RegisterComponents(SYNS_ComponentsPage, [TSynEdit, TSynMemo,
-    TSynExporterHTML, TSynExporterRTF, TSynEditPythonBehaviour,// TSynMultiSyn,
+  RegisterComponents(SYNS_ComponentsPage, [TSynEdit, TSynMemo, TDBSynEdit,
+    TSynExporterHTML, TSynExporterRTF, TSynEditPythonBehaviour, //TSynMultiSyn,
     TSynCompletionProposal, TSynAutoComplete,
     TSynEditPrint, TSynEditPrintPreview]);
-    
 // SynEdit highlighters
   RegisterComponents(SYNS_HighlightersPage, [
-	TSynSCISyn,TSynNHASyn
+
+  TSynSCISyn,
+  TSynNHASyn
   ]);
 end;
 

@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditPrintHeaderFooter.pas,v 1.3 2001/08/03 02:36:19 jrx Exp $
+$Id: SynEditPrintHeaderFooter.pas,v 1.1.1.1 2000/07/08 15:54:06 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -98,13 +98,7 @@ unit SynEditPrintHeaderFooter;
 interface
 
 uses
-  Classes, SysUtils,
-  {$IFDEF LINUX}
-  Qt, QGraphics,
-  {$ELSE}
-  Windows, Graphics,
-  {$ENDIF}
-  SynEditPrintTypes, SynEditPrintMargins;
+  Windows, Classes, Graphics, SysUtils, SynEditPrintTypes, SynEditPrintMargins;
 
 type
   //An item in a header or footer. An item has a text,Font,LineNumber and
@@ -359,11 +353,9 @@ begin
               Inc(Run); // also the '$'
               Start := Run;
               break;
-            end else begin
+            end else
                 // this '$' might again be the start of a macro
               TryAppend(Start, Run);
-              Inc(Run);                                                         //ek 2001-08-02
-            end;
           end else
             Inc(Run);
         end;
@@ -517,10 +509,7 @@ var
   i, CurLine: Integer;
   AItem: THeaderFooterItem;
   FOrgHeight: Integer;
-  {************}
-  {$IFNDEF LINUX}
   TextMetric: TTextMetric;
-  {$ENDIF}
 begin
   FFrameHeight := -1;
   if FItems.Count <= 0 then Exit;
@@ -535,14 +524,11 @@ begin
       FOrgHeight := FFrameHeight;
     end;
     ACanvas.Font.Assign(AItem.Font);
-    {************}
-    {$IFNDEF LINUX}
     GetTextMetrics(ACanvas.Handle, TextMetric);
     with TLineInfo(FLineInfo[CurLine - 1]), TextMetric do begin
       LineHeight := Max(LineHeight, ACanvas.TextHeight('W'));
       MaxBaseDist := Max(MaxBaseDist, tmHeight - tmDescent);
     end;
-    {$ENDIF}
     FFrameHeight := Max(FFrameHeight, FOrgHeight + ACanvas.TextHeight('W'));
   end;
   FFrameHeight := FFrameHeight + 2 * FMargins.PHFInternalMargin;
@@ -676,15 +662,9 @@ begin
       end;
     end;
       {Aligning at base line - Fonts can have different size in headers and footers}
-    {************}
-    {$IFNDEF LINUX}
     OldAlign := SetTextAlign(ACanvas.Handle, TA_BASELINE);
-    {$ENDIF}
     ACanvas.TextOut(X, Y + TLineInfo(FLineInfo[CurLine - 1]).MaxBaseDist, AStr);
-    {************}
-    {$IFNDEF LINUX}
     SetTextAlign(ACanvas.Handle, OldAlign);
-    {$ENDIF}
   end;
   RestoreFontPenBrush(ACanvas);
 end;

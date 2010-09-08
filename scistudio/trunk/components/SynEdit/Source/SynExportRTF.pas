@@ -29,7 +29,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynExportRTF.pas,v 1.5 2001/05/31 12:07:07 claplace Exp $
+$Id: SynExportRTF.pas,v 1.3 2000/10/13 18:46:40 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -44,13 +44,7 @@ unit SynExportRTF;
 interface
 
 uses
-  Classes,
-  {$IFDEF SYN_KYLIX}
-  Qt, QGraphics,
-  {$ELSE}
-  Windows, Graphics, RichEdit,
-  {$ENDIF}
-  SynEditExport;
+  Classes, Windows, Graphics, SynEditExport;
 
 type
   TSynExporterRTF = class(TSynCustomExporter)
@@ -65,8 +59,10 @@ type
       FontStylesChanged: TFontStyles); override;
     procedure FormatAttributeInit(BackgroundChanged, ForegroundChanged: boolean;
       FontStylesChanged: TFontStyles); override;
+{begin}                                                                         //mh 2000-10-10
     procedure FormatBeforeFirstAttribute(BackgroundChanged,
       ForegroundChanged: boolean; FontStylesChanged: TFontStyles); override;
+{end}                                                                           //mh 2000-10-10
     procedure FormatNewLine; override;
     function GetFooter: string; override;
     function GetFormatName: string; override;
@@ -90,7 +86,7 @@ type
 implementation
 
 uses
-  SysUtils, SynEditStrConst;
+  SysUtils, SynEditStrConst, RichEdit;
 
 { TSynExporterRTF }
 
@@ -99,10 +95,7 @@ begin
   inherited Create(AOwner);
   fListColors := TList.Create;
   fDefaultFilter := SYNS_FilterRTF;
-  {*****************}
-  {$IFNDEF SYN_KYLIX}
   fClipboardFormat := RegisterClipboardFormat(CF_RTF);
-  {$ENDIF}
   // setup array of chars to be replaced
   fReplaceReserved['\'] := '\\';
   fReplaceReserved['{'] := '\{';
@@ -128,11 +121,8 @@ var
   Col: Integer;
 begin
   Col := ColorToRGB(AColor);
-  {*****************}
-  {$IFNDEF SYN_KYLIX}
   Result := Format('\red%d\green%d\blue%d;', [GetRValue(Col), GetGValue(Col),
     GetBValue(Col)]);
-  {$ENDIF}
 end;
 
 procedure TSynExporterRTF.FormatAfterLastAttribute;
@@ -185,11 +175,13 @@ begin
   end;
 end;
 
+{begin}                                                                         //mh 2000-10-10
 procedure TSynExporterRTF.FormatBeforeFirstAttribute(BackgroundChanged,
   ForegroundChanged: boolean; FontStylesChanged: TFontStyles);
 begin
   FormatAttributeInit(BackgroundChanged, ForegroundChanged, FontStylesChanged);
 end;
+{end}                                                                           //mh 2000-10-10
 
 procedure TSynExporterRTF.FormatNewLine;
 begin
@@ -246,15 +238,13 @@ begin
   Result := Result + '{\title ' + fTitle + '}}'#13#10;
   if fUseBackground then
     Result := Result + { TODO } #13#10;
-  Result := Result + Format('\deflang1033\pard\plain\f0\fs%d ',
-    [2 * Font.Size]);
+  Result := Result + Format('\deflang1033\pard\plain\f0\fs%d ', [2 * Font.Size]);
 end;
 
 {$IFDEF SYN_MBCSSUPPORT}
 function TSynExporterRTF.ReplaceMBCS(Char1, Char2: char): string;
 begin
-//  Result := Format('\''%x\''%x ', [Char1, Char2]);
-  Result := Format('\''%x\''%x', [integer(Char1), integer(Char2)]);             //sqh 2001-01-04
+  Result := Format('\''%x\''%x ', [Char1, Char2]);
 end;
 {$ENDIF}
 

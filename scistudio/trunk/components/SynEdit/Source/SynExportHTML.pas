@@ -29,7 +29,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynExportHTML.pas,v 1.6 2001/08/06 19:37:40 jrx Exp $
+$Id: SynExportHTML.pas,v 1.4 2000/10/13 19:19:04 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -44,13 +44,7 @@ unit SynExportHTML;
 interface
 
 uses
-  Classes,
-  {$IFDEF SYN_KYLIX}
-  Qt, QGraphics,
-  {$ELSE}
-  Windows, Graphics,
-  {$ENDIF}
-  SynEditExport;
+  Classes, Windows, Graphics, SynEditExport;
 
 type
   THTMLFontSize = (fs01, fs02, fs03, fs04, fs05, fs06, fs07, fsDefault);        //eb 2000-10-12
@@ -100,112 +94,35 @@ const
   CF_HTML = 'HTML Format';
 begin
   inherited Create(AOwner);
-  {**************}
-  {$IFNDEF SYN_KYLIX}
   fClipboardFormat := RegisterClipboardFormat(CF_HTML);
-  {$ENDIF}
   fFontSize := fs03;
   fDefaultFilter := SYNS_FilterHTML;
   // setup array of chars to be replaced
-  fReplaceReserved['&'] := '&amp;';
   fReplaceReserved['<'] := '&lt;';
   fReplaceReserved['>'] := '&gt;';
+  fReplaceReserved['&'] := '&amp;';
   fReplaceReserved['"'] := '&quot;';
-  fReplaceReserved['™'] := '&trade;';
   fReplaceReserved['©'] := '&copy;';
-  fReplaceReserved['®'] := '&reg;';
-  fReplaceReserved['À'] := '&Agrave;';
-  fReplaceReserved['Á'] := '&Aacute;';
-  fReplaceReserved['Â'] := '&Acirc;';
-  fReplaceReserved['Ã'] := '&Atilde;';
-  fReplaceReserved['Ä'] := '&Auml;';
-  fReplaceReserved['Å'] := '&Aring;';
-  fReplaceReserved['Æ'] := '&AElig;';
-  fReplaceReserved['Ç'] := '&Ccedil;';
-  fReplaceReserved['È'] := '&Egrave;';
   fReplaceReserved['É'] := '&Eacute;';
-  fReplaceReserved['Ê'] := '&Ecirc;';
-  fReplaceReserved['Ë'] := '&Euml;';
-  fReplaceReserved['Ì'] := '&Igrave;';
-  fReplaceReserved['Í'] := '&Iacute;';
-  fReplaceReserved['Î'] := '&Icirc;';
-  fReplaceReserved['Ï'] := '&Iuml;';
-  fReplaceReserved['Ð'] := '&ETH;';
-  fReplaceReserved['Ñ'] := '&Ntilde;';
-  fReplaceReserved['Ò'] := '&Ograve;';
-  fReplaceReserved['Ó'] := '&Oacute;';
-  fReplaceReserved['Ô'] := '&Ocirc;';
-  fReplaceReserved['Õ'] := '&Otilde;';
-  fReplaceReserved['Ö'] := '&Ouml;';
-  fReplaceReserved['Ø'] := '&Oslash;';
-  fReplaceReserved['Ù'] := '&Ugrave;';
-  fReplaceReserved['Ú'] := '&Uacute;';
-  fReplaceReserved['Û'] := '&Ucirc;';
-  fReplaceReserved['Ü'] := '&Uuml;';
-  fReplaceReserved['Ý'] := '&Yacute;';
-  fReplaceReserved['Þ'] := '&THORN;';
-  fReplaceReserved['ß'] := '&szlig;';
-  fReplaceReserved['à'] := '&agrave;';
-  fReplaceReserved['á'] := '&aacute;';
-  fReplaceReserved['â'] := '&acirc;';
-  fReplaceReserved['ã'] := '&atilde;';
-  fReplaceReserved['ä'] := '&auml;';
-  fReplaceReserved['å'] := '&aring;';
-  fReplaceReserved['æ'] := '&aelig;';
-  fReplaceReserved['ç'] := '&ccedil;';
-  fReplaceReserved['è'] := '&egrave;';
   fReplaceReserved['é'] := '&eacute;';
+  fReplaceReserved['È'] := '&Egrave;';
+  fReplaceReserved['è'] := '&egrave;';
+  fReplaceReserved['Ê'] := '&Ecirc;';
   fReplaceReserved['ê'] := '&ecirc;';
+  fReplaceReserved['Ë'] := '&Euml;';
   fReplaceReserved['ë'] := '&euml;';
-  fReplaceReserved['ì'] := '&igrave;';
-  fReplaceReserved['í'] := '&iacute;';
-  fReplaceReserved['î'] := '&icirc;';
+  fReplaceReserved['Ï'] := '&Iuml;';
   fReplaceReserved['ï'] := '&iuml;';
-  fReplaceReserved['ð'] := '&eth;';
-  fReplaceReserved['ñ'] := '&ntilde;';
-  fReplaceReserved['ò'] := '&ograve;';
-  fReplaceReserved['ó'] := '&oacute;';
-  fReplaceReserved['ô'] := '&ocirc;';
-  fReplaceReserved['õ'] := '&otilde;';
-  fReplaceReserved['ö'] := '&ouml;';
-  fReplaceReserved['ø'] := '&oslash;';
-  fReplaceReserved['ù'] := '&ugrave;';
-  fReplaceReserved['ú'] := '&uacute;';
-  fReplaceReserved['û'] := '&ucirc;';
+  fReplaceReserved['Î'] := '&Icirc;';
+  fReplaceReserved['î'] := '&icirc;';
+  fReplaceReserved['Ç'] := '&Ccedil;';
+  fReplaceReserved['ç'] := '&ccedil;';
+  fReplaceReserved['À'] := '&Agrave;';
+  fReplaceReserved['à'] := '&agrave;';
+  fReplaceReserved['Ü'] := '&Uuml;';
   fReplaceReserved['ü'] := '&uuml;';
-  fReplaceReserved['ý'] := '&yacute;';
-  fReplaceReserved['þ'] := '&thorn;';
-  fReplaceReserved['ÿ'] := '&yuml;';
-  fReplaceReserved['¡'] := '&iexcl;';
-  fReplaceReserved['¢'] := '&cent;';
-  fReplaceReserved['£'] := '&pound;';
-  fReplaceReserved['¤'] := '&curren;';
-  fReplaceReserved['¥'] := '&yen;';
-  fReplaceReserved['¦'] := '&brvbar;';
-  fReplaceReserved['§'] := '&sect;';
-  fReplaceReserved['¨'] := '&uml;';
-  fReplaceReserved['ª'] := '&ordf;';
-  fReplaceReserved['«'] := '&laquo;';
-  fReplaceReserved['¬'] := '&shy;';
-  fReplaceReserved['¯'] := '&macr;';
-  fReplaceReserved['°'] := '&deg;';
-  fReplaceReserved['±'] := '&plusmn;';
-  fReplaceReserved['²'] := '&sup2;';
-  fReplaceReserved['³'] := '&sup3;';
-  fReplaceReserved['´'] := '&acute;';
-  fReplaceReserved['µ'] := '&micro;';
-  fReplaceReserved['·'] := '&middot;';
-  fReplaceReserved['¸'] := '&cedil;';
-  fReplaceReserved['¹'] := '&sup1;';
-  fReplaceReserved['º'] := '&ordm;';
-  fReplaceReserved['»'] := '&raquo;';
-  fReplaceReserved['¼'] := '&frac14;';
-  fReplaceReserved['½'] := '&frac12;';
-  fReplaceReserved['¾'] := '&frac34;';
-  fReplaceReserved['¿'] := '&iquest;';
-  fReplaceReserved['×'] := '&times;';
-  fReplaceReserved['÷'] := '&divide';
-  fReplaceReserved['€'] := '&euro;';
+  fReplaceReserved['Û'] := '&Ucirc;';
+  fReplaceReserved['û'] := '&ucirc;';
 end;
 
 function TSynExporterHTML.ColorToHTML(AColor: TColor): string;
@@ -217,26 +134,17 @@ const
 begin
   RGBColor := ColorToRGB(AColor);
   Result := '"#000000"';
- {****************}
- {$IFNDEF SYN_KYLIX}
   RGBValue := GetRValue(RGBColor);
- {$ENDIF}
   if RGBValue > 0 then begin
     Result[3] := Digits[RGBValue shr  4];
     Result[4] := Digits[RGBValue and 15];
   end;
- {****************}
- {$IFNDEF SYN_KYLIX}
   RGBValue := GetGValue(RGBColor);
- {$ENDIF}
   if RGBValue > 0 then begin
     Result[5] := Digits[RGBValue shr  4];
     Result[6] := Digits[RGBValue and 15];
   end;
- {****************}
- {$IFNDEF SYN_KYLIX}
   RGBValue := GetBValue(RGBColor);
- {$ENDIF}
   if RGBValue > 0 then begin
     Result[7] := Digits[RGBValue shr  4];
     Result[8] := Digits[RGBValue and 15];

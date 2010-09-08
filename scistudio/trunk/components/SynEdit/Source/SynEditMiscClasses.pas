@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditMiscClasses.pas,v 1.5 2001/10/17 12:52:04 harmeister Exp $
+$Id: SynEditMiscClasses.pas,v 1.2 2000/10/13 18:43:06 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -42,12 +42,7 @@ unit SynEditMiscClasses;
 interface
 
 uses
-{$IFDEF SYN_KYLIX}
-  kTextDrawer, Types, QGraphics, QControls, QImgList, QStdCtrls, QMenus,
-{$ELSE}
-  Windows, Graphics, Controls, stdctrls, Menus,
-{$ENDIF}
-  Classes, SysUtils;
+  Windows, Classes, Graphics, Controls, SysUtils;
 
 type
   TSynSelectedColor = class(TPersistent)
@@ -59,7 +54,6 @@ type
     procedure SetFG(Value: TColor);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;                            //jcr 2000-12-08
   published
     property Background: TColor read fBG write SetBG default clHighLight;
     property Foreground: TColor read fFG write SetFG default clHighLightText;
@@ -68,7 +62,6 @@ type
 
   TSynGutter = class(TPersistent)
   private
-    fFont: TFont;                                                               //DDH 10/16/01
     fColor: TColor;
     fWidth: integer;
     fShowLineNumbers: boolean;
@@ -94,11 +87,8 @@ type
     procedure SetVisible(Value: boolean);
     procedure SetWidth(Value: integer);
     procedure SetZeroStart(const Value: boolean);
-    procedure SetFont(Value: TFont);                                            //DDH 10/16/01
-    procedure OnFontChange(Sender: TObject);                                    //DDH 10/16/01
   public
     constructor Create;
-    destructor Destroy; override;                                               //DDH 10/16/01
     procedure Assign(Source: TPersistent); override;
     procedure AutoSizeDigitCount(LinesCount: integer);
     function FormatLineNumber(Line: integer): string;
@@ -109,7 +99,6 @@ type
     property Cursor: TCursor read fCursor write fCursor default crDefault;
     property DigitCount: integer read fDigitCount write SetDigitCount
       default 4;
-    property Font: TFont read fFont write SetFont;                              //DDH 10/16/01
     property LeadingZeros: boolean read fLeadingZeros write SetLeadingZeros
       default FALSE;
     property LeftOffset: integer read fLeftOffset write SetLeftOffset
@@ -119,18 +108,17 @@ type
     property ShowLineNumbers: boolean read fShowLineNumbers
       write SetShowLineNumbers default FALSE;
     property UseFontStyle: boolean read fUseFontStyle write SetUseFontStyle
-      default TRUE;                                                             //DDH 10/16/01
+      default FALSE;
     property Visible: boolean read fVisible write SetVisible default TRUE;
     property Width: integer read fWidth write SetWidth default 30;
-    property ZeroStart: boolean read fZeroStart write SetZeroStart
-      default FALSE;
+    property ZeroStart: boolean read fZeroStart write SetZeroStart default FALSE;
     property OnChange: TNotifyEvent read fOnChange write fOnChange;
   end;
 
   TSynBookMarkOpt = class(TPersistent)
   private
     fBookmarkImages: TImageList;
-    fDrawBookmarksFirst: boolean;
+    fDrawBookmarksFirst: boolean;                                               //mh 2000-10-12
     fEnableKeys: Boolean;
     fGlyphsVisible: Boolean;
     fLeftMargin: Integer;
@@ -138,17 +126,16 @@ type
     fXoffset: integer;
     fOnChange: TNotifyEvent;
     procedure SetBookmarkImages(const Value: TImageList);
-    procedure SetDrawBookmarksFirst(Value: boolean);
+    procedure SetDrawBookmarksFirst(Value: boolean);                            //mh 2000-10-12
     procedure SetGlyphsVisible(Value: Boolean);
     procedure SetLeftMargin(Value: Integer);
     procedure SetXOffset(Value: integer);
   public
     constructor Create(AOwner: TComponent);
-    procedure Assign(Source: TPersistent); override;                            //jcr 2000-12-08
   published
     property BookmarkImages: TImageList
       read fBookmarkImages write SetBookmarkImages;
-    property DrawBookmarksFirst: boolean read fDrawBookmarksFirst
+    property DrawBookmarksFirst: boolean read fDrawBookmarksFirst               //mh 2000-10-12
       write SetDrawBookmarksFirst default True;
     property EnableKeys: Boolean
       read fEnableKeys write fEnableKeys default True;
@@ -208,19 +195,6 @@ type
       LineHeight: integer; TransparentColor: TColor);
   end;
 
-  TSynHotKey=class(TEdit)
-  private
-    function GetHotKey: TShortcut;
-    procedure SetHotKey(const Value: TShortcut);
-  protected
-    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
-    procedure KeyUp(var Key: Word; Shift: TShiftState); override;
-    procedure KeyPress(var Key: Char); override;
-    procedure DoExit; override;
-  published
-    property HotKey: TShortcut read GetHotKey write SetHotKey;
-  end;
-
 implementation
 
 uses
@@ -233,19 +207,6 @@ begin
   inherited Create;
   fBG := clHighLight;
   fFG := clHighLightText;
-end;
-
-procedure TSynSelectedColor.Assign(Source: TPersistent);                        //jcr 2000-12-08
-var
-  Src: TSynSelectedColor;
-begin
-  if (Source <> nil) and (Source is TSynSelectedColor) then begin
-    Src := TSynSelectedColor(Source);
-    fBG := Src.fBG;
-    fFG := Src.fFG;
-    if Assigned(fOnChange) then fOnChange(Self);
-  end else
-    inherited Assign(Source);
 end;
 
 procedure TSynSelectedColor.SetBG(Value: TColor);
@@ -269,13 +230,6 @@ end;
 constructor TSynGutter.Create;
 begin
   inherited Create;
-  fFont := TFont.Create;                                                        //DDH 10/16/01 Start
-  fFont.Name := 'Terminal';
-  fFont.Size := 8;
-  fFont.Style := [];
-  fUseFontStyle := True;
-  fFont.OnChange := OnFontChange;                                               //DDH 10/16/01 End
-
   fColor := clBtnFace;
   fVisible := TRUE;
   fWidth := 30;
@@ -285,20 +239,12 @@ begin
   fRightOffset := 2;
 end;
 
-destructor TSynGutter.Destroy;                                                   //DDH 10/16/01
-begin
-  fFont.Free;
-  inherited Destroy;
-end;
-
 procedure TSynGutter.Assign(Source: TPersistent);
 var
   Src: TSynGutter;
 begin
   if Assigned(Source) and (Source is TSynGutter) then begin
     Src := TSynGutter(Source);
-    fFont.Assign(src.Font);                                                     //DDH 10/16/01
-    fUseFontStyle := src.fUseFontStyle;                                         //DDH 10/16/01
     fColor := Src.fColor;
     fVisible := Src.fVisible;
     fWidth := Src.fWidth;
@@ -368,18 +314,6 @@ begin
     if Assigned(fOnChange) then fOnChange(Self);
   end;
 end;
-
-//DDH 10/16/01 Start
-procedure TSynGutter.SetFont(Value: TFont);
-begin
-  fFont.Assign(Value);
-end;
-
-procedure TSynGutter.OnFontChange(Sender: TObject);
-begin
-  if Assigned(fOnChange) then fOnChange(Self);
-end;
-//DDH 10/16/01 End
 
 procedure TSynGutter.SetDigitCount(Value: integer);
 begin
@@ -463,29 +397,12 @@ end;
 constructor TSynBookMarkOpt.Create(AOwner: TComponent);
 begin
   inherited Create;
-  fDrawBookmarksFirst := TRUE;                                          
+  fDrawBookmarksFirst := TRUE;                                                  //mh 2000-10-12
   fEnableKeys := True;
   fGlyphsVisible := True;
   fLeftMargin := 2;
   fOwner := AOwner;
   fXOffset := 12;
-end;
-
-procedure TSynBookMarkOpt.Assign(Source: TPersistent);                          //jcr 2000-12-08
-var
-  Src: TSynBookMarkOpt;
-begin
-  if (Source <> nil) and (Source is TSynBookMarkOpt) then begin
-    Src := TSynBookMarkOpt(Source);
-    fBookmarkImages := Src.fBookmarkImages;
-    fDrawBookmarksFirst := Src.fDrawBookmarksFirst;
-    fEnableKeys := Src.fEnableKeys;
-    fGlyphsVisible := Src.fGlyphsVisible;
-    fLeftMargin := Src.fLeftMargin;
-    fXoffset := Src.fXoffset;
-    if Assigned(fOnChange) then fOnChange(Self);
-  end else
-    inherited Assign(Source);
 end;
 
 procedure TSynBookMarkOpt.SetBookmarkImages(const Value: TImageList);
@@ -497,6 +414,7 @@ begin
   end;
 end;
 
+{begin}                                                                         //mh 2000-10-12
 procedure TSynBookMarkOpt.SetDrawBookmarksFirst(Value: boolean);
 begin
   if Value <> fDrawBookmarksFirst then begin
@@ -504,6 +422,7 @@ begin
     if Assigned(fOnChange) then fOnChange(Self);
   end;
 end;
+{end}                                                                           //mh 2000-10-12
 
 procedure TSynBookMarkOpt.SetGlyphsVisible(Value: Boolean);
 begin
@@ -688,8 +607,7 @@ begin
     end else begin
       rcDest := Rect(X, Y, X + IIWidth, Y + LineHeight);
       Y := (IIHeight - LineHeight) div 2;
-      rcSrc := Rect(Number * IIWidth, Y, (Number + 1) * IIWidth,
-        Y + LineHeight);
+      rcSrc := Rect(Number * IIWidth, Y, (Number + 1) * IIWidth, Y + LineHeight);
     end;
     ACanvas.CopyRect(rcDest, InternalImages.Canvas, rcSrc);
   end;
@@ -709,134 +627,10 @@ begin
     end else begin
       rcDest := Rect(X, Y, X + IIWidth, Y + LineHeight);
       Y := (IIHeight - LineHeight) div 2;
-      rcSrc := Rect(Number * IIWidth, Y, (Number + 1) * IIWidth,
-        Y + LineHeight);
+      rcSrc := Rect(Number * IIWidth, Y, (Number + 1) * IIWidth, Y + LineHeight);
     end;
-{$IFDEF SYN_KYLIX}
-    ACanvas.CopyMode := cmMergeCopy;
-    ACanvas.CopyRect(rcDest, InternalImages.Canvas, rcSrc);
-{$ELSE}
     ACanvas.BrushCopy(rcDest, InternalImages, rcSrc, TransparentColor);
-{$ENDIF}
   end;
-end;
-
-{ TSynHotKey }
-
-procedure TSynHotKey.DoExit;
-begin
-  inherited;
-  if (length(Text) > 0) and (Text[Length(Text)] = '+') then
-  begin
-    Text := 'None';
-    SelStart := length(Text);
-  end;
-end;
-
-function TSynHotKey.GetHotKey: TShortcut;
-begin
-  Result := Menus.TextToShortCut(Text);
-end;
-
-procedure TSynHotKey.KeyDown(var Key: Word; Shift: TShiftState);
-VAR TmpString : String;
-begin
-//  inherited;
-  TmpString := '';
-  if ssCtrl in Shift then
-    TmpString := TmpString + 'Ctrl+';
-  if ssAlt in Shift then
-    TmpString := TmpString + 'Alt+';
-  if ssShift in Shift then
-    TmpString := TmpString + 'Shift+';
-
-  if key in [VK_CONTROL, VK_MENU, VK_SHIFT] then
-  begin
-    //Nothing, the Shift state takes care of it
-  end else if Key in [VK_F1..VK_F24] then
-  begin
-    TmpString := TmpString + 'F' + IntToStr(Key - VK_F1 + 1);
-  end else if Key in [VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT,
-                      VK_SPACE, VK_PRIOR, VK_NEXT, VK_END, VK_HOME, VK_PRINT,
-                      VK_INSERT, VK_DELETE, VK_NUMPAD0, VK_NUMPAD1, VK_NUMPAD2,
-                      VK_NUMPAD3, VK_NUMPAD4, VK_NUMPAD5, VK_NUMPAD6, VK_NUMPAD7,
-                      VK_NUMPAD8, VK_NUMPAD9, VK_MULTIPLY, VK_ADD, VK_SEPARATOR,
-                      VK_SUBTRACT, VK_DECIMAL, VK_DIVIDE, VK_NUMLOCK, VK_SCROLL,
-                      VK_BACK, VK_TAB, VK_CLEAR, VK_RETURN] then
-  begin
-    Case Key of
-      VK_UP        : TmpString := TmpString + 'Up';
-      VK_DOWN      : TmpString := TmpString + 'Down';
-      VK_LEFT      : TmpString := TmpString + 'Left';
-      VK_RIGHT     : TmpString := TmpString + 'Right';
-      VK_SPACE     : TmpString := TmpString + 'Space';
-      VK_PRIOR     : TmpString := TmpString + 'Page Up';
-      VK_NEXT      : TmpString := TmpString + 'Page Down';
-      VK_END       : TmpString := TmpString + 'End';
-      VK_HOME      : TmpString := TmpString + 'Home';
-      VK_PRINT     : TmpString := TmpString + 'Print Screen';
-      VK_INSERT    : TmpString := TmpString + 'Insert';
-      VK_DELETE    : TmpString := TmpString + 'Del';
-      VK_NUMPAD0   : TmpString := TmpString + 'Numpad 0';
-      VK_NUMPAD1   : TmpString := TmpString + 'Numpad 1';
-      VK_NUMPAD2   : TmpString := TmpString + 'Numpad 2';
-      VK_NUMPAD3   : TmpString := TmpString + 'Numpad 3';
-      VK_NUMPAD4   : TmpString := TmpString + 'Numpad 4';
-      VK_NUMPAD5   : TmpString := TmpString + 'Numpad 5';
-      VK_NUMPAD6   : TmpString := TmpString + 'Numpad 6';
-      VK_NUMPAD7   : TmpString := TmpString + 'Numpad 7';
-      VK_NUMPAD8   : TmpString := TmpString + 'Numpad 8';
-      VK_NUMPAD9   : TmpString := TmpString + 'Numpad 9';
-      VK_MULTIPLY  : TmpString := TmpString + 'Multiply';
-      VK_ADD       : TmpString := TmpString + 'Add';
-      VK_SEPARATOR : TmpString := TmpString + 'Separator';
-      VK_SUBTRACT  : TmpString := TmpString + 'Subtract';
-      VK_DECIMAL   : TmpString := TmpString + 'Decimal';
-      VK_DIVIDE    : TmpString := TmpString + 'Divide';
-      VK_NUMLOCK   : TmpString := TmpString + 'Num Lock';
-      VK_SCROLL    : TmpString := TmpString + 'Scroll Lock';
-      VK_BACK      : TmpString := TmpString + 'Backspace';
-      VK_TAB       : TmpString := TmpString + 'Tab';
-      VK_CLEAR     : TmpString := TmpString + 'Clear';
-      VK_RETURN    : TmpString := TmpString + 'Return';
-      VK_PAUSE     : TmpString := TmpString + 'Pause';
-      VK_CAPITAL   : TmpString := TmpString + 'Caps Lock';
-    end;
-    Key := 0;
-  end else begin
-    TmpString := TmpString + Chr(Key);
-    Key := 0;
-  end;
-
-  if Text <> TmpString then
-    Text := TmpString;
-  SelStart := length(Text);
-end;
-
-procedure TSynHotKey.KeyPress(var Key: Char);
-begin
-//  inherited;
-  if (length(Text) > 0) and (Text[Length(Text)] <> '+') then
-    Key := #0;
-
-end;
-
-procedure TSynHotKey.KeyUp(var Key: Word; Shift: TShiftState);
-begin
-//  inherited;
-  if (length(Text) > 0) and (Text[Length(Text)] = '+') then
-  begin
-    Text := 'None';
-    SelStart := length(Text);
-  end;
-end;
-
-procedure TSynHotKey.SetHotKey(const Value: TShortcut);
-begin
-  if Value = 0 then
-    Text := 'None'
-  else Text := Menus.ShortCutToText(Value);
-  SelStart := length(Text);
 end;
 
 end.

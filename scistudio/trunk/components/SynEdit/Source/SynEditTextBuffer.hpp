@@ -169,48 +169,36 @@ public:
 
 #pragma option push -b-
 enum TSynChangeReason { crInsert, crPaste, crDragDropInsert, crDeleteAfterCursor, crDelete, crLineBreak, 
-	crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crAutoCompleteBegin, crAutoCompleteEnd, 
-	crSpecial1Begin, crSpecial1End, crSpecial2Begin, crSpecial2End, crNothing };
+	crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crNothing };
 #pragma option pop
 
 class DELPHICLASS TSynEditUndoItem;
-class PASCALIMPLEMENTATION TSynEditUndoItem : public Classes::TPersistent 
+class PASCALIMPLEMENTATION TSynEditUndoItem : public System::TObject 
 {
-	typedef Classes::TPersistent inherited;
+	typedef System::TObject inherited;
 	
-protected:
+public:
 	TSynChangeReason fChangeReason;
 	Synedittypes::TSynSelectionMode fChangeSelMode;
 	Windows::TPoint fChangeStartPos;
 	Windows::TPoint fChangeEndPos;
 	AnsiString fChangeStr;
 	int fChangeNumber;
-	
-public:
-	virtual void __fastcall Assign(Classes::TPersistent* Source);
-	__property TSynChangeReason ChangeReason = {read=fChangeReason, nodefault};
-	__property Synedittypes::TSynSelectionMode ChangeSelMode = {read=fChangeSelMode, nodefault};
-	__property Windows::TPoint ChangeStartPos = {read=fChangeStartPos};
-	__property Windows::TPoint ChangeEndPos = {read=fChangeEndPos};
-	__property AnsiString ChangeStr = {read=fChangeStr};
-	__property int ChangeNumber = {read=fChangeNumber, nodefault};
 public:
 	#pragma option push -w-inl
-	/* TPersistent.Destroy */ inline __fastcall virtual ~TSynEditUndoItem(void) { }
+	/* TObject.Create */ inline __fastcall TSynEditUndoItem(void) : System::TObject() { }
 	#pragma option pop
-	
-public:
 	#pragma option push -w-inl
-	/* TObject.Create */ inline __fastcall TSynEditUndoItem(void) : Classes::TPersistent() { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TSynEditUndoItem(void) { }
 	#pragma option pop
 	
 };
 
 
 class DELPHICLASS TSynEditUndoList;
-class PASCALIMPLEMENTATION TSynEditUndoList : public Classes::TPersistent 
+class PASCALIMPLEMENTATION TSynEditUndoList : public System::TObject 
 {
-	typedef Classes::TPersistent inherited;
+	typedef System::TObject inherited;
 	
 private:
 	int fBlockChangeNumber;
@@ -220,7 +208,7 @@ private:
 	int fLockCount;
 	int fMaxUndoActions;
 	int fNextChangeNumber;
-	Classes::TNotifyEvent fOnAddedUndo;
+	Classes::TNotifyEvent fOnAdded;
 	void __fastcall EnsureMaxEntries(void);
 	bool __fastcall GetCanUndo(void);
 	int __fastcall GetItemCount(void);
@@ -239,14 +227,12 @@ public:
 	TSynEditUndoItem* __fastcall PopItem(void);
 	void __fastcall PushItem(TSynEditUndoItem* Item);
 	void __fastcall Unlock(void);
-	TSynChangeReason __fastcall GetChangeReason(void);
-	virtual void __fastcall Assign(Classes::TPersistent* Source);
 	__property int BlockChangeNumber = {read=fBlockChangeNumber, write=fBlockChangeNumber, nodefault};
 	__property bool CanUndo = {read=GetCanUndo, nodefault};
 	__property bool FullUndoImpossible = {read=fFullUndoImposible, nodefault};
 	__property int ItemCount = {read=GetItemCount, nodefault};
 	__property int MaxUndoActions = {read=fMaxUndoActions, write=SetMaxUndoActions, nodefault};
-	__property Classes::TNotifyEvent OnAddedUndo = {read=fOnAddedUndo, write=fOnAddedUndo};
+	__property Classes::TNotifyEvent OnAddedUndo = {read=fOnAdded, write=fOnAdded};
 };
 
 

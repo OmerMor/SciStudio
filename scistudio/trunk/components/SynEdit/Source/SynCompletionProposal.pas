@@ -27,14 +27,12 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynCompletionProposal.pas,v 1.12 2001/10/21 16:42:52 jrx Exp $
+$Id: SynCompletionProposal.pas,v 1.3 2000/07/28 20:31:10 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
 
 Known Issues:
-
-The Caret hides when scrolling with the scroll bar on the completion proposal
 -------------------------------------------------------------------------------}
 
 unit SynCompletionProposal;
@@ -44,151 +42,78 @@ unit SynCompletionProposal;
 interface
 
 uses
-  SysUtils, Classes,
-{$IFDEF SYN_KYLIX}
-  Qt, Types, QControls, QGraphics, QForms, QStdCtrls, QMenus,
-{$ELSE}
-  Windows, Messages, Graphics, Forms, Controls, StdCtrls, Menus,
-{$ENDIF}
- SynEditTypes, SynEditKeyCmds, SynEditHighlighter, SynEditKbdHandler, SynEdit;
+  Classes, Windows, Messages, Graphics, Forms, Controls, StdCtrls, Menus,
+  SysUtils, SynEditTypes, SynEditKeyCmds, SynEditHighlighter, SynEdit;
 
 type
-  SynCompletionType = (ctCode, ctHint, ctParams);
-
-  TSynForm = {$IFDEF SYN_DELPHI_3}TCustomForm{$ELSE}TForm{$ENDIF};
-
   TSynBaseCompletionProposalPaintItem = function(AKey: string; ACanvas: TCanvas;
     X, Y: integer): boolean of object;
-
   TCodeCompletionEvent = procedure(var Value: string; Shift: TShiftState)
     of object;
-
   TValidateEvent = procedure(Sender: TObject; Shift: TShiftState) of object;
 
-  TCompletionParameter = procedure(Sender : TObject; CurrentIndex : Integer;
-    VAR Level, IndexToDisplay : Integer; VAR Key : Char;
-    VAR DisplayString : String) of object;
-
-  TCompletionExecute = procedure(Kind : SynCompletionType; Sender : TObject;
-    VAR AString : String; x, y : Integer; var CanExecute : Boolean) of object;
-
-  TSynBaseCompletionProposalForm = class(TSynForm)
+  TSynBaseCompletionProposalForm = class(TForm)
   protected
-    FCurrentString  : string;
-    FOnKeyPress     : TKeyPressEvent;
-    FOnKeyDelete    : TNotifyEvent;
-    FOnPaintItem    : TSynBaseCompletionProposalPaintItem;
-    FItemList       : TStrings;
-    FInsertList     : TStrings;
-    FAssignedList   : TStrings;
-    FPosition       : Integer;
+    FCurrentString: string;
+    FOnKeyPress: TKeyPressEvent;
+    FOnKeyDelete: TNotifyEvent;
+    FOnPaintItem: TSynBaseCompletionProposalPaintItem;
+    FItemList: TStrings;
+    FPosition: Integer;
     FNbLinesInWindow: Integer;
-    FFontHeight     : integer;
-    Scroll          : TScrollBar;
-    FOnValidate     : TValidateEvent;
-    FOnCancel       : TNotifyEvent;
-    FClSelect       : TColor;
-    fClText         : TColor;
-    fClSelectText   : TColor;
-    fClBackGround   : TColor;
-    FAnsi           : boolean;
-    fCase           : boolean;
-    fShrink         : Boolean;
-    FMouseWheelAccumulator: integer;
-    FDisplayKind    : SynCompletionType;
-    FParameterToken : TCompletionParameter;
-    FCurrentIndex   : Integer;
-    FCurrentLevel   : Integer;
-    FDefaultKind    : SynCompletionType;
-    FUsePrettyText  : Boolean;
-    FBiggestWord    : string;
-    FMatchText      : Boolean;
-    FEndOfTokenChr  : String;
-    OldShowCaret    : Boolean;    
+    FFontHeight: integer;
+    Scroll: TScrollBar;
+    FOnValidate: TValidateEvent;
+    FOnCancel: TNotifyEvent;
+    FClSelect: TColor;
+    FAnsi: boolean;
     procedure SetCurrentString(const Value: string);
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure KeyPress(var Key: char); override;
     procedure Paint; override;
     procedure ScrollGetFocus(Sender: TObject);
-    procedure Activate; override;
     procedure Deactivate; override;
-    procedure MoveLine (cnt: Integer);
+    procedure SelectPrec;
+    procedure SelectNext;
     procedure ScrollChange(Sender: TObject);
-    procedure ScrollOnScroll(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer);
     procedure SetItemList(const Value: TStrings);
-    procedure SetInsertList(const Value: TStrings);
     procedure SetPosition(const Value: Integer);
     procedure SetNbLinesInWindow(const Value: Integer);
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); override;
-    procedure WMMouseWheel(var Msg: TMessage); message WM_MOUSEWHEEL;
     procedure StringListChange(Sender: TObject);
-    procedure DoDoubleClick(Sender : TObject);
-    function intLowerCase (s: string): string;
-    procedure DoFormShow(Sender: TObject);
-    procedure DoFormHide(Sender: TObject);
   private
     Bitmap: TBitmap; // used for drawing
     fCurrentEditor: TComponent;
-    FUseInsertList: boolean;
-    procedure SetShrink(const Value: Boolean);
-    procedure WMActivate (var Message: TWMActivate); message WM_ACTIVATE;
   public
     constructor Create(AOwner: Tcomponent); override;
-    procedure CreateParams (var Params: TCreateParams); override;
     destructor destroy; override;
-    property DisplayType : SynCompletionType read FDisplayKind write FDisplayKind;
-    property DefaultType : SynCompletionType read FDefaultKind write FDefaultKind;
-//  published
-    property CurrentString  : string read FCurrentString write SetCurrentString;
-    Property CurrentIndex   : Integer read FCurrentIndex write FCurrentIndex;
-    Property CurrentLevel   : Integer read FCurrentLevel write FCurrentLevel;
-    Property OnParameterToken : TCompletionParameter read FParameterToken write FParameterToken;
-    property OnKeyPress     : TKeyPressEvent read FOnKeyPress write FOnKeyPress;
-    property OnKeyDelete    : TNotifyEvent read FOnKeyDelete write FOnKeyDelete;
-    property OnPaintItem    : TSynBaseCompletionProposalPaintItem read FOnPaintItem
+  published
+    property CurrentString: string read FCurrentString write SetCurrentString;
+    property OnKeyPress: TKeyPressEvent read FOnKeyPress write FOnKeyPress;
+    property OnKeyDelete: TNotifyEvent read FOnKeyDelete write FOnKeyDelete;
+    property OnPaintItem: TSynBaseCompletionProposalPaintItem read FOnPaintItem
       write FOnPaintItem;
-    property OnValidate     : TValidateEvent read FOnValidate write FOnValidate;
-    property OnCancel       : TNotifyEvent read FOnCancel write FOnCancel;
-    property ItemList       : TStrings   read FItemList write SetItemList;
-    Property InsertList     : TStrings   read FInsertList write SetInsertList;
-    property AssignedList   : TStrings   read FAssignedList write FAssignedList;
-    property Position       : Integer    read FPosition write SetPosition;
-    property NbLinesInWindow: Integer    read FNbLinesInWindow
+    property OnValidate: TValidateEvent read FOnValidate write FOnValidate;
+    property OnCancel: TNotifyEvent read FOnCancel write FOnCancel;
+    property ItemList: TStrings read FItemList write SetItemList;
+    property Position: Integer read FPosition write SetPosition;
+    property NbLinesInWindow: Integer read FNbLinesInWindow
       write SetNbLinesInWindow;
-    property BiggestWord    : string     read FBiggestWord write FBiggestWord;
-    property ClSelect       : TColor     read FClSelect write FClSelect;
-    property ClSelectedText : TColor     read fClSelectText write fClSelectText;
-    property ClText         : TColor     read fClText write fClText;
-    property ClBackground   : TColor     read fClBackGround write fClBackGround;
-    property UsePrettyText  : boolean    read FUsePrettyText write FUsePrettyText default False;
-    property UseInsertList  : boolean    read FUseInsertList write FUseInsertList default False;
-    property AnsiStrings    : boolean    read fansi write fansi;
-    property CaseSensitive  : Boolean    read fCase write fCase;
-    property CurrentEditor  : TComponent read fCurrentEditor write fCurrentEditor;
-    property MatchText      : Boolean    read fMatchText write fMatchText;
-    property EndOfTokenChr  : String     read FEndOfTokenChr write FEndOfTokenChr;
-    property ShrinkList: Boolean read fShrink write SetShrink;
+    property ClSelect: TColor read FClSelect write FClSelect;
+    property ffAnsi: boolean read fansi write fansi;
+    property CurrentEditor: tComponent read fCurrentEditor write fCurrentEditor;
   end;
 
   TSynBaseCompletionProposal = class(TComponent)
   private
-    FForm: TSynBaseCompletionProposalForm;
-    FOnExecute: TCompletionExecute;
+    Form: TSynBaseCompletionProposalForm;
+    FOnExecute: TNotifyEvent;
     FWidth: Integer;
-    FBiggestWord: string;
-    FUsePrettyText: Boolean;
-    FDotOffset : Integer;
-    FOldPos : Integer;
-    FOldLeft: Integer;
-    FOldStr : String;
-    FUseInsertList: boolean;
-    FEndOfTokenChr: string;
     function GetClSelect: TColor;
     procedure SetClSelect(const Value: TColor);
     function GetCurrentString: string;
     function GetItemList: TStrings;
-    function GetInsertList: TStrings;
     function GetNbLinesInWindow: Integer;
     function GetOnCancel: TNotifyEvent;
     function GetOnKeyPress: TKeyPressEvent;
@@ -197,7 +122,6 @@ type
     function GetPosition: Integer;
     procedure SetCurrentString(const Value: string);
     procedure SetItemList(const Value: TStrings);
-    procedure SetInsertList(const Value: TStrings);
     procedure SetNbLinesInWindow(const Value: Integer);
     procedure SetOnCancel(const Value: TNotifyEvent);
     procedure SetOnKeyPress(const Value: TKeyPressEvent);
@@ -209,97 +133,46 @@ type
     procedure RFAnsi(const Value: boolean);
     function SFAnsi: boolean;
     procedure SetWidth(Value: Integer);
-    function GetDisplayKind: SynCompletionType;
-    procedure SetDisplayKind(const Value: SynCompletionType);
-    function GetParameterToken: TCompletionParameter;
-    procedure SetParameterToken(const Value: TCompletionParameter);
-    function GetDefaultKind: SynCompletionType;
-    procedure SetDefaultKind(const Value: SynCompletionType);
-    procedure SetUsePrettyText(const Value: Boolean);
-    procedure SetUseBiggestWord(const Value: String);
-    procedure SetUseInsertList(const Value: boolean);
-    function IsEndToken(AChar : Char) : Boolean;
-    function GetCase: boolean;
-    procedure SetCase(const Value: boolean);
-    function GetClBack: TColor;
-    procedure SetClBack(const Value: TColor);
-    function GetClText: TColor;
-    procedure SetClText(const Value: TColor);
-    function GetClSelectedText: TColor;
-    procedure SetClSelectedText(const Value: TColor);
-    function GetMatchText: Boolean;
-    procedure SetMatchText(const Value: Boolean);
-    procedure SetEndOfTokenChar(const Value: string);
-    function GetShrink: Boolean;
-    procedure SetShrink(const Value: Boolean);
-  protected
-    procedure loaded; override;
   public
     constructor Create(Aowner: TComponent); override;
     destructor Destroy; override;
     procedure Execute(s: string; x, y: integer);
-    procedure ExecuteEx(s: string; x, y: integer; Kind : SynCompletionType
-      {$IFDEF SYN_COMPILER_4_UP} = ctCode {$ENDIF});
-    procedure Activate;
     procedure Deactivate;
     property OnKeyPress: TKeyPressEvent read GetOnKeyPress write SetOnKeyPress;
     property OnKeyDelete: TNotifyEvent read GetOnKeyDelete write SetOnKeyDelete;
     property OnValidate: TValidateEvent read GetOnValidate write SetOnValidate;
     property OnCancel: TNotifyEvent read GetOnCancel write SetOnCancel;
     property CurrentString: string read GetCurrentString write SetCurrentString;
-    property DotOffset : Integer read FDotOffset write FDotOffset;
-    property DisplayType : SynCompletionType read GetDisplayKind write SetDisplayKind;
-    property Form: TSynBaseCompletionProposalForm read FForm write FForm;
   published
-    property DefaultType : SynCompletionType read GetDefaultKind write SetDefaultKind;
-    property OnExecute: TCompletionExecute read FOnExecute write FOnExecute;
-    property OnParameterToken: TCompletionParameter read GetParameterToken
-      write SetParameterToken;
+    property OnExecute: TNotifyEvent read FOnExecute write FOnExecute;
     property OnPaintItem: TSynBaseCompletionProposalPaintItem
       read GetOnPaintItem write SetOnPaintItem;
-    procedure ClearList;
-    function DisplayItem(AIndex : Integer) : String;
-    function InsertItem(AIndex : Integer) : String;
-    Procedure AddItemAt(Where : Integer; ADisplayText, AInsertText : String);
-    Procedure AddItem(ADisplayText, AInsertText : String);
     property ItemList: TStrings read GetItemList write SetItemList;
-    procedure ResetAssignedList;
-    property InsertList: TStrings read GetInsertList write SetInsertList;
     property Position: Integer read GetPosition write SetPosition;
     property NbLinesInWindow: Integer read GetNbLinesInWindow
       write SetNbLinesInWindow;
     property ClSelect: TColor read GetClSelect write SetClSelect;
-    property ClText: TColor read GetClText write SetClText;
-    property ClSelectedText: TColor read GetClSelectedText write SetClSelectedText;
-    property ClBackground: TColor read GetClBack write SetClBack;
     property AnsiStrings: boolean read SFAnsi write RFAnsi;
-    property CaseSensitive: boolean read GetCase write SetCase;
-    property ShrinkList: Boolean read GetShrink write SetShrink;
     property Width: Integer read FWidth write SetWidth;
-    property BiggestWord: string read FBiggestWord write SetUseBiggestWord;
-    property UsePrettyText: boolean read FUsePrettyText write SetUsePrettyText default False;
-    property UseInsertList: boolean read FUseInsertList write SetUseInsertList default False;
-    property EndOfTokenChr: string read FEndOfTokenChr write SetEndOfTokenChar;
-    property LimitToMatchedText: Boolean read GetMatchText write SetMatchText;
   end;
 
   TSynCompletionProposal = class(TSynBaseCompletionProposal)
   private
     FShortCut: TShortCut;
-    fEditor: TCustomSynEdit;
-    fKeyDownProc: TKeyDownProc;
-    fKeyPressProc: TKeyPressProc;
+    fEditors: TList;
+    fEditstuffs: TList;
     FEndOfTokenChr: string;
-    fNoNextKey: Boolean;
     FOnCodeCompletion: TCodeCompletionEvent;
     procedure SetEditor(const Value: TCustomSynEdit);
-    procedure backspace(Sender: TObject);
-    procedure Cancel(Sender: TObject);
-    procedure Validate(Sender: TObject; Shift: TShiftState);
+    procedure backspace(Senter: TObject);
+    procedure Cancel(Senter: TObject);
+    procedure Validate(Senter: TObject; Shift: TShiftState);
     procedure KeyPress(Sender: TObject; var Key: Char);
     procedure EditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure EditorKeyPress(Sender: TObject; var Key: char);
     function GetPreviousToken(FEditor: TCustomSynEdit): string;
+    function GetFEditor: TCustomSynEdit;
+    function GetEditor(i: integer): TCustomSynEdit;
   protected
     procedure Notification(AComponent: TComponent; Operation: TOperation);
       override;
@@ -307,10 +180,13 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor destroy; override;
+    property Editors[i: integer]: TCustomSynEdit read GetEditor;
+    procedure AddEditor(Editor: TCustomSynEdit);
     function RemoveEditor(Editor: TCustomSynEdit): boolean;
+    function EditorsCount: integer;
   published
     property ShortCut: TShortCut read FShortCut write SetShortCut;
-    property Editor: TCustomSynEdit read fEditor write SetEditor;
+    property Editor: TCustomSynEdit read GetFEditor write SetEditor;
     property EndOfTokenChr: string read FEndOfTokenChr write FEndOfTokenChr;
     property OnCodeCompletion: TCodeCompletionEvent
       read FOnCodeCompletion write FOnCodeCompletion;
@@ -319,14 +195,14 @@ type
   TSynAutoComplete = class(TComponent)
   private
     FShortCut: TShortCut;
-    fEditor: TCustomSynEdit;
+    fEditors: TList;
+    fEditstuffs: TList;
     fAutoCompleteList: TStrings;
-    fKeyDownProc : TKeyDownProc;
-    fKeyPressProc : TKeyPressProc;
-    fNoNextKey : Boolean;
     FEndOfTokenChr: string;
     procedure SetAutoCompleteList(List: TStrings);
-    procedure SetEditor(const Value: TCustomSynEdit);
+    function GetEditor(i: integer): TCustomSynEdit;
+    function GetEdit: TCustomSynEdit;
+    procedure SetEdit(const Value: TCustomSynEdit);
   protected
     procedure SetShortCut(Value: TShortCut);
     procedure Notification(AComponent: TComponent; Operation: TOperation);
@@ -339,23 +215,26 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor destroy; override;
     procedure Execute(token: string; Editor: TCustomSynEdit);
+    property Editors[i: integer]: TCustomSynEdit read GetEditor;
+    procedure AddEditor(Editor: TCustomSynEdit);
     function RemoveEditor(Editor: TCustomSynEdit): boolean;
+    function EditorsCount: integer;
     function GetTokenList: string;
-    function GetTokenValue(Token: string): string;
+    function GetTokenValue(Token: string): string; 
   published
     property AutoCompleteList: TStrings read fAutoCompleteList
       write SetAutoCompleteList;
     property EndOfTokenChr: string read FEndOfTokenChr write FEndOfTokenChr;
-    property Editor: TCustomSynEdit read fEditor write SetEditor;
+    property Editor: TCustomSynEdit read GetEdit write SetEdit;
     property ShortCut: TShortCut read FShortCut write SetShortCut;
   end;
 
-  Procedure PrettyTextOut(c: TCanvas; x, y: integer; s: String; DoAlign: Boolean; BiggestWord: String);
+procedure PretyTextOut(c: TCanvas; x, y: integer; s: string);
 
 implementation
 
 uses
-  SynEditKeyConst, SynEditStrConst, SynEditTextBuffer, SynEditMiscProcs;
+  SynEditStrConst;
 
 { TSynBaseCompletionProposalForm }
 
@@ -367,183 +246,90 @@ begin
   CreateNew(AOwner);
 {$ENDIF}
   FItemList := TStringList.Create;
-  FInsertList := TStringList.Create;
-  fAssignedList := TStringList.Create;
-  FMatchText := False;
-  {$IFDEF SYN_KYLIX}
-  BorderStyle := fbsNone;
-  {$ELSE}
   BorderStyle := bsNone;
-  {$ENDIF}
   Scroll := TScrollBar.Create(self);
   Scroll.Kind := sbVertical;
-  {$IFNDEF SYN_KYLIX}
   Scroll.ParentCtl3D := False;
-  {$ENDIF}
   Scroll.OnChange := ScrollChange;
-  Scroll.OnScroll := ScrollOnScroll;
   Scroll.Parent := self;
   Scroll.OnEnter := ScrollGetFocus;
   Visible := false;
   FFontHeight := Canvas.TextHeight('Cyrille de Brebisson');
+  Color := clWindow;
   ClSelect := clHighlight;
-  ClSelectedText := clHighlightText;
-  ClBackground := clWindow;
-  ClText := clWindowText;
-  CaseSensitive := false;
-  ShrinkList := true;
   TStringList(FItemList).OnChange := StringListChange;
   bitmap := TBitmap.Create;
-  NbLinesInWindow := 8;
-  Canvas.Font.Name := 'Arial';
-  Canvas.Font.Size := 8;
-  OnDblClick := DoDoubleClick;
-
-  OnShow := DoFormShow;
-  OnHide := DoFormHide;
-end;
-
-procedure TSynBaseCompletionProposalForm.CreateParams (var Params: TCreateParams);
-const
-  ThickFrames: array[Boolean] of DWORD = (0, WS_THICKFRAME);
-begin
-  inherited;
-
-  with Params do begin
-    Style := WS_POPUP;
-    ExStyle := WS_EX_TOOLWINDOW;
-  end;
-end;
-
-procedure TSynBaseCompletionProposalForm.Activate;
-begin
-  Visible := True;
-  if DefaultType = ctCode then
-    TCustomSynEdit (CurrentEditor).AddFocusControl(self);
+  NbLinesInWindow := 6;
 end;
 
 procedure TSynBaseCompletionProposalForm.Deactivate;
 begin
-  if FormStyle = fsNormal then
-  begin
-    try
-      if (DefaultType = ctCode) then
-        TCustomSynEdit (CurrentEditor).RemoveFocusControl(self);
-    except
-      on exception do;
-    end;
-    Visible := False;
-  end;
+  Visible := False;
 end;
 
 destructor TSynBaseCompletionProposalForm.destroy;
 begin
   bitmap.free;
-//  Scroll.Free;                                                                //DDH The form will free this   
+  Scroll.Free;
   FItemList.Free;
-  FInsertList.Free;
-  fAssignedList.Free;
   inherited destroy;
 end;
 
 procedure TSynBaseCompletionProposalForm.KeyDown(var Key: Word;
   Shift: TShiftState);
+var
+  i: integer;
 begin
-  if DisplayType = ctCode then
-  begin
-    case Key of
-      SYNEDIT_RETURN : if Assigned(OnValidate) then OnValidate(Self, Shift);
-      SYNEDIT_ESCAPE : if Assigned(OnCancel) then OnCancel(Self);
-      SYNEDIT_PRIOR  : MoveLine (NbLinesInWindow * -1);
-      SYNEDIT_NEXT   : MoveLine (NbLinesInWindow);
-      SYNEDIT_END    : Position := ItemList.count - 1;
-      SYNEDIT_HOME   : Position := 0;
-      SYNEDIT_UP     : if ssCtrl in Shift then
-                         Position := 0
-                       else MoveLine (-1);
-      SYNEDIT_DOWN   : if ssCtrl in Shift then
-                         Position := ItemList.count - 1
-                       else MoveLine (1);
-      SYNEDIT_BACK   : if (Shift = []) and (Length(CurrentString) > 0) then
-                       begin
-                         CurrentString := Copy(CurrentString, 1, Length(CurrentString) - 1);
-                         if Assigned (OnKeyDelete) then OnKeyDelete(Self);
-                       end;
-    end;
-  end else if DisplayType = ctParams then
-  begin
-    case Key of
-      SYNEDIT_RETURN : begin
-                         Top := Top + TCustomSynEdit(CurrentEditor).LineHeight;
-                       end;
-      SYNEDIT_ESCAPE, SYNEDIT_PRIOR, SYNEDIT_NEXT, SYNEDIT_HOME, SYNEDIT_UP, SYNEDIT_DOWN :
-                       begin
-                          if Assigned(OnCancel) then OnCancel(Self);
-                       end;
-      SYNEDIT_BACK   : if Assigned(OnKeyDelete) then OnKeyDelete(Self);
-
-    end;
+  case Key of
+// added the VK_XXX codes to make it more readable / maintainable
+    VK_RETURN:
+      if Assigned(OnValidate) then OnValidate(Self, Shift);
+    VK_ESCAPE, VK_SPACE:
+      if Assigned(OnCancel) then OnCancel(Self);
+    // I do not think there is a worst way to do this, but laziness rules :-)
+    VK_PRIOR:
+      for i := 1 to NbLinesInWindow do
+        SelectPrec;
+    VK_NEXT:
+      for i := 1 to NbLinesInWindow do
+        SelectNext;
+    VK_END:
+      if ssCtrl in Shift then Position := ItemList.count - 1;
+    VK_HOME:
+      if ssCtrl in Shift then Position := 0;
+    VK_UP:
+      if ssCtrl in Shift then
+        Position := 0
+      else
+        SelectPrec;
+    VK_DOWN:
+      if ssCtrl in Shift then
+        Position := ItemList.count - 1
+      else
+        SelectNext;
+    VK_BACK:
+      if (Shift = []) and (Length(CurrentString) > 0) then begin
+        CurrentString := Copy(CurrentString, 1, Length(CurrentString) - 1);
+        if Assigned(OnKeyDelete) then OnKeyDelete(Self);
+      end;
   end;
-  invalidate;
+  Paint;
 end;
 
 procedure TSynBaseCompletionProposalForm.KeyPress(var Key: char);
-VAR TmpIndex, TmpLevel : Integer;
-    TmpStr : String;
 begin
-  if DisplayType = ctCode then
-  begin
-    case key of    //
-      #32     : begin
-                  OnValidate(Self, []);
-                  Key := #0;
-                end;
-      #33..'z': Begin
-                  if Pos(Key, FEndOfTokenChr) <> 0 then
-                    OnValidate(Self, []);
-
-                  CurrentString:= CurrentString+key;
-                  if Assigned(OnKeyPress) then
-                    OnKeyPress(self, Key);
-                end;
-      #8: if Assigned(OnKeyPress) then OnKeyPress(self, Key);
-      else if Assigned(OnCancel) then OnCancel(Self);
-    end;    // case
-  end else if DisplayType = ctHint then
-  begin
-    if Assigned(OnKeyPress) then OnKeyPress(self, Key);
-    if Assigned(OnCancel) then OnCancel(Self);
-    Hide;
-  end else begin
-    case key of
-      ',','(',')' : Begin
-                      if Assigned(FParameterToken) then
-                      begin
-                        TmpIndex := CurrentIndex;
-                        TmpLevel := CurrentLevel;
-                        TmpStr := CurrentString;
-                        OnParameterToken(self, CurrentIndex, TmpLevel, TmpIndex, key, TmpStr);
-                        CurrentIndex := TmpIndex;
-                        CurrentLevel := TmpLevel;
-                        CurrentString := TmpStr;
-                      end;
-                      if Assigned(OnKeyPress) then
-                        OnKeyPress(self, Key);
-                    end;
-      #27     : begin
-                  Hide;
-                  if Assigned(OnCancel) then OnCancel(Self);
-                end;
-      #33..'''',
-      '*','+',
-      '-'..'z': Begin
-                  if Assigned(OnKeyPress) then
-                    OnKeyPress(self, Key);
-                end;
-      #8: if Assigned(OnKeyPress) then OnKeyPress(self, Key);
-    end;
-  end;
-  Invalidate;
+  case key of //
+    #33..'z': begin
+        CurrentString := CurrentString + key;
+        if Assigned(OnKeyPress) then
+          OnKeyPress(self, Key);
+      end;
+    #8:
+      if Assigned(OnKeyPress) then OnKeyPress(self, Key); 
+  else if Assigned(OnCancel) then
+    OnCancel(Self);
+  end; // case
+  paint;
 end;
 
 procedure TSynBaseCompletionProposalForm.MouseDown(Button: TMouseButton;
@@ -551,7 +337,6 @@ procedure TSynBaseCompletionProposalForm.MouseDown(Button: TMouseButton;
 begin
   y := (y - 1) div FFontHeight;
   Position := Scroll.Position + y;
-  TCustomSynEdit(CurrentEditor).UpdateCaret;
 end;
 
 procedure TSynBaseCompletionProposalForm.Paint;
@@ -566,80 +351,42 @@ var
   end;
 
 begin
-//There are now multiple kinds of painting.
-//this is for code completion
+  // update scrool bar
+  if ItemList.Count - NbLinesInWindow < 0 then
+    Scroll.Max := 0
+  else
+    Scroll.Max := ItemList.Count - NbLinesInWindow;
+  Position := Position;
+  Scroll.LargeChange := NbLinesInWindow;
 
-// draw a rectangle around the window
-  Canvas.Brush.Color:= ClBlack;
-  Canvas.FrameRect(Rect(0,0, Width, Height));
-{  Canvas.Moveto(0, 0);
-  Canvas.LineTo(Width-1, 0);
-  Canvas.LineTo(Width-1, Height-1);
-  Canvas.LineTo(0, Height-1);
+  // draw a rectangle around the window
+  Canvas.Pen.Color := ClBlack;
+  Canvas.Moveto(0, 0);
+  Canvas.LineTo(Width - 1, 0);
+  Canvas.LineTo(Width - 1, Height - 1);
+  Canvas.LineTo(0, Height - 1);
   Canvas.LineTo(0, 0);
-}
-  if FDisplayKind = ctCode then
-  begin
 
-    // update scroll bar
-    if ItemList.Count - NbLinesInWindow < 0 then
-      Scroll.Max := 0
-    else
-      Scroll.Max := ItemList.Count - NbLinesInWindow;
-//    Scroll.Position := Position;
-    Scroll.LargeChange := NbLinesInWindow;
+  with bitmap do begin
+    canvas.pen.color := color;
+    canvas.brush.color := color;
+    canvas.Rectangle(0, 0, Width, Height);
+    for i := 0 to min(NbLinesInWindow - 1, ItemList.Count - 1) do begin
+      if i + Scroll.Position = Position then begin
+        Canvas.Brush.Color := ClSelect;
+        Canvas.Pen.Color := ClSelect;
+        Canvas.Rectangle(0, FFontHeight * i, width, FFontHeight * (i + 1));
+        Canvas.Pen.Color := ClBlack;
+      end else
+        Canvas.Brush.Color := Color;
 
-    with bitmap do
-    begin
-      canvas.pen.color := fClBackGround;
-      canvas.brush.color := fClBackGround;
-      canvas.Rectangle(0, 0, Width, Height);
-      for i := 0 to min(NbLinesInWindow - 1, ItemList.Count - 1) do
-      begin
-        if i + Scroll.Position = Position then
-        begin
-          Canvas.Brush.Color := fClSelect;
-          Canvas.Pen.Color   := fClSelect;
-          Canvas.Rectangle(0, FFontHeight * i, width, FFontHeight * (i + 1));
-          Canvas.Pen.Color   := fClSelectText;
-          Canvas.Font.Color  := fClSelectText;
-        end else begin
-          Canvas.Brush.Color := fclBackground;
-          Canvas.Pen.Color   := fClBackGround;
-          Canvas.Font.Color  := fClText;
-        end;
-
-        if not Assigned(OnPaintItem)
-          or not OnPaintItem(ItemList[Scroll.Position + i], Canvas, 0, FFontHeight * i) then
-        begin
-          if FUsePrettyText then
-            PrettyTextOut( Canvas, 1, FFontHeight*i, ItemList[Scroll.Position+i], True, FBiggestWord)
-          else Canvas.TextOut(2, FFontHeight * i, ItemList[Scroll.Position + i]);
-        end;
-      end;
+      if not Assigned(OnPaintItem)
+        or not OnPaintItem(ItemList[Scroll.Position + i], Canvas, 0, FFontHeight * i)
+      then
+        Canvas.TextOut(2, FFontHeight * i, ItemList[Scroll.Position + i]);
     end;
-    canvas.Draw(1, 1, bitmap);
-    //This is to try and reduce flickering, but doesn't reduce it
-//    Canvas.BrushCopy(Rect(1,1,Bitmap.Width + 1, Bitmap.Height + 1), Bitmap, Rect(0, 0, Bitmap.Width, Bitmap.Height), clBlack);
-  end else if (FDisplayKind = ctHint) or (FDisplayKind = ctParams) then
-  begin
-    with bitmap do
-    begin
-      canvas.pen.color:= fClBackGround;
-      canvas.brush.color:= fClBackGround;
-      canvas.Rectangle(0,0,Width,Height);
-
-      Canvas.Brush.Color := fClBackGround;
-      Canvas.Font.Color  := fClText;
-      if not Assigned(OnPaintItem) or not OnPaintItem(CurrentString, Canvas, 0, FFontHeight) then
-      begin
-        if UsePrettyText then
-          PrettyTextOut( Canvas, 3, 1, CurrentString, False, FBiggestWord)
-        else Canvas.TextOut( 4, 2, CurrentString);
-      end;
-    end;
-    canvas.Draw(1, 1, bitmap);
   end;
+  canvas.Draw(1, 1, bitmap);
 end;
 
 procedure TSynBaseCompletionProposalForm.ScrollChange(Sender: TObject);
@@ -648,16 +395,7 @@ begin
     Position := Scroll.Position
   else if Position > Scroll.Position + NbLinesInWindow - 1 then
     Position := Scroll.Position + NbLinesInWindow - 1;
-  Invalidate;
-end;
-
-procedure TSynBaseCompletionProposalForm.ScrollOnScroll(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer);
-begin
-  with TCustomSynEdit(CurrentEditor) do
-  begin
-    SetFocus;
-    //I haven't figured out why carets hide when scrolling, but at least you can type now.
-  end;
+  Paint;
 end;
 
 procedure TSynBaseCompletionProposalForm.ScrollGetFocus(Sender: TObject);
@@ -665,83 +403,45 @@ begin
   ActiveControl := nil;
 end;
 
-procedure TSynBaseCompletionProposalForm.MoveLine (cnt: Integer);
+procedure TSynBaseCompletionProposalForm.SelectNext;
 begin
-  if (cnt > 0) then begin
-    if (Position < (ItemList.Count - cnt)) then
-      Position := Position + cnt
-    else
-      Position := ItemList.Count - 1;
-  end else begin
-    if (Position + cnt) > 0 then
-      Position := Position + cnt
-    else
-      Position := 0;
-  end;
+  if Position < ItemList.Count - 1 then
+    Position := Position + 1;
+end;
+
+procedure TSynBaseCompletionProposalForm.SelectPrec;
+begin
+  if Position > 0 then
+    Position := Position - 1;
 end;
 
 procedure TSynBaseCompletionProposalForm.SetCurrentString(const Value: string);
-var i: integer;
-    cs: string;
-
-  function MatchItem (item: string): Boolean;
-  var ci: string;
-      TmpStr: String;
-  begin
-    if UsePrettyText then
-    begin
-      if pos(#9, item) <> 0 then
-        TmpStr := Copy(Item, pos(#9, item) + 1, length(item))
-      else TmpStr := Item;
-    end else TmpStr := Item;
-
-    ci := intLowerCase (Copy (TmpStr,1,Length (Value)));
-
-    if fAnsi then
-      Result := (AnsiCompareText (ci,cs) = 0)
-    else
-      Result := (CompareText (ci,cs) = 0);
-  end;
-
-  procedure RecalcList;
-  var idx: Integer;
-  begin
-    if FMatchText then
-    begin
-      with fAssignedList do
-        if (FItemList.Count > Count) then
-          Assign (FItemList);
-
-      ItemList.Clear;
-
-      for idx := 0 to fAssignedList.Count - 1 do begin
-        if MatchItem (fAssignedList[idx]) then
-          ItemList.AddObject(fAssignedList[idx], TObject(idx));
-      end;
-    end;
-  end;
+var
+  i: integer;
 begin
   FCurrentString := Value;
-  i:= 0;
-  cs := intLowerCase (Value);
-  if fShrink then
-    RecalcList;
-  while (i <= ItemList.count-1) and not MatchItem (ItemList[i]) do
-    Inc (i);
-  if (i <= ItemList.Count-1) then Position:= i
-    else Position := 0;
+  if ffAnsi then begin
+    for i := 0 to Pred(ItemList.Count) do
+      if 0 = CompareText(fCurrentString,
+        Copy(ItemList[i], 1, Length(fCurrentString)))
+        then begin
+        Position := i;
+        break;
+      end;
+  end else begin
+    for i := 0 to Pred(ItemList.Count) do
+      if 0 = CompareStr(fCurrentString,
+        Copy(ItemList[i], 1, Length(fCurrentString)))
+        then begin
+        Position := i;
+        break;
+      end;
+  end;
 end;
 
 procedure TSynBaseCompletionProposalForm.SetItemList(const Value: TStrings);
 begin
   FItemList.Assign(Value);
-  fAssignedList.Assign(Value);
-  CurrentString := CurrentString;
-end;
-
-procedure TSynBaseCompletionProposalForm.SetInsertList(const Value: TStrings);
-begin
-  FInsertList.Assign(Value);
 end;
 
 procedure TSynBaseCompletionProposalForm.SetNbLinesInWindow(
@@ -752,26 +452,14 @@ begin
   Scroll.Top := 1;
   Scroll.Left := ClientWidth - Scroll.Width - 1;
   Scroll.Height := Height - 2;
-  Bitmap.Width := Scroll.Left - 2;
+  Bitmap.Width := Scroll.Left;
   Bitmap.Height := Height - 2;
-end;
-
-procedure TSynBaseCompletionProposalForm.DoDoubleClick(Sender: TObject);
-begin
-//we need to do the same as the enter key;
-  if DefaultType = ctCode then
-    if Assigned(OnValidate) then OnValidate(Self, []);
 end;
 
 procedure TSynBaseCompletionProposalForm.SetPosition(const Value: Integer);
 begin
-  if ((Value <= 0) and (FPosition = 0)) or
-     (FPosition = Value) then exit;
-
-  if Value <= ItemList.Count - 1 then
-  begin
-    if FPosition <> Value then
-    begin
+  if Value <= ItemList.Count - 1 then begin
+    if FPosition <> Value then begin
       FPosition := Value;
       if Position < Scroll.Position then
         Scroll.Position := Position
@@ -788,109 +476,7 @@ begin
     Scroll.Max := 0
   else
     Scroll.Max := ItemList.Count - NbLinesInWindow;
-  Scroll.Position := Position;
-end;
-
-procedure TSynBaseCompletionProposalForm.WMMouseWheel(var Msg: TMessage);
-var
-  nDelta: integer;
-  nWheelClicks: integer;
-{$IFNDEF SYN_COMPILER_4_UP}
-const
-  LinesToScroll = 3;
-  WHEEL_DELTA = 120;
-  WHEEL_PAGESCROLL = MAXDWORD;
-{$ENDIF}
-begin
-  if csDesigning in ComponentState then exit;
-
-{$IFDEF SYN_COMPILER_4_UP}
-  if GetKeyState(VK_CONTROL) >= 0 then nDelta := Mouse.WheelScrollLines
-{$ELSE}
-  if GetKeyState(VK_CONTROL) >= 0 then nDelta := LinesToScroll
-{$ENDIF}
-    else nDelta := FNbLinesInWindow;
-
-  Inc(fMouseWheelAccumulator, SmallInt(Msg.wParamHi));
-  nWheelClicks := fMouseWheelAccumulator div WHEEL_DELTA;
-  fMouseWheelAccumulator := fMouseWheelAccumulator mod WHEEL_DELTA;
-  if (nDelta = integer(WHEEL_PAGESCROLL)) or (nDelta > FNbLinesInWindow) then
-    nDelta := FNbLinesInWindow;
-
-  Position := Position - (nDelta * nWheelClicks);
-
-end;
-
-function TSynBaseCompletionProposalForm.intLowerCase (s: string): string;
-begin
-  if fCase then Result := s
-    else Result := LowerCase (s);
-end;
-
-procedure TSynBaseCompletionProposalForm.SetShrink(const Value: Boolean);
-begin
-  fShrink := Value;
-  with FItemList do
-    if (Count < fAssignedList.Count) then
-      Assign(fAssignedList);
-end;
-
-function GetMDIParent (const Form: TSynForm): TSynForm;
-{ Returns the parent of the specified MDI child form. But, if Form isn't a
-  MDI child, it simply returns Form. }
-var
-  I, J: Integer;
-begin
-  Result := Form;
-  if Form = nil then Exit;
-  if {$IFDEF SYN_DELPHI_3} (Form is TForm) and {$ENDIF}
-     (TForm(Form).FormStyle = fsMDIChild) then
-    for I := 0 to Screen.FormCount-1 do
-      with Screen.Forms[I] do begin
-        if FormStyle <> fsMDIForm then Continue;
-        for J := 0 to MDIChildCount-1 do
-          if MDIChildren[J] = Form then begin
-            Result := Screen.Forms[I];
-            Exit;
-          end;
-      end;
-end;
-
-procedure TSynBaseCompletionProposalForm.WMActivate(var Message: TWMActivate);
-var
-  ParentForm: TSynForm;
-begin
-  if csDesigning in ComponentState then begin
-    inherited;
-    Exit;
-  end;
-     {Owner of the component that created me}
-  if Owner.Owner is TSynForm then
-    ParentForm := GetMDIParent(TSynForm(Owner.Owner))
-  else ParentForm := nil;
-
-  if Assigned(ParentForm) and ParentForm.HandleAllocated then
-    SendMessage (ParentForm.Handle, WM_NCACTIVATE, Ord(Message.Active <> WA_INACTIVE), 0);
-end;
-
-procedure TSynBaseCompletionProposalForm.DoFormHide(Sender: TObject);
-begin
-  if CurrentEditor <> nil then
-  begin
-    TCustomSynEdit(CurrentEditor).AlwaysShowCaret := OldShowCaret;
-    TCustomSynEdit(CurrentEditor).UpdateCaret;
-  end;
-end;
-
-procedure TSynBaseCompletionProposalForm.DoFormShow(Sender: TObject);
-begin
-  if CurrentEditor <> nil then
-  begin
-    OldShowCaret := TCustomSynEdit(CurrentEditor).AlwaysShowCaret;
-
-    TCustomSynEdit(CurrentEditor).AlwaysShowCaret := True;
-    TCustomSynEdit(CurrentEditor).UpdateCaret;
-  end;
+  Position := Position;
 end;
 
 { TSynBaseCompletionProposal }
@@ -898,130 +484,25 @@ end;
 constructor TSynBaseCompletionProposal.Create(Aowner: TComponent);
 begin
   FWidth := 262;
-  FBiggestWord := 'CONSTRUCTOR';
   inherited Create(AOwner);
   Form := TSynBaseCompletionProposalForm.Create(Self);
   Form.Width := FWidth;
-  Form.UsePrettyText := FUsePrettyText;
-  FDotOffset := 0;
-  FOldPos := 0;
-  FOldLeft := 0;
-  FOldStr := '';
 end;
 
 destructor TSynBaseCompletionProposal.Destroy;
 begin
-  FreeAndNil(Fform);
+  form.Free;
   inherited Destroy;
 end;
 
 procedure TSynBaseCompletionProposal.Execute(s: string; x, y: integer);
 begin
-  ExecuteEx(s, x, y, ctCode);
-end;
-
-procedure TSynBaseCompletionProposal.ExecuteEx(s: string; x, y: integer; Kind : SynCompletionType);
-VAR CanExecute : Boolean;
-    TmpOffset  : Integer;
-begin
-  DisplayType := Kind;
-
-  CanExecute := True;
+  form.top := y;
+  form.left := x;
+  CurrentString := s;
   if assigned(OnExecute) then
-    OnExecute(Kind, Self, s, x, y, CanExecute);
-
-  if not(CanExecute) then
-    exit;
-
-  if Kind = ctParams then
-  begin
-    Form.FormStyle := fsStayOnTop;
-  end else begin
-    Form.FormStyle := fsNormal;
-    FOldPos := -1;
-    FOldLeft := -1;
-    FOldStr := '';
-  end;
-
-  if form.CurrentEditor <> nil then
-  begin
-    TmpOffset := TCustomSynEdit(form.CurrentEditor).Canvas.TextWidth(copy(s, 1, DotOffset));
-
-    if DotOffset > 1 then TmpOffset := TmpOffset + (3 * (DotOffset - 1))
-  end else TmpOffset := 0;
-
-  if (FOldStr <> s) or (FOldStr = '') then
-  begin
-    form.height := 0;
-    form.width := 0;
-    form.top:= y;
-    form.left:= x - TmpOffset;
-    FOldStr := s;
-  end;
-
-  if kind = ctParams then
-    if length(s) > 0 then  //this is for spacing stuff later on;
-      if IsEndToken(s[length(s)]) then
-        s := copy(s,1,length(s) - 1);
-
-  CurrentString:= s;
-
-  if Kind = ctCode then
-  begin
-    with form do
-    begin
-      width:=262;
-      Color := CLBackground;
-            Height:= fFontHeight * NbLinesInWindow + 2;
-      bitmap.Width:= Scroll.left - 2;
-      bitmap.height:= Height-2;
-      Scroll.Visible := True;
-
-      Show;
-    end;
-  end else begin
-    with form do
-    begin
-      form.Invalidate;
-      Canvas.Font.Style := [fsBold];
-      width := Canvas.TextWidth(s);
-      Canvas.Font.Style := [];
-      TmpOffset := Canvas.TextWidth(copy(s,1, pos(#9,s) - 1));
-
-      if Top <> y then Top := y;
-
-      if TmpOffset <> FOldPos then
-      begin
-        left := Left - TmpOffset;
-        FOldPos := TmpOffset;
-        FOldLeft := Left;
-      end else Left := FOldLeft;
-      Height := FFontHeight + 4;
-
-      if (Width - 2 < 1) or
-         (Height - 2 < 1) then
-      begin
-        //There is nothing to display
-        exit;
-      end;
-      bitmap.Width := width - 2;
-
-      bitmap.height:= Height - 2;
-
-      Color := ClBackground;
-      Scroll.Visible := False;
-
-      try
-        form.Show;
-      except
-        on exception do ;
-      end;
-
-      if Kind = ctParams then
-        TCustomSynEdit(form.CurrentEditor).SetFocus;
-
-    end;
-  end;
+    OnExecute(Self);
+  form.Show;
 end;
 
 function TSynBaseCompletionProposal.GetCurrentString: string;
@@ -1032,11 +513,6 @@ end;
 function TSynBaseCompletionProposal.GetItemList: TStrings;
 begin
   result := Form.ItemList;
-end;
-
-function TSynBaseCompletionProposal.GetInsertList: TStrings;
-begin
-  result := Form.InsertList;
 end;
 
 function TSynBaseCompletionProposal.GetNbLinesInWindow: Integer;
@@ -1077,11 +553,6 @@ end;
 procedure TSynBaseCompletionProposal.SetItemList(const Value: TStrings);
 begin
   form.ItemList := Value;
-end;
-
-procedure TSynBaseCompletionProposal.SetInsertList(const Value: TStrings);
-begin
-  form.InsertList := Value;
 end;
 
 procedure TSynBaseCompletionProposal.SetNbLinesInWindow(const Value: Integer);
@@ -1137,22 +608,12 @@ end;
 
 procedure TSynBaseCompletionProposal.RFAnsi(const Value: boolean);
 begin
-  form.AnsiStrings := value;
+  form.ffAnsi := value;
 end;
 
 function TSynBaseCompletionProposal.SFAnsi: boolean;
 begin
-  result := form.AnsiStrings;
-end;
-
-function TSynBaseCompletionProposal.GetCase: boolean;
-begin
-  result := form.CaseSensitive;
-end;
-
-procedure TSynBaseCompletionProposal.SetCase(const Value: boolean);
-begin
-  form.CaseSensitive := Value;
+  result := form.ffansi;
 end;
 
 procedure TSynBaseCompletionProposal.SetWidth(Value: Integer);
@@ -1162,128 +623,48 @@ begin
   Form.SetNbLinesInWindow(Form.FNbLinesInWindow);
 end;
 
-procedure TSynBaseCompletionProposal.Activate;
-begin
-  if Assigned(Form) then Form.Activate;
-end;
-
 procedure TSynBaseCompletionProposal.Deactivate;
 begin
   if Assigned(Form) then Form.Deactivate;
 end;
 
-function TSynBaseCompletionProposal.GetClBack: TColor;
-begin
-  Result := form.ClBackground;
-end;
-
-procedure TSynBaseCompletionProposal.SetClBack(const Value: TColor);
-begin
-  form.ClBackground := Value
-end;
-
-function TSynBaseCompletionProposal.GetClText: TColor;
-begin
-  Result := form.ClText;
-end;
-
-procedure TSynBaseCompletionProposal.SetClText(const Value: TColor);
-begin
-  form.ClText := Value;
-end;
-
-function TSynBaseCompletionProposal.GetClSelectedText: TColor;
-begin
-  Result := form.ClSelectedText;
-end;
-
-procedure TSynBaseCompletionProposal.SetClSelectedText(const Value: TColor);
-begin
-  form.ClSelectedText := Value;
-end;
-
-function TSynBaseCompletionProposal.GetShrink: Boolean;
-begin
-  Result := form.ShrinkList;
-end;
-
-procedure TSynBaseCompletionProposal.SetShrink(const Value: Boolean);
-begin
-  form.ShrinkList := Value;
-end;
-
-Procedure PrettyTextOut(c: TCanvas; x, y: integer; s: String; DoAlign: Boolean; BiggestWord: String);
+procedure PretyTextOut(c: TCanvas; x, y: integer; s: string);
 var
   i: integer;
   b: TBrush;
   f: TFont;
-  InBold : Boolean;
-  DidAlign : Boolean;
-Begin
-  b:= TBrush.Create;
+begin
+  b := TBrush.Create;
   b.Assign(c.Brush);
-  f:= TFont.Create;
+  f := TFont.Create;
   f.Assign(c.Font);
-  InBold := False;
-  DidAlign := False;
   try
-    i:= 1;
-    while i<=Length(s) do
+    i := 1;
+    while i <= Length(s) do
       case s[i] of
-//maybe in the future, but for right now, no colors
-//        #1: Begin
-//              C.Font.Color:= (Ord(s[i+3]) shl 8 + Ord(s[i+2])) shl 8 + Ord(s[i+1]);
-//              inc(i, 4);
-//            end;
-//        #2: Begin
-//              C.Font.Color:= (Ord(s[i+3]) shl 8 + Ord(s[i+2])) shl 8 + Ord(s[i+1]);
-//              inc(i, 4);
-//            end;
-        #3: Begin
-              case s[i+1] of
-                'B': c.Font.Style:= c.Font.Style+[fsBold];
-                'b': c.Font.Style:= c.Font.Style-[fsBold];
-                'U': c.Font.Style:= c.Font.Style+[fsUnderline];
-                'u': c.Font.Style:= c.Font.Style-[fsUnderline];
-                'I': c.Font.Style:= c.Font.Style+[fsItalic];
-                'i': c.Font.Style:= c.Font.Style-[fsItalic];
-              end;
-              inc(i, 2);
-            end;
-        #9: Begin
-              InBold := not(InBold);
-
-              if InBold then
-                c.Font.Style:= c.Font.Style+[fsBold]
-              else begin
-                c.Font.Style:= c.Font.Style-[fsBold];
-                x := x + 1;  //spacing issue
-              end;
-
-              if not(DidAlign) and DoAlign then
-              begin
-                x := 1 + c.TextWidth(BiggestWord);
-                DidAlign := True;
-              end;
-              inc(i);
-            end;
-
-        else
-          if (not(DidAlign) and (x < c.TextWidth(BiggestWord)) and (pos(#9, s) <> 0) and DoAlign) or
-             ((pos(#9, s) <> 0) and not(DoAlign)) or
-             (pos(#9, s) = 0) or
-             (DidAlign) then
-          begin
-            C.TextOut(x, y, s[i]);
-            x:= x+c.TextWidth(s[i])
+        #1: begin
+            C.Font.Color := (Ord(s[i + 3]) shl 8 + Ord(s[i + 2])) shl 8 + Ord(s[i + 1]);
+            inc(i, 4);
           end;
-
-          {$IFNDEF SYN_KYLIX}
-          if Win32Platform <> VER_PLATFORM_WIN32_NT then
-            if InBold then x := x - 1; //spacing issue, need to verify on WINNT
-          {$ENDIF}
-
-          inc(i);
+        #2: begin
+            C.Font.Color := (Ord(s[i + 3]) shl 8 + Ord(s[i + 2])) shl 8 + Ord(s[i + 1]);
+            inc(i, 4);
+          end;
+        #3: begin
+            case s[i + 1] of
+              'B': c.Font.Style := c.Font.Style + [fsBold];
+              'b': c.Font.Style := c.Font.Style - [fsBold];
+              'U': c.Font.Style := c.Font.Style + [fsUnderline];
+              'u': c.Font.Style := c.Font.Style - [fsUnderline];
+              'I': c.Font.Style := c.Font.Style + [fsItalic];
+              'i': c.Font.Style := c.Font.Style - [fsItalic];
+            end;
+            inc(i, 2);
+          end;
+      else
+        C.TextOut(x, y, s[i]);
+        x := x + c.TextWidth(s[i]);
+        inc(i);
       end;
   except
   end;
@@ -1293,130 +674,32 @@ Begin
   b.Free;
 end;
 
-procedure TSynBaseCompletionProposal.AddItem(ADisplayText, AInsertText: String);
-begin
-  GetInsertList.Add(AInsertText);
-  GetItemList.Add(ADisplayText);
-end;
-
-procedure TSynBaseCompletionProposal.AddItemAt(Where : Integer; ADisplayText, AInsertText: String);
-begin
-  try
-    GetInsertList.Insert(Where, AInsertText);
-    GetItemList.Insert(Where, ADisplayText);
-  except
-    on exception do Exception.Create('Cannot insert item at position ' + IntToStr(Where) + '.');
-  end;
-end;
-
-
-procedure TSynBaseCompletionProposal.ClearList;
-begin
-  GetInsertList.Clear;
-  GetItemList.Clear;
-end;
-
-function TSynBaseCompletionProposal.DisplayItem(AIndex : Integer): String;
-begin
-  Result := GetItemList[AIndex];
-end;
-
-function TSynBaseCompletionProposal.InsertItem(AIndex : Integer): String;
-begin
-  Result := GetInsertList[AIndex];
-end;
-
-function TSynBaseCompletionProposal.GetDisplayKind: SynCompletionType;
-begin
-  result := form.DisplayType;
-end;
-
-procedure TSynBaseCompletionProposal.SetDisplayKind(const Value: SynCompletionType);
-begin
-  form.DisplayType := Value;
-end;
-
-function TSynBaseCompletionProposal.GetParameterToken: TCompletionParameter;
-begin
-  Result := Form.OnParameterToken;
-end;
-
-procedure TSynBaseCompletionProposal.SetParameterToken(
-  const Value: TCompletionParameter);
-begin
-  Form.OnParameterToken := Value;
-end;
-
-function TSynBaseCompletionProposal.GetDefaultKind: SynCompletionType;
-begin
-  result := Form.DefaultType;
-end;
-
-procedure TSynBaseCompletionProposal.SetDefaultKind(const Value: SynCompletionType);
-begin
-  Form.DefaultType := Value;
-end;
-
-procedure TSynBaseCompletionProposal.SetUsePrettyText(const Value: Boolean);
-begin
-  FUsePrettyText := Value;
-  Form.UsePrettyText := Value;
-end;
-
-procedure TSynBaseCompletionProposal.SetUseBiggestWord(const Value: String);
-begin
-  FBiggestWord := Value;
-  Form.BiggestWord := Value;
-end;
-
-procedure TSynBaseCompletionProposal.SetUseInsertList(
-  const Value: boolean);
-begin
-  FUseInsertList := Value;
-  Form.UseInsertList := Value;
-end;
-
-function TSynBaseCompletionProposal.IsEndToken(AChar: Char): Boolean;
-var i : Integer;
-begin
-  Result := False;
-  i := 1;
-  while i < length(FEndOfTokenChr) do
-    if AChar = FEndOfTokenChr[i] then
-    begin
-      Result := True;
-      break;
-    end else inc(i);
-end;
-
-procedure TSynBaseCompletionProposal.SetEndOfTokenChar(
-  const Value: string);
-begin
-  if FEndOfTokenChr <> Value then
-  begin
-    FEndOfTokenChr := Value;
-    Form.EndOfTokenChr := Value;
-  end;
-end;
-
 { TSynCompletionProposal }
 
-procedure TSynCompletionProposal.backspace(Sender: TObject);
+type
+  TRecordUsedToStoreEachEditorVars = record
+    kp: TKeyPressEvent;
+    kd: TKeyEvent;
+    NoNextKey: boolean;
+  end;
+  PRecordUsedToStoreEachEditorVars = ^TRecordUsedToStoreEachEditorVars;
+
+procedure TSynCompletionProposal.backspace(Senter: TObject);
 var
   F: TSynBaseCompletionProposalForm;
 begin
-  F := Sender as TSynBaseCompletionProposalForm;
+  F := Senter as TSynBaseCompletionProposalForm;
   if F.CurrentEditor <> nil then begin
     (F.CurrentEditor as TCustomSynEdit).CommandProcessor(ecDeleteLastChar, #0,
       nil);
   end;
 end;
 
-procedure TSynCompletionProposal.Cancel(Sender: TObject);
+procedure TSynCompletionProposal.Cancel(Senter: TObject);
 var
   F: TSynBaseCompletionProposalForm;
 begin
-  F := Sender as TSynBaseCompletionProposalForm;
+  F := Senter as TSynBaseCompletionProposalForm;
   if F.CurrentEditor <> nil then begin
     if (F.CurrentEditor as TCustomSynEdit).Owner is TWinControl then
       TWinControl((F.CurrentEditor as TCustomSynEdit).Owner).SetFocus;
@@ -1424,69 +707,32 @@ begin
   end;
 end;
 
-procedure TSynCompletionProposal.Validate(Sender: TObject; Shift: TShiftState);
+procedure TSynCompletionProposal.Validate(Senter: TObject; Shift: TShiftState);
 var
   F: TSynBaseCompletionProposalForm;
   Value: string;
-  TmpChr : Char;
   Pos: TPoint;
 begin
-  F := Sender as TSynBaseCompletionProposalForm;
+  F := Senter as TSynBaseCompletionProposalForm;
   if F.CurrentEditor <> nil then
     with F.CurrentEditor as TCustomSynEdit do begin
       BlockBegin := Point(CaretX - length(CurrentString), CaretY);
       BlockEnd := Point(CaretX, CaretY);
-
-      //when there is a dot at the end, then GetSelstart = the first letter of
-      //the thing we will replace
-      //when there is *NO* dot at the end, getselstart refers to the dot
-      if length(CurrentString) <> 0 then
-      begin
-
-        if IsEndToken(Text[SelStart]) then
-        begin
-          BlockBegin:= Point(CaretX - length(CurrentString) + 1, CaretY);
-          BlockEnd:= Point(CaretX + 1, CaretY);
-        end;
-      end;
-
-      if FUseInsertList then
-      begin
-        if LimitToMatchedText then
-          Value := InsertList[Integer(ItemList.Objects[position])]
-        else Value := InsertList[position]
-      end else Value := ItemList[position];
-
-      if Assigned(FOnCodeCompletion) then
-      begin
+      if Assigned(FOnCodeCompletion) then begin
+        Value := ItemList[position];
         FOnCodeCompletion(Value, Shift);
         SelText := Value;
-      end else begin
-        SelText := Value;
-      end;
-
-      CurrentString := SelText;
-      if length(Text) <> SelEnd + length(CurrentString) + 1 then
-        if IsEndToken(Text[SelEnd + length(CurrentString)]) then
-        begin
-          TmpChr := Text[SelEnd + length(CurrentString)];
-          SelEnd := (length(CurrentString) + SelEnd);
-          SelStart := (length(CurrentString) + SelEnd + 1);
-          SelText := TmpChr;
-        end;
-
+      end else
+        SelText := ItemList[position];
       with Editor do begin
-        Pos := CaretXY;
-        {*****************}
-        {$IFNDEF SYN_KYLIX}
+        Pos.x := CaretX;
+        Pos.y := CaretY;
         Perform(WM_MBUTTONDOWN, 0, 0);
-        {$ENDIF}
         Application.ProcessMessages;
-        CaretXY := Pos;
-        BlockBegin := CaretXY;
-        BlockEnd := CaretXY;
+        CaretX := Pos.x;
+        CaretY := Pos.y;
       end;
-//      SetFocus;
+      SetFocus;
     end;
 end;
 
@@ -1503,34 +749,15 @@ end;
 
 procedure TSynCompletionProposal.SetEditor(const Value: TCustomSynEdit);
 begin
-  if (fEditor <> nil) then
-  begin
-    RemoveEditor(fEditor);
-    fEditor := nil;
-  end;
-  fEditor := Value;
-  Form.CurrentEditor := Value;
-
-  if (fEditor <> nil) then
-  begin
-    with fEditor do
-    begin
-      AddKeyDownHandler(fKeyDownProc);
-      AddKeyPressHandler(fKeyPressProc);
-    end;
-    fEditor.FreeNotification(Self);
-  end;
+  AddEditor(Value);
 end;
 
 procedure TSynCompletionProposal.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
-  if (Operation = opRemove) and (AComponent is TCustomSynEdit) then
-  begin
-    RemoveEditor(AComponent as TCustomSynEdit);
-    Editor := nil;
-  end;
   inherited Notification(AComponent, Operation);
+  if (Operation = opRemove) and (fEditors.IndexOf(AComponent) > -1) then
+    RemoveEditor(AComponent as TCustomSynEdit);
 end;
 
 constructor TSynCompletionProposal.Create(AOwner: TComponent);
@@ -1540,16 +767,10 @@ begin
   Form.OnKeyDelete := backspace;
   Form.OnValidate := validate;
   Form.OnCancel := Cancel;
-  EndOfTokenChr := '()[].';
-  fKeyDownProc := TKeyDownProc.Create (EditorKeyDown);
-  fKeyPressProc := TKeyPressProc.Create (EditorKeyPress);
-  fEditor := nil;
-  fNoNextKey := false;
-  {$IFDEF SYN_KYLIX}
-  fShortCut := QMenus.ShortCut(Ord(' '), [ssCtrl]);
-  {$ELSE}
+  FEndOfTokenChr := '()[].';
+  fEditors := TList.Create;
+  fEditstuffs := TList.Create;
   fShortCut := Menus.ShortCut(Ord(' '), [ssCtrl]);
-  {$ENDIF}
 end;
 
 procedure TSynCompletionProposal.SetShortCut(Value: TShortCut);
@@ -1560,20 +781,25 @@ end;
 procedure TSynCompletionProposal.EditorKeyDown(Sender: TObject;
   var Key: Word; Shift: TShiftState);
 var
-  p             : TPoint;
-  ShortCutKey   : Word;
-  ShortCutShift : TShiftState;
+  p: TPoint;
+  i: integer;
+  ShortCutKey: Word;
+  ShortCutShift: TShiftState;
 begin
-  ShortCutToKey (fShortCut,ShortCutKey,ShortCutShift);
-  with sender as TCustomSynEdit do begin
-    if not ReadOnly and (Shift = ShortCutShift) and (Key = ShortCutKey) then begin
-      p := ClientToScreen(Point(CaretXPix, CaretYPix+LineHeight));
-      Form.CurrentEditor:= Sender as TCustomSynEdit;
-      ExecuteEx(GetPreviousToken (Sender as TCustomSynEdit),p.x,p.y, DefaultType);
-      fNoNextKey := true;
-      Key := 0;
+  ShortCutToKey(FShortCut, ShortCutKey, ShortCutShift);
+  i := fEditors.indexOf(Sender);
+  if i <> -1 then
+    with sender as TCustomSynEdit do begin
+      if not ReadOnly and (Shift = ShortCutShift) and (Key = ShortCutKey) then begin
+        p := ClientToScreen(Point(CaretXPix, CaretYPix + LineHeight));
+        Form.CurrentEditor := Sender as TCustomSynEdit;
+        Execute(GetPreviousToken(Sender as TCustomSynEdit), p.x, p.y);
+        Key := 0;
+        TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).NoNextKey := true;
+      end;
+      if assigned(TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).kd) then
+        TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).kd(sender, key, shift);
     end;
-  end;
 end;
 
 function TSynCompletionProposal.GetPreviousToken(FEditor: TCustomSynEdit): string;
@@ -1581,23 +807,33 @@ var
   s: string;
   i: integer;
 begin
-  Result := '';
   if FEditor <> nil then begin
     s := FEditor.LineText;
     i := FEditor.CaretX - 1;
-    if i <= length(s) then begin
+    if i > length(s) then
+      result := ''
+    else begin
       while (i > 0) and (s[i] > ' ') and (pos(s[i], FEndOfTokenChr) = 0) do
         dec(i);
       result := copy(s, i + 1, FEditor.CaretX - i - 1);
     end;
-  end;
+  end
+  else
+    result := '';
 end;
 
 procedure TSynCompletionProposal.EditorKeyPress(Sender: TObject; var Key: char);
+var
+  i: integer;
 begin
-  if Form.Visible and fNoNextKey then begin
-    fNoNextKey := false;
-    Key := #0;
+  i := fEditors.IndexOf(Sender);
+  if i <> -1 then begin
+    if TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).NoNextKey then begin
+      key := #0;
+      TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).NoNextKey := false;
+    end;
+    if assigned(TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).kp) then
+      TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).kp(sender, key);
   end;
 end;
 
@@ -1606,61 +842,95 @@ begin
   // necessary to get Notification called before fEditors is freed
   Form.Free;
   Form := nil;
-
-  RemoveEditor(fEditor);
-  fKeyDownProc.Free;
-  fKeyPressProc.Free;
-
+  while fEditors.Count <> 0 do
+    RemoveEditor(TCustomSynEdit(fEditors.last));
+  fEditors.Free;
+  fEditstuffs.free;
   inherited;
 end;
 
-function TSynCompletionProposal.RemoveEditor(Editor: TCustomSynEdit): boolean;
+function TSynCompletionProposal.GetFEditor: TCustomSynEdit;
 begin
-  Result := Assigned(Editor);
-  if Result then
-  begin
-    Editor.RemoveKeyDownHandler(fKeyDownProc);
-    Editor.RemoveKeyPressHandler(fKeyPressProc);
+  if EditorsCount > 0 then
+    result := Editors[0]
+  else
+    result := nil;
+end;
+
+procedure TSynCompletionProposal.AddEditor(Editor: TCustomSynEdit);
+var
+  p: PRecordUsedToStoreEachEditorVars;
+begin
+  if fEditors.IndexOf(Editor) = -1 then begin
+    fEditors.Add(Editor);
+    new(p);
+    p.kp := Editor.OnKeyPress;
+    p.kd := Editor.OnKeyDown;
+    p.NoNextKey := false;
+    fEditstuffs.add(p);
+    Editor.FreeNotification(self);
+    if not (csDesigning in ComponentState) then begin
+      Editor.OnKeyDown := EditorKeyDown;
+      Editor.OnKeyPress := EditorKeyPress;
+    end;
   end;
 end;
 
-function TSynBaseCompletionProposal.GetMatchText: Boolean;
+function TSynCompletionProposal.EditorsCount: integer;
 begin
-  Result := Form.MatchText;
+  result := fEditors.count;
 end;
 
-procedure TSynBaseCompletionProposal.SetMatchText(const Value: Boolean);
+function TSynCompletionProposal.GetEditor(i: integer): TCustomSynEdit;
 begin
-  Form.MatchText := Value;
+  if (i < 0) or (i >= EditorsCount) then
+    result := nil
+  else
+    result := TCustomSynEdit(fEditors[i]);
 end;
 
-procedure TSynBaseCompletionProposal.loaded;
+function TSynCompletionProposal.RemoveEditor(Editor: TCustomSynEdit): boolean;
+var
+  i: integer;
 begin
-  inherited;
-  Form.AssignedList.Assign(ItemList);
-end;
-
-procedure TSynBaseCompletionProposal.ResetAssignedList;
-begin
-  Form.AssignedList.Assign(ItemList);
+  i := fEditors.Remove(Editor);
+  result := i <> -1;
+  if result then begin
+    ;
+    dispose(fEditstuffs[i]);
+    fEditstuffs.delete(i);
+  end;
 end;
 
 { TSynAutoComplete }
 
+procedure TSynAutoComplete.AddEditor(Editor: TCustomSynEdit);
+var
+  p: PRecordUsedToStoreEachEditorVars;
+begin
+  if fEditors.IndexOf(Editor) = -1 then begin
+    fEditors.Add(Editor);
+    new(p);
+    p.kp := Editor.OnKeyPress;
+    p.kd := Editor.OnKeyDown;
+    p.NoNextKey := false;
+    fEditstuffs.add(p);
+    Editor.FreeNotification(self);
+    if not (csDesigning in ComponentState) then begin
+      Editor.OnKeyDown := EditorKeyDown;
+      Editor.OnKeyPress := EditorKeyPress;
+    end;
+  end;
+end;
+
 constructor TSynAutoComplete.Create(AOwner: TComponent);
 begin
   inherited;
-
+  fEditors := TList.Create;
+  fEditstuffs := TList.Create;
   FEndOfTokenChr := '()[].';
   fAutoCompleteList := TStringList.Create;
-  fKeyDownProc := TKeyDownProc.Create (EditorKeyDown);
-  fKeyPressProc := TKeyPressProc.Create (EditorKeyPress);
-  fNoNextKey := false;
-  {$IFDEF SYN_KYLIX}
-  fShortCut := QMenus.ShortCut(Ord(' '), [ssShift]);
-  {$ELSE}
   fShortCut := Menus.ShortCut(Ord(' '), [ssShift]);
-  {$ENDIF}
 end;
 
 procedure TSynAutoComplete.SetShortCut(Value: TShortCut);
@@ -1670,9 +940,10 @@ end;
 
 destructor TSynAutoComplete.destroy;
 begin
-  RemoveEditor (fEditor);
-  fKeyDownProc.Free;
-  fKeyPressProc.Free;
+  while feditors.count <> 0 do
+    RemoveEditor(feditors.last);
+  fEditors.free;
+  fEditstuffs.free;
   fAutoCompleteList.free;
   inherited;
 end;
@@ -1680,24 +951,43 @@ end;
 procedure TSynAutoComplete.EditorKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
-  ShortCutKey   : Word;
-  ShortCutShift : TShiftState;
+  i: integer;
+  ShortCutKey: Word;
+  ShortCutShift: TShiftState;
 begin
-  ShortCutToKey (fShortCut,ShortCutKey,ShortCutShift);
-  if not (Sender as TCustomSynEdit).ReadOnly and
-    (Shift = ShortCutShift) and (Key = ShortCutKey) then begin
-    Execute(GetPreviousToken (Sender as TCustomSynEdit),Sender as TCustomSynEdit);
-    fNoNextKey := true;
-    Key := 0;
+  ShortCutToKey(FShortCut, ShortCutKey, ShortCutShift);
+  i := fEditors.IndexOf(Sender);
+  if i <> -1 then begin
+    if (Shift = ShortCutShift) and (Key = ShortCutKey) and
+      not (Sender as TCustomSynEdit).ReadOnly
+    then begin
+      Execute(GetPreviousToken(Sender as TCustomSynEdit), Sender as TCustomSynEdit);
+      Key := 0;
+      TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).NoNextKey := true;
+    end;
+    if assigned(TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).kd) then
+      TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).kd(sender, key, Shift);
   end;
 end;
 
 procedure TSynAutoComplete.EditorKeyPress(Sender: TObject; var Key: char);
+var
+  i: integer;
 begin
-  if fNoNextKey then begin
-    fNoNextKey := false;
-    Key := #0;
+  i := fEditors.IndexOf(Sender);
+  if i <> -1 then begin
+    if TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).NoNextKey then begin
+      key := #0;
+      TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).NoNextKey := false;
+    end;
+    if assigned(TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).kp) then
+      TRecordUsedToStoreEachEditorVars(fEditstuffs[i]^).kp(sender, key);
   end;
+end;
+
+function TSynAutoComplete.EditorsCount: integer;
+begin
+  result := fEditors.count;
 end;
 
 procedure TSynAutoComplete.Execute(token: string; Editor: TCustomSynEdit);
@@ -1705,72 +995,56 @@ var
   Temp: string;
   i, j, prevspace: integer;
   StartOfBlock: tpoint;
-  ChangedIndent   : Boolean;
-  ChangedTrailing : Boolean;
-  TmpOptions : TSynEditorOptions;
-  OrigOptions: TSynEditorOptions;
-  BeginningSpaceCount : Integer;
 begin
   i := AutoCompleteList.IndexOf(token);
-
-  if (i <> -1) then
-  begin
-    TmpOptions := Editor.Options;
-    OrigOptions:= Editor.Options;
-    ChangedIndent   := eoAutoIndent in TmpOptions;
-    ChangedTrailing := eoTrimTrailingSpaces in TmpOptions;
-
-    if ChangedIndent then Exclude(TmpOptions, eoAutoIndent);
-    if ChangedTrailing then Exclude(TmpOptions, eoTrimTrailingSpaces);
-
-    if ChangedIndent or ChangedTrailing then
-      Editor.Options := TmpOptions;
-
-    Editor.UndoList.AddChange(crAutoCompleteBegin, StartOfBlock, StartOfBlock, '',
-      smNormal);
-
-    fNoNextKey := true;
+  if i <> -1 then begin
+    TRecordUsedToStoreEachEditorVars(fEditstuffs[fEditors.IndexOf(Editor)]^).NoNextKey := true;
     for j := 1 to length(token) do
       Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);
-    BeginningSpaceCount := Editor.CaretX - 1;
     inc(i);
     StartOfBlock := Point(-1, -1);
+    PrevSpace := 0;
     while (i < AutoCompleteList.Count) and
-          (length(AutoCompleteList[i]) > 0) and
-          (AutoCompleteList[i][1] = '=') do
-    begin
-{      for j := 0 to PrevSpace - 1 do
-        Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);}
+      (length(AutoCompleteList[i]) > 0) and
+      (AutoCompleteList[i][1] = '=') do begin
+      for j := 0 to PrevSpace - 1 do
+        Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);
       Temp := AutoCompleteList[i];
       PrevSpace := 0;
       while (length(temp) >= PrevSpace + 2) and (temp[PrevSpace + 2] <= ' ') do
         inc(PrevSpace);
       for j := 2 to length(Temp) do begin
         Editor.CommandProcessor(ecChar, Temp[j], nil);
-        if (Temp[j] = '|') then
+        if Temp[j] = '|' then
           StartOfBlock := Editor.CaretXY
       end;
       inc(i);
       if (i < AutoCompleteList.Count) and
-         (length(AutoCompleteList[i]) > 0) and
-         (AutoCompleteList[i][1] = '=') then
-      begin
-         Editor.CommandProcessor (ecLineBreak,' ',nil);
-         for j := 0 to BeginningSpaceCount  - 1do
-           Editor.CommandProcessor (ecChar, ' ', nil);
-      end;
+        (length(AutoCompleteList[i]) > 0) and
+        (AutoCompleteList[i][1] = '=') then
+        Editor.CommandProcessor(ecLineBreak, ' ', nil);
     end;
     if (StartOfBlock.x <> -1) and (StartOfBlock.y <> -1) then begin
       Editor.CaretXY := StartOfBlock;
       Editor.CommandProcessor(ecDeleteLastChar, ' ', nil);
     end;
-
-    if ChangedIndent or ChangedTrailing then Editor.Options := OrigOptions;
-
-    Editor.UndoList.AddChange(crAutoCompleteEnd, StartOfBlock, StartOfBlock, '',
-      smNormal);
-
   end;
+end;
+
+function TSynAutoComplete.GetEdit: TCustomSynEdit;
+begin
+  if EditorsCount > 0 then
+    result := Editors[0]
+  else
+    result := nil;
+end;
+
+function TSynAutoComplete.GetEditor(i: integer): TCustomSynEdit;
+begin
+  if (i < 0) or (i >= EditorsCount) then
+    result := nil
+  else
+    result := TCustomSynEdit(fEditors[i]);
 end;
 
 function TSynAutoComplete.GetPreviousToken(Editor: TCustomSynEdit): string;
@@ -1778,31 +1052,38 @@ var
   s: string;
   i: integer;
 begin
-  Result := '';
   if Editor <> nil then begin
     s := Editor.LineText;
     i := Editor.CaretX - 1;
-    if i <= Length (s) then begin
+    if i > length(s) then
+      result := ''
+    else begin
       while (i > 0) and (s[i] > ' ') and (pos(s[i], FEndOfTokenChr) = 0) do
-        Dec(i);
-      Result := copy(s, i + 1, Editor.CaretX - i - 1);
+        dec(i);
+      result := copy(s, i + 1, Editor.CaretX - i - 1);
     end;
   end
+  else
+    result := '';
 end;
 
 procedure TSynAutoComplete.Notification(AComponent: TComponent; Operation: TOperation);
 begin
-  if (Operation = opRemove) and (AComponent is TCustomSynEdit) then
-    RemoveEditor(AComponent as TCustomSynEdit);
   inherited Notification(AComponent, Operation);
+  if (Operation = opRemove) and (fEditors.indexOf(AComponent) <> -1) then
+    RemoveEditor(AComponent as TCustomSynEdit);
 end;
 
 function TSynAutoComplete.RemoveEditor(Editor: TCustomSynEdit): boolean;
+var
+  i: integer;
 begin
-  Result := Assigned (Editor);
-  if Result then begin
-    Editor.RemoveKeyDownHandler (fKeyDownProc);
-    Editor.RemoveKeyPressHandler (fKeyPressProc);
+  i := fEditors.Remove(Editor);
+  result := i <> -1;
+  if result then begin
+    ;
+    dispose(fEditstuffs[i]);
+    fEditstuffs.delete(i);
   end;
 end;
 
@@ -1811,18 +1092,9 @@ begin
   fAutoCompleteList.Assign(List);
 end;
 
-procedure TSynAutoComplete.SetEditor(const Value: TCustomSynEdit);
+procedure TSynAutoComplete.SetEdit(const Value: TCustomSynEdit);
 begin
-  if (fEditor <> nil) then begin
-    RemoveEditor (fEditor);
-    fEditor := nil;
-  end;
-  fEditor := Value;
-  if (fEditor <> nil) then
-    with fEditor do begin
-      AddKeyDownHandler (fKeyDownProc);
-      AddKeyPressHandler (fKeyPressProc);
-    end;
+  AddEditor(Value);
 end;
 
 function TSynAutoComplete.GetTokenList: string;

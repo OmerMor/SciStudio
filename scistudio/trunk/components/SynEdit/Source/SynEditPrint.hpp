@@ -16,13 +16,12 @@
 #include <SynEditPrinterInfo.hpp>	// Pascal unit
 #include <SynEditPrintHeaderFooter.hpp>	// Pascal unit
 #include <SynEditPrintTypes.hpp>	// Pascal unit
-#include <SynEditTypes.hpp>	// Pascal unit
 #include <SynEdit.hpp>	// Pascal unit
 #include <Printers.hpp>	// Pascal unit
 #include <Graphics.hpp>	// Pascal unit
-#include <Windows.hpp>	// Pascal unit
 #include <Classes.hpp>	// Pascal unit
 #include <SysUtils.hpp>	// Pascal unit
+#include <Windows.hpp>	// Pascal unit
 #include <SysInit.hpp>	// Pascal unit
 #include <System.hpp>	// Pascal unit
 
@@ -55,7 +54,6 @@ class PASCALIMPLEMENTATION TSynEditPrint : public Classes::TComponent
 	typedef Classes::TComponent inherited;
 	
 private:
-	int FCopies;
 	Syneditprintheaderfooter::TFooter* FFooter;
 	Syneditprintheaderfooter::THeader* FHeader;
 	Classes::TStrings* FLines;
@@ -95,11 +93,6 @@ private:
 	bool FLineNumbersInMargin;
 	int FTabWidth;
 	Graphics::TColor fFontColor;
-	bool fSelectedOnly;
-	bool fSelAvail;
-	Synedittypes::TSynSelectionMode fSelMode;
-	Windows::TPoint fBlockBegin;
-	Windows::TPoint fBlockEnd;
 	void __fastcall CalcPages(void);
 	void __fastcall SetLines(const Classes::TStrings* Value);
 	void __fastcall SetFont(const Graphics::TFont* Value);
@@ -138,7 +131,6 @@ public:
 	__property Synedit::TSynEdit* SynEdit = {write=SetSynEdit};
 	
 __published:
-	__property int Copies = {read=FCopies, write=FCopies, nodefault};
 	__property Syneditprintheaderfooter::THeader* Header = {read=FHeader, write=FHeader};
 	__property Syneditprintheaderfooter::TFooter* Footer = {read=FFooter, write=FFooter};
 	__property Syneditprintmargins::TSynEditPrintMargins* Margins = {read=FMargins, write=FMargins};
@@ -148,7 +140,6 @@ __published:
 	__property AnsiString DocTitle = {read=FDocTitle, write=FDocTitle};
 	__property bool Wrap = {read=FWrap, write=FWrap, default=1};
 	__property bool Highlight = {read=FHighlight, write=FHighlight, default=1};
-	__property bool SelectedOnly = {read=fSelectedOnly, write=fSelectedOnly, default=0};
 	__property bool Colors = {read=FColors, write=FColors, default=0};
 	__property bool LineNumbers = {read=FLineNumbers, write=FLineNumbers, default=0};
 	__property int LineOffset = {read=FLineOffset, write=FLineOffset, default=0};

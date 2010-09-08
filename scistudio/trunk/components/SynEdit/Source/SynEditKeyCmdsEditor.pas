@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditKeyCmdsEditor.pas,v 1.3 2001/10/17 12:52:04 harmeister Exp $
+$Id: SynEditKeyCmdsEditor.pas,v 1.1.1.1 2000/07/08 15:54:05 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -42,30 +42,19 @@ unit SynEditKeyCmdsEditor;
 interface
 
 uses
-  SysUtils, Classes,
-  {$IFDEF SYN_KYLIX}
-  Qt, QGraphics, QControls, QForms, QDialogs,
-  QComCtrls, QMenus, QStdCtrls,
-  {$ELSE}
-  Windows, Messages, Graphics, Controls, Forms, Dialogs,
-  ComCtrls, Menus, StdCtrls,
-  {$ENDIF}
-  SynEditKeyCmds, Buttons, ExtCtrls;
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  ComCtrls, SynEditKeyCmds, Menus, StdCtrls;
 
 type
   TSynEditKeystrokesEditorForm = class(TForm)
-    pnlBottom: TPanel;
-    lnlInfo: TLabel;
-    lnlInfo2: TLabel;
-    btnAdd: TSpeedButton;
-    btnEdit: TSpeedButton;
-    btnDelete: TSpeedButton;
-    btnClear: TSpeedButton;
-    btnReset: TSpeedButton;
-    btnOK: TSpeedButton;
-    btnCancel: TSpeedButton;
-    pnlCommands: TPanel;
     KeyCmdList: TListView;
+    btnAdd: TButton;
+    btnEdit: TButton;
+    btnDelete: TButton;
+    btnOK: TButton;
+    btnCancel: TButton;
+    btnClear: TButton;
+    btnReset: TButton;
     procedure FormResize(Sender: TObject);
     procedure btnAddClick(Sender: TObject);
     procedure btnEditClick(Sender: TObject);
@@ -73,29 +62,22 @@ type
     procedure btnResetClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnClearClick(Sender: TObject);
-    procedure btnOKClick(Sender: TObject);
-    procedure btnCancelClick(Sender: TObject);
   private
     FKeystrokes: TSynEditKeystrokes;
-    FExtended: Boolean;
     procedure SetKeystrokes(const Value: TSynEditKeyStrokes);
     procedure UpdateKeystrokesList;
-    {**************}
-    {$IFNDEF SYN_KYLIX}
     procedure WMGetMinMaxInfo(var Msg: TWMGetMinMaxInfo);
       message WM_GETMINMAXINFO;
-    {$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
     property Keystrokes: TSynEditKeyStrokes read FKeystrokes write SetKeystrokes;
-    property ExtendedString: Boolean read FExtended write FExtended;
   end;
 
 implementation
 
-{$R *.dfm}
+{$R *.DFM}
 
 uses
   SynEditKeyCmdEditor, SynEditStrConst;
@@ -134,26 +116,15 @@ begin
     begin
       with KeyCmdList.Items.Add do
       begin
-        if FExtended then
-          Caption := ConvertCodeStringToExtended(EditorCommandToCodeString(FKeystrokes[x].Command))
-        else Caption := EditorCommandToCodeString(FKeystrokes[x].Command);
+        Caption := EditorCommandToCodeString(FKeystrokes[x].Command);
         if FKeystrokes[x].ShortCut = 0 then
           SubItems.Add(SYNS_ShortCutNone)
         else
           if FKeystrokes[x].ShortCut2 = 0 then
-            {$IFDEF SYN_KYLIX}
-            SubItems.Add(QMenus.ShortCutToText(FKeystrokes[x].ShortCut))
-            {$ELSE}
             SubItems.Add(Menus.ShortCutToText(FKeystrokes[x].ShortCut))
-            {$ENDIF}
           else
-            {$IFDEF SYN_KYLIX}
-            SubItems.Add(QMenus.ShortCutToText(FKeystrokes[x].ShortCut)+ ' '+
-              QMenus.ShortCutToText(FKeystrokes[x].ShortCut2));
-            {$ELSE}
             SubItems.Add(Menus.ShortCutToText(FKeystrokes[x].ShortCut)+ ' '+
               Menus.ShortCutToText(FKeystrokes[x].ShortCut2));
-            {$ENDIF}
       end;
     end;
   finally
@@ -180,101 +151,56 @@ begin
     end;
 end;
 
-{***************}
-{$IFNDEF SYN_KYLIX}
 procedure TSynEditKeystrokesEditorForm.WMGetMinMaxInfo(var Msg: TWMGetMinMaxInfo);
 begin
   inherited;
   Msg.MinMaxInfo.ptMinTrackSize := Point(300, 225);
 end;
-{$ENDIF}
 
-procedure TSynEditKeystrokesEditorForm.btnAddClick(Sender: TObject);            //DDH 10/16/01 Begin (reworked proc)
+procedure TSynEditKeystrokesEditorForm.btnAddClick(Sender: TObject);
 var
   NewStroke: TSynEditKeyStroke;
-  AForm : TSynEditKeystrokeEditorForm;
-
-  Function AddKeyStroke: Boolean;
-  VAR KeyLoc : Integer;
-      TmpCommand: String;
-  begin
-    Result := False;
-    KeyLoc := 0;
-    if AForm.ShowModal = mrOK then
-    begin
-      Result := True;
-      NewStroke := FKeystrokes.Add;
-      NewStroke.Command := AForm.Command;
-      try
-        KeyLoc := TSynEditKeyStrokes(NewStroke.Collection).FindShortcut2(AForm.Keystroke, AForm.Keystroke2);
-        NewStroke.ShortCut := AForm.Keystroke;
-        NewStroke.ShortCut2 := AForm.Keystroke2;
-      except
-        on ESynKeyError do
-          begin
-            // Shortcut already exists in the collection!
-            if FExtended then
-              TmpCommand := ConvertCodeStringToExtended(EditorCommandToCodeString(TSynEditKeyStrokes(NewStroke.Collection).Items[KeyLoc].Command))
-            else TmpCommand := EditorCommandToCodeString(TSynEditKeyStrokes(NewStroke.Collection).Items[KeyLoc].Command);
-
-            {$IFDEF KYLIX}
-            Result := MessageDlg(Format(SYNS_DuplicateShortcutMsg,
-              [QMenus.ShortCutToText(AForm.Keystroke), TmpCommand]),
-              mtError, [mbOK, mbCancel], 0) = mrOK;
-            {$ELSE}
-            Result := MessageDlg(Format(SYNS_DuplicateShortcutMsg,
-              [Menus.ShortCutToText(AForm.Keystroke), TmpCommand]),
-              mtError, [mbOK, mbCancel], 0) = mrOK;
-            {$ENDIF}
-            NewStroke.Free;
-
-            if Result then
-              Result := AddKeyStroke;
-          end;
-        // Some other kind of exception, we don't deal with it...
-      end;
-    end;
-  end;
-
 begin
-  AForm := TSynEditKeystrokeEditorForm.Create(Self);
-  with AForm do
+  with TSynEditKeystrokeEditorForm.Create(Self) do
     try
-      Caption := 'Add Keystroke';
-      ExtendedString := self.ExtendedString;
       Command := ecNone;
       Keystroke := 0;
       Keystroke2 := 0;
-
-      if AddKeyStroke then
+      if ShowModal = mrOK then
       begin
+        NewStroke := FKeystrokes.Add;
+        NewStroke.Command := Command;
+        try
+          NewStroke.ShortCut := Keystroke;
+          NewStroke.ShortCut2 := Keystroke2;
+        except
+          on ESynKeyError do
+            begin
+              // Shortcut already exists in the collection!
+              MessageDlg(Format(SYNS_DuplicateShortcutMsg,
+                [Menus.ShortCutToText(Keystroke)]), mtError, [mbOK], 0);
+
+              NewStroke.Free;
+              exit;
+            end;
+          // Some other kind of exception, we don't deal with it...
+        end;
 
         with KeyCmdList.Items.Add do
         begin
-          if FExtended then
-            Caption := ConvertCodeStringToExtended(EditorCommandToCodeString(NewStroke.Command))
-          else Caption := EditorCommandToCodeString(NewStroke.Command);
+          Caption := EditorCommandToCodeString(NewStroke.Command);
           if NewStroke.ShortCut = 0 then
             SubItems.Add(SYNS_ShortcutNone)
           else
           if NewStroke.ShortCut2 = 0 then
-            {$IFDEF SYN_KYLIX}
-            SubItems.Add(QMenus.ShortCutToText(NewStroke.ShortCut))
-            {$ELSE}
             SubItems.Add(Menus.ShortCutToText(NewStroke.ShortCut))
-            {$ENDIF}
           else
-            {$IFDEF SYN_KYLIX}
-            SubItems.Add(QMenus.ShortCutToText(NewStroke.ShortCut)+ ' '+
-              QMenus.ShortCutToText(NewStroke.ShortCut2));
-            {$ELSE}
             SubItems.Add(Menus.ShortCutToText(NewStroke.ShortCut)+ ' '+
               Menus.ShortCutToText(NewStroke.ShortCut2));
-            {$ENDIF}
         end;
       end;
     finally
-      AForm.Free;
+      Free;
     end;
 end;
 
@@ -283,95 +209,38 @@ var
   SelItem: TListItem;
   OldShortcut: TShortcut;
   OldShortcut2: TShortcut;
-  AForm : TSynEditKeystrokeEditorForm;
-
-  function EditKeyStroke: Boolean;
-  VAR KeyLoc : Integer;
-      TmpCommand: String;
-  begin
-    Result := False;
-    KeyLoc := 0;
-    if AForm.ShowModal = mrOK then
-    begin
-      Result := True;
-      OldShortCut := FKeystrokes[SelItem.Index].ShortCut;
-      OldShortCut2 := FKeystrokes[SelItem.Index].ShortCut2;
-
-      try
-        KeyLoc := TSynEditKeyStrokes(FKeystrokes[SelItem.Index].Collection).FindShortcut2(AForm.Keystroke, AForm.Keystroke2);
-        FKeystrokes[SelItem.Index].Command := AForm.Command;
-        FKeystrokes[SelItem.Index].ShortCut := AForm.Keystroke;
-        FKeystrokes[SelItem.Index].ShortCut2 := AForm.Keystroke2;
-      except
-        on ESynKeyError do
-          begin
-            // Shortcut already exists in the collection!
-            if FExtended then
-              TmpCommand := ConvertCodeStringToExtended(EditorCommandToCodeString(TSynEditKeyStrokes(FKeystrokes[SelItem.Index].Collection).Items[KeyLoc].Command))
-            else TmpCommand := EditorCommandToCodeString(TSynEditKeyStrokes(FKeystrokes[SelItem.Index].Collection).Items[KeyLoc].Command);
-
-            {$IFDEF KYLIX}
-            Result := MessageDlg(Format(SYNS_DuplicateShortcutMsg,
-              [QMenus.ShortCutToText(AForm.Keystroke), TmpCommand]),
-              mtError, [mbOK, mbCancel], 0) = mrOK;
-            {$ELSE}
-            Result := MessageDlg(Format(SYNS_DuplicateShortcutMsg,
-              [Menus.ShortCutToText(AForm.Keystroke), TmpCommand]),
-              mtError, [mbOK, mbCancel], 0) = mrOK;
-            {$ENDIF}
-
-            FKeystrokes[SelItem.Index].ShortCut := OldShortCut;
-            FKeystrokes[SelItem.Index].ShortCut2 := OldShortCut2;
-
-            if Result then
-              Result := EditKeyStroke;
-          end;
-        // Some other kind of exception, we don't deal with it...
-      end;
-    end;
-(*
-      if ShowModal = mrOK then
-      begin
-
-        try
-        except
-          on ESynKeyError do
-            begin
-              // Shortcut already exists in the collection!
-              {$IFDEF SYN_KYLIX}
-              MessageDlg(Format(SYNS_DuplicateShortcutMsg2,
-                [QMenus.ShortCutToText(Keystroke)]), mtError, [mbOK], 0);
-              {$ELSE}
-              MessageDlg(Format(SYNS_DuplicateShortcutMsg2,
-                [Menus.ShortCutToText(Keystroke)]), mtError, [mbOK], 0);
-              {$ENDIF}
-            end;
-          // Some other kind of exception, we don't deal with it...
-        end;
-*)
-  end;
 begin
   SelItem := KeyCmdList.Selected;
   if SelItem = NIL then
   begin
-    {$IFDEF SYN_KYLIX}
-    QControls.Beep;
-    {$ELSE}
     MessageBeep(1);
-    {$ENDIF}
     exit;
   end;
-
-  AForm := TSynEditKeystrokeEditorForm.Create(Self);
-
-  with AForm do
+  with TSynEditKeystrokeEditorForm.Create(Self) do
     try
-      ExtendedString := self.ExtendedString;
       Command := FKeystrokes[SelItem.Index].Command;
       Keystroke := FKeystrokes[SelItem.Index].Shortcut;
       Keystroke2 := FKeystrokes[SelItem.Index].Shortcut2;
-      if EditKeyStroke then
+      if ShowModal = mrOK then
       begin
+        FKeystrokes[SelItem.Index].Command := Command;
+        OldShortCut := FKeystrokes[SelItem.Index].ShortCut;
+        OldShortCut2 := FKeystrokes[SelItem.Index].ShortCut2;
+        try
+          FKeystrokes[SelItem.Index].ShortCut := Keystroke;
+          FKeystrokes[SelItem.Index].ShortCut2 := Keystroke2;
+        except
+          on ESynKeyError do
+            begin
+              // Shortcut already exists in the collection!
+              MessageDlg(Format(SYNS_DuplicateShortcutMsg2,
+                [Menus.ShortCutToText(Keystroke)]), mtError, [mbOK], 0);
+              FKeystrokes[SelItem.Index].ShortCut := OldShortCut;
+              FKeystrokes[SelItem.Index].ShortCut2 := OldShortCut2;
+            end;
+          // Some other kind of exception, we don't deal with it...
+        end;
+
         KeyCmdList.Items.BeginUpdate;
         try
           with SelItem do
@@ -381,28 +250,19 @@ begin
               SubItems[0] := SYNS_ShortcutNone
             else
               if FKeystrokes[Index].ShortCut2 = 0 then
-                {$IFDEF SYN_KYLIX}
-                SubItems[0] := QMenus.ShortCutToText(FKeystrokes[Index].ShortCut)
-                {$ELSE}
                 SubItems[0] := Menus.ShortCutToText(FKeystrokes[Index].ShortCut)
-                {$ENDIF}
               else
-                {$IFDEF SYN_KYLIX}
-                SubItems[0] := QMenus.ShortCutToText(FKeystrokes[Index].ShortCut)
-                  + ' ' + QMenus.ShortCutToText(FKeystrokes[Index].ShortCut2);
-                {$ELSE}
                 SubItems[0] := Menus.ShortCutToText(FKeystrokes[Index].ShortCut)
                   + ' ' + Menus.ShortCutToText(FKeystrokes[Index].ShortCut2);
-                {$ENDIF}
           end;
         finally
           KeyCmdList.Items.EndUpdate;
         end;
       end;
     finally
-      AForm.Free;
+      Free;
     end;
-end;                                                                            //DDH 10/16/01 End (reworked procs)
+end;
 
 procedure TSynEditKeystrokesEditorForm.btnDeleteClick(Sender: TObject);
 var
@@ -411,11 +271,7 @@ begin
   SelItem := KeyCmdList.Selected;
   if SelItem = NIL then
   begin
-    {$IFDEF SYN_KYLIX}
-    QControls.Beep;
-    {$ELSE}
     MessageBeep(1);
-    {$ENDIF}
     exit;
   end;
   FKeystrokes[SelItem.Index].Free;
@@ -439,16 +295,6 @@ begin
   {$IFDEF SYN_COMPILER_3_UP}
   KeyCmdList.RowSelect := TRUE;
   {$ENDIF}
-end;
-
-procedure TSynEditKeystrokesEditorForm.btnOKClick(Sender: TObject);
-begin
-  ModalResult := mrOK;
-end;
-
-procedure TSynEditKeystrokesEditorForm.btnCancelClick(Sender: TObject);
-begin
-  ModalResult := mrCancel;
 end;
 
 end.

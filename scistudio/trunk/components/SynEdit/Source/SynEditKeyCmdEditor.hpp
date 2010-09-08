@@ -10,20 +10,18 @@
 #pragma delphiheader begin
 #pragma option push -w-
 #pragma option push -Vx
-#include <SynEditMiscClasses.hpp>	// Pascal unit
-#include <ExtCtrls.hpp>	// Pascal unit
+#include <Menus.hpp>	// Pascal unit
 #include <SynEditKeyCmds.hpp>	// Pascal unit
 #include <ComCtrls.hpp>	// Pascal unit
 #include <StdCtrls.hpp>	// Pascal unit
 #include <Dialogs.hpp>	// Pascal unit
 #include <Forms.hpp>	// Pascal unit
 #include <Controls.hpp>	// Pascal unit
-#include <Menus.hpp>	// Pascal unit
 #include <Graphics.hpp>	// Pascal unit
-#include <Messages.hpp>	// Pascal unit
-#include <Windows.hpp>	// Pascal unit
 #include <Classes.hpp>	// Pascal unit
 #include <SysUtils.hpp>	// Pascal unit
+#include <Messages.hpp>	// Pascal unit
+#include <Windows.hpp>	// Pascal unit
 #include <SysInit.hpp>	// Pascal unit
 #include <System.hpp>	// Pascal unit
 
@@ -38,23 +36,20 @@ class PASCALIMPLEMENTATION TSynEditKeystrokeEditorForm : public Forms::TForm
 	typedef Forms::TForm inherited;
 	
 __published:
-	Extctrls::TPanel* pnlAlign;
 	Stdctrls::TLabel* Label1;
 	Stdctrls::TLabel* Label2;
-	Stdctrls::TLabel* Label4;
-	Stdctrls::TButton* bntClearKey;
-	Stdctrls::TButton* btnOK;
 	Stdctrls::TComboBox* cmbCommand;
+	Comctrls::THotKey* hkKeystroke;
+	Stdctrls::TButton* btnOK;
 	Stdctrls::TButton* btnCancel;
-	void __fastcall FormShow(System::TObject* Sender);
-	void __fastcall bntClearKeyClick(System::TObject* Sender);
-	void __fastcall cmbCommandKeyPress(System::TObject* Sender, char &Key);
-	void __fastcall cmbCommandExit(System::TObject* Sender);
-	void __fastcall btnOKClick(System::TObject* Sender);
+	Stdctrls::TButton* bntClearKey;
+	Stdctrls::TLabel* Label4;
+	Comctrls::THotKey* hkKeystroke2;
 	void __fastcall FormCreate(System::TObject* Sender);
+	void __fastcall FormKeyDown(System::TObject* Sender, Word &Key, Classes::TShiftState Shift);
+	void __fastcall bntClearKeyClick(System::TObject* Sender);
 	
 private:
-	bool FExtended;
 	void __fastcall SetCommand(const Syneditkeycmds::TSynEditorCommand Value);
 	void __fastcall SetKeystroke(const Classes::TShortCut Value);
 	void __fastcall AddEditorCommand(const AnsiString S);
@@ -64,14 +59,12 @@ private:
 	void __fastcall SetKeystroke2(const Classes::TShortCut Value);
 	
 public:
-	Syneditmiscclasses::TSynHotKey* hkKeystroke2;
-	Syneditmiscclasses::TSynHotKey* hkKeystroke;
 	__property Syneditkeycmds::TSynEditorCommand Command = {read=GetCommand, write=SetCommand, nodefault
 		};
 	__property Classes::TShortCut Keystroke = {read=GetKeystroke, write=SetKeystroke, nodefault};
 	__property Classes::TShortCut Keystroke2 = {read=GetKeystroke2, write=SetKeystroke2, nodefault};
-	__property bool ExtendedString = {read=FExtended, write=FExtended, default=1};
 public:
+		
 	#pragma option push -w-inl
 	/* TCustomForm.Create */ inline __fastcall virtual TSynEditKeystrokeEditorForm(Classes::TComponent* 
 		AOwner) : Forms::TForm(AOwner) { }

@@ -55,11 +55,11 @@ unit SynRegExpr;
  -=- code slightly rewriten for pascal
  -=- now macro correct proceeded in ranges
  -=- r.e.ranges syntax extended for russian letters ranges:
-     à-ÿ - replaced with all small russian letters (Win1251)
-     À-ß - replaced with all capital russian letters (Win1251)
-     à-ß - replaced with all russian letters (Win1251)
- -=- added macro 'ö' and '\d' (opcode ANYDIGIT) - match any digit
- -=- added macro 'Ö' and '\D' (opcode NOTDIGIT) - match not digit
+     …-˜ - replaced with all small russian letters (Win1251)
+     À-á - replaced with all capital russian letters (Win1251)
+     …-á - replaced with all russian letters (Win1251)
+ -=- added macro '”' and '\d' (opcode ANYDIGIT) - match any digit
+ -=- added macro '™' and '\D' (opcode NOTDIGIT) - match not digit
  -=- added macro '\w' (opcode ANYLETTER) - match any english letter or '_'
  -=- added macro '\W' (opcode NOTLETTER) - match not english letter or '_'
  (all r.e.syntax extensions may be turned off by flag ExtSyntax)
@@ -557,7 +557,7 @@ const
  SPSTART  =   04; // Starts with * or +.
  WORST    =   0;  // Worst case.
  META : array [0 .. 13] of char = (
-  '^', '$', '.', '[', '(', ')', '|', '?', '+', '*', '\', 'ö', 'Ö', #0);
+  '^', '$', '.', '[', '(', ')', '|', '?', '+', '*', '\', '”', '™', #0);
 
 function TRegExpr.CompileRegExpr (exp : PChar) : boolean;
 // compile a regular expression into internal code
@@ -867,16 +867,16 @@ function TRegExpr.ParseAtom (var flagp : integer) : PChar;
        ret := EmitNode (ANY);
        flagp := flagp or HASWIDTH or SIMPLE;
       end;
-    'ö': if fExtSyntax then begin // r.e.extension - any digit ('0' .. '9')
+    '”': if fExtSyntax then begin // r.e.extension - any digit ('0' .. '9')
          ret := EmitNode (ANYDIGIT);
          flagp := flagp or HASWIDTH or SIMPLE;
         end
-       else EmitExactly ('ö');
-    'Ö': if fExtSyntax then begin // r.e.extension - any digit ('0' .. '9')
+       else EmitExactly ('”');
+    '™': if fExtSyntax then begin // r.e.extension - any digit ('0' .. '9')
          ret := EmitNode (NOTDIGIT);
          flagp := flagp or HASWIDTH or SIMPLE;
         end
-       else EmitExactly ('Ö');
+       else EmitExactly ('™');
     '[': begin
             if regparse^ = '^' then begin // Complement of range.
                ret := EmitNode (ANYBUT);
@@ -897,15 +897,15 @@ function TRegExpr.ParseAtom (var flagp : integer) : PChar;
                       RangeEnd := regparse^;
 
                       // r.e.ranges extension for russian
-                      if fExtSyntax and (RangeBeg = 'à') and (RangeEnd = 'ÿ') then begin
-                        EmitStr ('àáâãäå¸æçèéêëìíîïðñòóôõö÷øùúûüýþÿ');
+                      if fExtSyntax and (RangeBeg = '…') and (RangeEnd = '˜') then begin
+                        EmitStr ('… ƒã„†¸‘‡Š‚ˆ‰¡Œ‹ð¤•¢“õ”ö°—£–²þ˜');
                        end
-                      else if fExtSyntax and (RangeBeg = 'À') and (RangeEnd = 'ß') then begin
-                        EmitStr ('ÀÁÂÃÄÅ¨ÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß');
+                      else if fExtSyntax and (RangeBeg = 'À') and (RangeEnd = 'á') then begin
+                        EmitStr ('ÀÁÂÃŽ¿’€ÈÊËÌÍÎÏÐ¥ÒÓÔÕ™×ØÙÚÛšÝÞá');
                        end
-                      else if fExtSyntax and (RangeBeg = 'à') and (RangeEnd = 'ß') then begin
-                        EmitStr ('àáâãäå¸æçèéêëìíîïðñòóôõö÷øùúûüýþÿ');
-                        EmitStr ('ÀÁÂÃÄÅ¨ÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß');
+                      else if fExtSyntax and (RangeBeg = '…') and (RangeEnd = 'á') then begin
+                        EmitStr ('… ƒã„†¸‘‡Š‚ˆ‰¡Œ‹ð¤•¢“õ”ö°—£–²þ˜');
+                        EmitStr ('ÀÁÂÃŽ¿’€ÈÊËÌÍÎÏÐ¥ÒÓÔÕ™×ØÙÚÛšÝÞá');
                        end
                       else begin // standard r.e. handling
                         if RangeBeg > RangeEnd
@@ -946,7 +946,7 @@ function TRegExpr.ParseAtom (var flagp : integer) : PChar;
                         else EmitC (regparse^);
                        end; { of case}
                      end
-                    else if regparse^ = 'ö'
+                    else if regparse^ = '”'
                           then EmitStr ('0123456789')
                     else begin
                       EmitC (regparse^);

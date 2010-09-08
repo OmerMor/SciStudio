@@ -13,11 +13,11 @@
 #include <SynEditPrint.hpp>	// Pascal unit
 #include <Forms.hpp>	// Pascal unit
 #include <Graphics.hpp>	// Pascal unit
+#include <SysUtils.hpp>	// Pascal unit
 #include <Messages.hpp>	// Pascal unit
 #include <Controls.hpp>	// Pascal unit
-#include <Windows.hpp>	// Pascal unit
-#include <SysUtils.hpp>	// Pascal unit
 #include <Classes.hpp>	// Pascal unit
+#include <Windows.hpp>	// Pascal unit
 #include <SysInit.hpp>	// Pascal unit
 #include <System.hpp>	// Pascal unit
 
@@ -50,7 +50,6 @@ protected:
 	int FPageNumber;
 	bool FShowScrollHint;
 	TPreviewPageEvent FOnPreviewPage;
-	int FWheelAccumulator;
 	void __fastcall SetBorderStyle(Forms::TBorderStyle Value);
 	void __fastcall SetPageBG(Graphics::TColor Value);
 	void __fastcall SetSynEditPrint(Syneditprint::TSynEditPrint* Value);
@@ -62,9 +61,7 @@ private:
 	HIDESBASE MESSAGE void __fastcall WMHScroll(Messages::TWMScroll &Msg);
 	HIDESBASE MESSAGE void __fastcall WMSize(Messages::TWMSize &Msg);
 	HIDESBASE MESSAGE void __fastcall WMVScroll(Messages::TWMScroll &Msg);
-	HIDESBASE MESSAGE void __fastcall WMMouseWheel(Messages::TWMMouseWheel &Message);
 	void __fastcall PaintPaper(void);
-	int __fastcall GetPageCount(void);
 	
 protected:
 	virtual void __fastcall CreateParams(Controls::TCreateParams &Params);
@@ -91,13 +88,11 @@ public:
 	void __fastcall LastPage(void);
 	void __fastcall Print(void);
 	__property int PageNumber = {read=FPageNumber, nodefault};
-	__property int PageCount = {read=GetPageCount, nodefault};
 	
 __published:
 	__property Align ;
 	__property Forms::TBorderStyle BorderStyle = {read=FBorderStyle, write=SetBorderStyle, default=1};
 	__property Color ;
-	__property Cursor ;
 	__property Graphics::TColor PageBGColor = {read=FPageBG, write=SetPageBG, default=16777215};
 	__property Syneditprint::TSynEditPrint* SynEditPrint = {read=FSynEditPrint, write=SetSynEditPrint};
 		

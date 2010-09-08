@@ -18,6 +18,7 @@
 #include <SynCompletionProposal.hpp>	// Pascal unit
 #include <SynExportRTF.hpp>	// Pascal unit
 #include <SynExportHTML.hpp>	// Pascal unit
+#include <SynDBEdit.hpp>	// Pascal unit
 #include <SynMemo.hpp>	// Pascal unit
 #include <SynEdit.hpp>	// Pascal unit
 #include <SynEditPropertyReg.hpp>	// Pascal unit

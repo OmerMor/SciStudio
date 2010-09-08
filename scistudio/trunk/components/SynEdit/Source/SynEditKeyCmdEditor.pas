@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditKeyCmdEditor.pas,v 1.3 2001/10/17 12:52:04 harmeister Exp $
+$Id: SynEditKeyCmdEditor.pas,v 1.1.1.1 2000/07/08 15:54:05 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -71,36 +71,25 @@ unit SynEditKeyCmdEditor;
 interface
 
 uses
-  SysUtils, Classes,
-  {$IFDEF SYN_KYLIX}
-  Qt, QGraphics, QMenus, QControls, QForms, QDialogs,
-  QStdCtrls, QComCtrls,
-  {$ELSE}
-  Windows, Messages, Graphics, Menus, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls,
-  {$ENDIF}
-  SynEditKeyCmds, ExtCtrls, SynEditMiscClasses;
-
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, ComCtrls, SynEditKeyCmds, Menus;
 
 type
   TSynEditKeystrokeEditorForm = class(TForm)
-    pnlAlign: TPanel;
     Label1: TLabel;
     Label2: TLabel;
-    Label4: TLabel;
-    bntClearKey: TButton;
-    btnOK: TButton;
     cmbCommand: TComboBox;
+    hkKeystroke: THotKey;
+    btnOK: TButton;
     btnCancel: TButton;
-
-    procedure FormShow(Sender: TObject);
-    procedure bntClearKeyClick(Sender: TObject);
-    procedure cmbCommandKeyPress(Sender: TObject; var Key: Char);
-    procedure cmbCommandExit(Sender: TObject);
-    procedure btnOKClick(Sender: TObject);
+    bntClearKey: TButton;
+    Label4: TLabel;
+    hkKeystroke2: THotKey;
     procedure FormCreate(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure bntClearKeyClick(Sender: TObject);
   private
-    FExtended: Boolean;
     procedure SetCommand(const Value: TSynEditorCommand);
     procedure SetKeystroke(const Value: TShortcut);
     procedure AddEditorCommand(const S: string);
@@ -109,12 +98,9 @@ type
     function GetKeystroke2: TShortcut;
     procedure SetKeystroke2(const Value: TShortcut);
   public
-    hkKeystroke2: TSynHotKey;
-    hkKeystroke: TSynHotKey;
     property Command: TSynEditorCommand read GetCommand write SetCommand;
     property Keystroke: TShortcut read GetKeystroke write SetKeystroke;
     property Keystroke2: TShortcut read GetKeystroke2 write SetKeystroke2;
-    property ExtendedString: Boolean read FExtended write FExtended default True;
   end;
 
 var
@@ -122,35 +108,23 @@ var
 
 implementation
 
-{$R *.dfm}
+{$R *.DFM}
 
 { TSynEditKeystrokeEditorForm }
 
 procedure TSynEditKeystrokeEditorForm.SetCommand(const Value: TSynEditorCommand);
 begin
-  if FExtended then
-    cmbCommand.Text := ConvertCodeStringToExtended(EditorCommandToCodeString(Value))
-  else cmbCommand.Text := EditorCommandToCodeString(Value);
+  cmbCommand.Text := EditorCommandToCodeString(Value);
 end;
 
 procedure TSynEditKeystrokeEditorForm.SetKeystroke(const Value: TShortcut);
 begin
-  {*****************}
   hkKeystroke.Hotkey := Value;
 end;
 
-procedure TSynEditKeystrokeEditorForm.FormShow(Sender: TObject);
-Var i : Integer;
+procedure TSynEditKeystrokeEditorForm.FormCreate(Sender: TObject);
 begin
-  if FExtended then
-    GetEditorCommandExtended(AddEditorCommand)
-  else GetEditorCommandValues(AddEditorCommand);
-
-  //Now add the values for quick access
-  for i := 0 to cmbCommand.Items.Count - 1 do
-    cmbCommand.Items.Objects[i] := TObject(IndexToEditorCommand(i));
-  if FExtended then
-    cmbCommand.Sorted := True;
+  GetEditorCommandValues(AddEditorCommand);
 end;
 
 procedure TSynEditKeystrokeEditorForm.AddEditorCommand(const S: string);
@@ -162,11 +136,7 @@ function TSynEditKeystrokeEditorForm.GetCommand: TSynEditorCommand;
 var
   NewCmd: longint;
 begin
-  cmbCommand.ItemIndex := cmbCommand.Items.IndexOf(cmbCommand.Text);
-  if cmbCommand.ItemIndex <> -1 then
-  begin
-    NewCmd := TSynEditorCommand(Integer(cmbCommand.Items.Objects[cmbCommand.ItemIndex]));
-  end else if not IdentToEditorCommand(cmbCommand.Text, NewCmd) then
+  if not IdentToEditorCommand(cmbCommand.Text, NewCmd) then
   begin
      try
        NewCmd := StrToInt(cmbCommand.Text);
@@ -179,8 +149,24 @@ end;
 
 function TSynEditKeystrokeEditorForm.GetKeystroke: TShortcut;
 begin
- {*****************}
   Result := hkKeystroke.HotKey;
+end;
+
+procedure TSynEditKeystrokeEditorForm.FormKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+begin
+  // THotKey uses backspace to remove the current keystroke.  That would prevent
+  // us from assigning backspace to anything.  We have to handle it here.
+  if (Key = VK_BACK) and (hkKeystroke.Focused) then
+  begin
+    hkKeystroke.HotKey := Menus.ShortCut(Key, Shift);
+    Key := 0;  // Eat the key so THotKey doesn't get it.
+  end;
+  if (Key = VK_BACK) and (hkKeystroke2.Focused) then
+  begin
+    hkKeystroke2.HotKey := Menus.ShortCut(Key, Shift);
+    Key := 0;  // Eat the key so THotKey doesn't get it.
+  end;
 end;
 
 procedure TSynEditKeystrokeEditorForm.bntClearKeyClick(Sender: TObject);
@@ -199,86 +185,5 @@ begin
   hkKeystroke2.Hotkey := Value;
 end;
 
-procedure TSynEditKeystrokeEditorForm.cmbCommandKeyPress(Sender: TObject;
-  var Key: Char);
-var WorkStr : String;
-    i       : Integer;
-begin
-//This would be better if componentized, but oh well...
-  WorkStr := AnsiUppercase(Copy(cmbCommand.Text, 1, cmbCommand.SelStart) + Key);
-  i := 0;
-  While i < cmbCommand.Items.Count do
-  begin
-    if pos(WorkStr, AnsiUppercase(cmbCommand.Items[i])) = 1 then
-    begin
-      cmbCommand.Text := cmbCommand.Items[i];
-      cmbCommand.SelStart := length(WorkStr);
-      cmbCommand.SelLength := Length(cmbCommand.Text) - cmbCommand.SelStart;
-      Key := #0;
-      break;
-    end else inc(i);
-  end;
-end;
-
-procedure TSynEditKeystrokeEditorForm.cmbCommandExit(Sender: TObject);
-VAR TmpIndex : Integer;
-begin
-  TmpIndex := cmbCommand.Items.IndexOf(cmbCommand.Text);
-  if TmpIndex = -1 then
-  begin
-     cmbCommand.ItemIndex := cmbCommand.Items.IndexOf(ConvertCodeStringToExtended('ecNone'));
-  end else cmbCommand.ItemIndex := TmpIndex;  //need to force it incase they just typed something in
-end;
-
-procedure TSynEditKeystrokeEditorForm.btnOKClick(Sender: TObject);
-begin
-  if Command = ecNone then
-  begin
-    MessageDlg('You must first select a command.', mtError, [mbOK], 0);
-    cmbCommand.SetFocus;
-    cmbCommand.SelectAll;
-  end else if Keystroke = 0 then
-  begin
-    MessageDlg('The command "'+cmbCommand.Text+'" needs to have at least one keystroke assigned to it.', mtError, [mbOK], 0);
-    hkKeystroke.SetFocus;
-  end else ModalResult := mrOK;
-end;
-
-procedure TSynEditKeystrokeEditorForm.FormCreate(Sender: TObject);
-begin
-{$IFNDEF SYN_KYLIX}
-  hkKeystroke := TSynHotKey.Create(self);
-  with hkKeystroke do
-  begin
-    Parent := pnlAlign;
-    Left := 65;
-    Top := 38;
-    Width := 186;
-    Height := 19;
-    HotKey := 0;
-//    InvalidKeys := [hcNone];
-//    Modifiers := [];
-    TabOrder := 1;
-  end;
-
-  hkKeystroke2 := TSynHotKey.Create(self);
-  with hkKeystroke2 do
-  begin
-    Parent := pnlAlign;
-    Left := 65;
-    Top := 62;
-    Width := 186;
-    Height := 19;
-    HotKey := 0;
-//    InvalidKeys := [hcNone];
-//    Modifiers := [];
-    TabOrder := 2;
-  end;
-
-  {$ENDIF}
-end;
-
 end.
-
-
 

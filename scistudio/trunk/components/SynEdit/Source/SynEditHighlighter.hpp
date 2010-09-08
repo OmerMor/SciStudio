@@ -12,12 +12,11 @@
 #pragma option push -Vx
 #include <SynEditMiscClasses.hpp>	// Pascal unit
 #include <SynEditTypes.hpp>	// Pascal unit
-#include <IniFiles.hpp>	// Pascal unit
 #include <Registry.hpp>	// Pascal unit
 #include <Graphics.hpp>	// Pascal unit
-#include <Windows.hpp>	// Pascal unit
 #include <Classes.hpp>	// Pascal unit
 #include <SysUtils.hpp>	// Pascal unit
+#include <Windows.hpp>	// Pascal unit
 #include <SysInit.hpp>	// Pascal unit
 #include <System.hpp>	// Pascal unit
 
@@ -75,8 +74,6 @@ public:
 		, bool oldStyle);
 	bool __fastcall LoadFromRegistry(TBetterRegistry* Reg);
 	bool __fastcall SaveToRegistry(TBetterRegistry* Reg);
-	bool __fastcall LoadFromFile(Inifiles::TIniFile* Ini);
-	bool __fastcall SaveToFile(Inifiles::TIniFile* Ini);
 	__property int IntegerStyle = {read=GetStyleFromInt, write=SetStyleFromInt, nodefault};
 	__property AnsiString Name = {read=fName};
 	__property Classes::TNotifyEvent OnChange = {read=fOnChange, write=fOnChange};
@@ -110,16 +107,11 @@ class PASCALIMPLEMENTATION TSynCustomHighlighter : public Classes::TComponent
 private:
 	Classes::TStringList* fAttributes;
 	Syneditmiscclasses::TSynNotifyEventChain* fAttrChangeHooks;
-	int fUpdateCount;
-	bool fEnabled;
-	void __fastcall SetEnabled(const bool Value);
 	
 protected:
 	AnsiString fDefaultFilter;
-	bool fUpdateChange;
 	void __fastcall AddAttribute(TSynHighlighterAttributes* AAttrib);
 	void __fastcall DefHighlightChange(System::TObject* Sender);
-	void __fastcall FreeHighlighterAttributes(void);
 	virtual int __fastcall GetAttribCount(void);
 	virtual TSynHighlighterAttributes* __fastcall GetAttribute(int idx);
 	virtual TSynHighlighterAttributes* __fastcall GetDefaultAttribute(int Index) = 0 ;
@@ -146,8 +138,6 @@ public:
 	__fastcall virtual TSynCustomHighlighter(Classes::TComponent* AOwner);
 	__fastcall virtual ~TSynCustomHighlighter(void);
 	virtual void __fastcall Assign(Classes::TPersistent* Source);
-	void __fastcall BeginUpdate(void);
-	void __fastcall EndUpdate(void);
 	virtual bool __fastcall GetEol(void) = 0 ;
 	virtual void * __fastcall GetRange(void);
 	virtual AnsiString __fastcall GetToken(void) = 0 ;
@@ -164,8 +154,6 @@ public:
 	virtual void __fastcall EnumUserSettings(Classes::TStrings* Settings);
 	virtual bool __fastcall LoadFromRegistry(HKEY RootKey, AnsiString Key);
 	virtual bool __fastcall SaveToRegistry(HKEY RootKey, AnsiString Key);
-	bool __fastcall LoadFromFile(AnsiString AFileName);
-	bool __fastcall SaveToFile(AnsiString AFileName);
 	void __fastcall HookAttrChangeEvent(Classes::TNotifyEvent ANotifyEvent);
 	void __fastcall UnhookAttrChangeEvent(Classes::TNotifyEvent ANotifyEvent);
 	__property Synedittypes::TSynIdentChars IdentChars = {read=GetIdentChars};
@@ -178,13 +166,11 @@ public:
 	__property TSynHighlighterAttributes* IdentifierAttribute = {read=GetDefaultAttribute, index=1};
 	__property TSynHighlighterAttributes* KeywordAttribute = {read=GetDefaultAttribute, index=2};
 	__property TSynHighlighterAttributes* StringAttribute = {read=GetDefaultAttribute, index=3};
-	__property TSynHighlighterAttributes* SymbolAttribute = {read=GetDefaultAttribute, index=5};
 	__property TSynHighlighterAttributes* WhitespaceAttribute = {read=GetDefaultAttribute, index=4};
 	
 __published:
 	__property AnsiString DefaultFilter = {read=GetDefaultFilter, write=SetDefaultFilter, stored=IsFilterStored
 		};
-	__property bool Enabled = {read=fEnabled, write=SetEnabled, default=1};
 };
 
 
@@ -215,7 +201,6 @@ static const Shortint SYN_ATTR_IDENTIFIER = 0x1;
 static const Shortint SYN_ATTR_KEYWORD = 0x2;
 static const Shortint SYN_ATTR_STRING = 0x3;
 static const Shortint SYN_ATTR_WHITESPACE = 0x4;
-static const Shortint SYN_ATTR_SYMBOL = 0x5;
 extern PACKAGE TSynHighlighterList* __fastcall GetPlaceableHighlighters(void);
 extern PACKAGE void __fastcall RegisterPlaceableHighlighter(TMetaClass* highlighter);
 

@@ -12,10 +12,10 @@
 #pragma option push -Vx
 #include <SynEditPrintMargins.hpp>	// Pascal unit
 #include <SynEditPrintTypes.hpp>	// Pascal unit
-#include <Graphics.hpp>	// Pascal unit
-#include <Windows.hpp>	// Pascal unit
 #include <SysUtils.hpp>	// Pascal unit
+#include <Graphics.hpp>	// Pascal unit
 #include <Classes.hpp>	// Pascal unit
+#include <Windows.hpp>	// Pascal unit
 #include <SysInit.hpp>	// Pascal unit
 #include <System.hpp>	// Pascal unit
 

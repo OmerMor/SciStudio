@@ -26,7 +26,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditPrint.pas,v 1.12 2001/10/25 14:40:58 harmeister Exp $
+$Id: SynEditPrint.pas,v 1.7 2000/11/08 21:27:58 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -66,7 +66,6 @@ CONTENTS:
     LineNumbersInMargin : If true line numbers are printed in the left margin,
                           else left margin is increased by width of line
                           number text.
-    SelectedOnly  : Print only the selected Area
   Run-time properties:
     DocTitle    : Used to display the document name in the print queue monitor  //JJV 2000-10-13
     PrinterInfo : Read only. Returns info on printer (used internally)
@@ -84,18 +83,11 @@ CONTENTS:
 unit SynEditPrint;
 
 {$M+}
-{$I SynEdit.inc}
 
 interface
 
 uses
-  SysUtils, Classes,
-  {$IFDEF SYN_KYLIX}
-  Qt, QGraphics, QPrinters, Types,
-  {$ELSE}
-  Windows, Graphics, Printers,
-  {$ENDIF}
-  SynEdit, SynEditTypes, SynEditPrintTypes,
+  Windows, SysUtils, Classes, Graphics, Printers, SynEdit, SynEditPrintTypes,
   SynEditPrintHeaderFooter, SynEditPrinterInfo, SynEditPrintMargins,
   SynEditMiscProcs, SynEditHighlighter;
 
@@ -109,7 +101,6 @@ type
   TSynEditPrint =
     class(TComponent)
   private
-    FCopies: integer;                                                           //EK 10/16/01
     FFooter: TFooter;
     FHeader: THeader;
     FLines: TStrings;
@@ -121,10 +112,7 @@ type
     FPrinterInfo: TSynEditPrinterInfo;
     FPages: TList;
     FCanvas: TCanvas;
-    {************}
-    {$IFNDEF SYN_KYLIX}
     FTextMetrics: TTextMetric;
-    {$ENDIF}
     FCharWidth: Integer;
     FMaxLeftChar: Integer;
     FETODist: PIntArray;
@@ -152,11 +140,6 @@ type
     FLineNumbersInMargin: Boolean;
     FTabWidth: integer;
     fFontColor: TColor;                                                         // djlp 2000-09-20
-    fSelectedOnly: Boolean;                                                     // jj 2001-07-23
-    fSelAvail: Boolean;
-    fSelMode: TSynSelectionMode;
-    fBlockBegin: TPoint;
-    fBlockEnd: TPoint;
     procedure CalcPages;
     procedure SetLines(const Value: TStrings);
     procedure SetFont(const Value: TFont);
@@ -192,7 +175,6 @@ type
     property PageCount: Integer read GetPageCount;
     property SynEdit: TSynEdit write SetSynEdit;
   published
-    property Copies: integer read FCopies write FCopies;
     property Header: THeader read FHeader write FHeader;
     property Footer: TFooter read FFooter write FFooter;
     property Margins: TSynEditPrintMargins read FMargins write FMargins;
@@ -202,8 +184,6 @@ type
     property DocTitle: string read FDocTitle write FDocTitle;                   //JJV  2000-10-13
     property Wrap: Boolean read FWrap write FWrap default True;
     property Highlight: Boolean read FHighlight write FHighlight default True;
-    property SelectedOnly: Boolean read FSelectedOnly write FSelectedOnly       // jj 2001-07-23
-      default False;
     property Colors: Boolean read FColors write FColors default False;
     property LineNumbers: Boolean read FLineNumbers write FLineNumbers
       default False;
@@ -227,7 +207,6 @@ implementation
 constructor TSynEditPrint.Create(AOwner: TComponent);
 begin
   inherited;
-  FCopies := 1;
   FFooter := TFooter.Create;
   FHeader := THeader.Create;
   FLines := TStringList.Create;
@@ -343,11 +322,8 @@ begin
     FCanvas.Font.PixelsPerInch := FFont.PixelsPerInch;
     FCanvas.Font.Size := TmpSize;
   end;
-  {************}
-  {$IFNDEF SYN_KYLIX}
   GetTextMetrics(FCanvas.Handle, FTextMetrics);
   CharWidth := FTextMetrics.tmAveCharWidth;
-  {$ENDIF}
   FMargins.InitPage(FCanvas, 1, FPrinterInfo, FLineNumbers, FLineNumbersInMargin,
     FLines.Count - 1 + FLineOffset);
   CalcPages;
@@ -425,10 +401,8 @@ begin
 //  fTestString := StringOfChar('W', FMaxCol);
   AStr := StringOfChar('W', FMaxCol);
   FMaxWidth := FCanvas.TextWidth(AStr);
-  {************}
-  {$IFNDEF SYN_KYLIX}
   FLineHeight := FTextMetrics.tmHeight + FTextMetrics.tmExternalLeading;
-  {$ENDIF}
+
   FPageCount := 1;
   PageLine := TPageLine.Create;
   PageLine.FirstLine := 0;
@@ -571,21 +545,15 @@ var
     FirstPos := TokenPos;
     TokenEnd := TokenPos + Length(Token);
     while (LCount < AList.Count) and (TokenEnd > TWrapPos(AList[LCount]).Index) do begin
-      AStr := Copy(Text, Last + 1, TWrapPos(AList[LCount]).Index - Last);       //DDH 10/16/01 added fix from Oliver Grahl
-      Last := TWrapPos(AList[LCount]).Index;                                    //DDH 10/16/01 added fix from Oliver Grahl
-      {************}
-      {$IFNDEF SYN_KYLIX}
+      AStr := Copy(Text, Last, TWrapPos(AList[LCount]).Index - Last);
+      Last := TWrapPos(AList[LCount]).Index + 1;
       ExtTextOut(FCanvas.Handle, FMargins.PLeft + FirstPos * FCharWidth, FYPos, 0, nil, PChar(AStr), Length(AStr), @FETODist[0]);
-      {$ENDIF}
       FirstPos := 0;
       LCount := LCount + 1;
       FYPos := FYPos + FLineHeight;
     end;
-    AStr := Copy(Text, Last + 1, TokenEnd - Last);                              //DDH 10/16/01 added fix from Oliver Grahl
-    {************}
-    {$IFNDEF SYN_KYLIX}
+    AStr := Copy(Text, Last, TokenEnd - Last + 1);
     ExtTextOut(FCanvas.Handle, FMargins.PLeft + FirstPos * FCharWidth, FYPos, 0, nil, PChar(AStr), Length(AStr), @FETODist[0]);
-    {$ENDIF}
     //Ready for next token:
     TokenStart := TokenPos + Length(Token) - Length(AStr);
   end;
@@ -638,12 +606,7 @@ begin
         end;
       end;
       if not Handled then
-        {************}
-        {$IFNDEF SYN_KYLIX}
         ExtTextOut(FCanvas.Handle, FMargins.PLeft + (TokenPos - TokenStart) * FCharWidth, FYPos, 0, nil, PChar(Token), Length(Token), @FETODist[0]);
-        {$ELSE}
-        ;
-        {$ENDIF}
       FHighLighter.Next;
     end;
     RestoreCurrentFont;
@@ -701,11 +664,8 @@ begin
         iEnd := TPageLine(FPages[Num]).FirstLine - 1;
       for i := TPageLine(FPages[Num - 1]).FirstLine to iEnd do begin
         FLineNumber := i + 1;
-        if (not fSelectedOnly or ((i >= fBlockBegin.Y - 1) and (i <= fBlockEnd.Y - 1))) then begin
-          if (not fSelectedOnly or (fSelMode = smLine)) then WriteLine(Lines[i])
-            else WriteLine (Copy (Lines[i],fBlockBegin.X,fBlockEnd.X - fBlockBegin.X));
-          PrintLine(i + 1, Num);
-        end;
+        WriteLine(Lines[i]);
+        PrintLine(i + 1, Num);
       end;
     end;
     FFooter.Print(FCanvas, Num + FPageOffset);
@@ -737,11 +697,8 @@ end;
 procedure TSynEditPrint.PrintRange(StartPage, EndPage: Integer);
 //Prints the pages in the specified range
 var
-  i, ii: Integer;
+  i: Integer;
 begin
-  if fSelectedOnly and not fSelAvail then                                       // jj 2001-07-23
-    exit;
-
   FPrinting := True;
   FAbort := False;
   // The next part sets the document title that is used by the printer queue.
@@ -752,20 +709,16 @@ begin
   Printer.BeginDoc;
   PrintStatus(psBegin, StartPage, FAbort);
   UpdatePages(Printer.Canvas);
-
-  for ii:=1 to Copies do begin                                                  //EK 10/16/01
-    i := StartPage;
-    if EndPage < 0 then
-      EndPage := FPageCount;
-    while (i <= EndPage) and (not FAbort) do begin
-      PrintPage(i);
-      if ((i < EndPage) or (ii<Copies)) and not(FAbort) then                    //DDH 2001-10-25
-        Printer.NewPage;
-      i := i + 1;
-    end;
+  i := StartPage;
+  if EndPage < 0 then
+    EndPage := FPageCount;
+  while (i <= EndPage) and (not FAbort) do begin
+    PrintPage(i);
+    if i < EndPage then
+      Printer.NewPage;
+    i := i + 1;
   end;
-  if not(FAbort) then                                                           //DDH 2001-10-25 
-    PrintStatus(psEnd, EndPage, FAbort);
+  PrintStatus(psBegin, EndPage, FAbort);
   Printer.EndDoc;
   FPrinting := False;
 end;
@@ -803,8 +756,6 @@ begin
   else begin
     TmpCanvas := TCanvas.Create;
     try
-      {************}
-      {$IFNDEF SYN_KYLIX}
       DC := GetDC(0);
       try
         if DC <> 0 then begin
@@ -817,7 +768,6 @@ begin
       finally
         ReleaseDC(0, DC);
       end;
-      {$ENDIF}
     finally
       TmpCanvas.Free;
     end;
@@ -829,11 +779,7 @@ begin
   Lines := Value.Lines;
   HighLighter := Value.Highlighter;
   Font := Value.Font;
-  FTabWidth := Value.TabWidth;
-  fSelAvail := Value.SelAvail;                                                  // jj 2001-07-23
-  fBlockBegin := Value.BlockBegin;
-  fBlockEnd := Value.BlockEnd;
-  fSelMode := Value.SelectionMode;
+  FTabWidth := Value.TabWidth;                                        
 end;
 
 end.

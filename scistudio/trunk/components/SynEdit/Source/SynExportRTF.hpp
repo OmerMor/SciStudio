@@ -12,7 +12,6 @@
 #pragma option push -Vx
 #include <SynEditHighlighter.hpp>	// Pascal unit
 #include <SynEditExport.hpp>	// Pascal unit
-#include <RichEdit.hpp>	// Pascal unit
 #include <Graphics.hpp>	// Pascal unit
 #include <Windows.hpp>	// Pascal unit
 #include <Classes.hpp>	// Pascal unit

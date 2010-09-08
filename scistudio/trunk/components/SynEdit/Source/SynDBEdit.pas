@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynDBEdit.pas,v 1.2 2001/05/31 12:07:07 claplace Exp $
+$Id: SynDBEdit.pas,v 1.1.1.1 2000/07/08 15:54:05 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -42,14 +42,8 @@ unit SynDBEdit;
 interface
 
 uses
-  SysUtils, Classes,
-  {$IFDEF SYN_KYLIX}
-  QControls, DB, QDBCtrls, 
-  {$ELSE}
-  Windows, Messages, Controls, Db, DbCtrls,
-  {$ENDIF}
-  {$IFNDEF SYN_COMPILER_3_UP} DbTables, {$ENDIF}
-  SynEdit, SynEditKeyCmds;
+  Windows, Messages, SysUtils, Classes, Controls, Db, DbCtrls,
+  {$IFNDEF SYN_COMPILER_3_UP} DbTables, {$ENDIF} SynEdit, SynEditKeyCmds;
 
 type
   TCustomDBSynEdit = class(TCustomSynEdit)
@@ -69,15 +63,12 @@ type
     procedure SetFocused(Value: Boolean);
     procedure UpdateData(Sender: TObject);
   private
-    {*****************}
-    {$IFNDEF SYN_KYLIX}
     procedure CMEnter(var Msg: TCMEnter);
       message CM_ENTER;
     procedure CMExit(var Msg: TCMExit);
       message CM_EXIT;
     procedure CMGetDataLink(var Msg: TMessage);
       message CM_GETDATALINK;
-    {$ENDIF}
   protected
     function GetReadOnly: boolean; override;
     procedure Loaded; override;
@@ -114,17 +105,13 @@ type
     property Constraints;
 {$ENDIF}
     property Color;
-    {$IFNDEF SYN_KYLIX}
     property Ctl3D;
-    {$ENDIF}
     property Enabled;
     property Font;
     property Height;
     property Name;
     property ParentColor;
-    {$IFNDEF SYN_KYLIX}
     property ParentCtl3D;
-    {$ENDIF}
     property ParentFont;
     property ParentShowHint;
     property PopupMenu;
@@ -140,9 +127,7 @@ type
     property OnDragDrop;
     property OnDragOver;
 {$IFDEF SYN_COMPILER_4_UP}
-    {$IFNDEF SYN_KYLIX}
     property OnEndDock;
-    {$ENDIF}
 {$ENDIF}
     property OnEndDrag;
     property OnEnter;
@@ -154,9 +139,7 @@ type
     property OnMouseMove;
     property OnMouseUp;
 {$IFDEF SYN_COMPILER_4_UP}
-    {$IFNDEF SYN_KYLIX}
     property OnStartDock;
-    {$ENDIF}
 {$ENDIF}
     property OnStartDrag;
     // TCustomSynEdit properties
@@ -214,17 +197,13 @@ begin
   inherited Destroy;
 end;
 
-{*****************}
-{$IFNDEF SYN_KYLIX}
+
 procedure TCustomDBSynEdit.CMEnter(var Msg: TCMEnter);
 begin
   SetFocused(True);
   inherited;
 end;
-{$ENDIF}
 
-{*****************}
-{$IFNDEF SYN_KYLIX}
 procedure TCustomDBSynEdit.CMExit(var Msg: TCMExit);
 begin
   try
@@ -236,15 +215,11 @@ begin
   SetFocused(False);
   inherited;
 end;
-{$ENDIF}
 
-{*****************}
-{$IFNDEF SYN_KYLIX}
 procedure TCustomDBSynEdit.CMGetDataLink(var Msg: TMessage);
 begin
   Msg.Result := Integer(FDataLink);
 end;
-{$ENDIF}
 
 procedure TCustomDBSynEdit.DataChange(Sender: TObject);
 begin

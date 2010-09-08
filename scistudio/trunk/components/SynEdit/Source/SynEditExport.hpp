@@ -10,11 +10,9 @@
 #pragma delphiheader begin
 #pragma option push -w-
 #pragma option push -Vx
-#include <Clipbrd.hpp>	// Pascal unit
+#include <SynEditHighlighter.hpp>	// Pascal unit
 #include <Graphics.hpp>	// Pascal unit
 #include <Windows.hpp>	// Pascal unit
-#include <SynEditHighlighter.hpp>	// Pascal unit
-#include <SysUtils.hpp>	// Pascal unit
 #include <Classes.hpp>	// Pascal unit
 #include <SysInit.hpp>	// Pascal unit
 #include <System.hpp>	// Pascal unit

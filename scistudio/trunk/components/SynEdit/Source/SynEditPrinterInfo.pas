@@ -26,7 +26,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditPrinterInfo.pas,v 1.2 2001/05/31 12:07:07 claplace Exp $
+$Id: SynEditPrinterInfo.pas,v 1.1.1.1 2000/07/08 15:54:05 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -45,11 +45,7 @@ unit SynEditPrinterInfo;
 interface
 
 uses
-  {$IFDEF LINUX}
-  Qt, QPrinters;
-  {$ELSE}
   Windows, Printers;
-  {$ENDIF}
 
 type
   //Printer info class - getting dimensions of paper
@@ -242,25 +238,16 @@ begin
     FillDefault;
     Exit;
   end;
-  {************}
-  {$IFNDEF LINUX}
   FPhysicalWidth := GetDeviceCaps(Printer.Handle, Windows.PhysicalWidth);
   FPhysicalHeight := GetDeviceCaps(Printer.Handle, Windows.PhysicalHeight);
-  {$ENDIF}
   FPrintableWidth := Printer.PageWidth; {or GetDeviceCaps(Printer.Handle, HorzRes);}
   FPrintableHeight := Printer.PageHeight; {or GetDeviceCaps(Printer.Handle, VertRes);}
-  {************}
-  {$IFNDEF LINUX}
   FLeftGutter := GetDeviceCaps(Printer.Handle, PhysicalOffsetX);
   FTopGutter := GetDeviceCaps(Printer.Handle, PhysicalOffsetY);
-  {$ENDIF}
   FRightGutter := FPhysicalWidth - FPrintableWidth - FLeftGutter;
   FBottomGutter := FPhysicalHeight - FPrintableHeight - FTopGutter;
-  {************}
-  {$IFNDEF LINUX}
   FXPixPrInch := GetDeviceCaps(Printer.Handle, LogPixelsX);
   FYPixPrInch := GetDeviceCaps(Printer.Handle, LogPixelsY);
-  {$ENDIF}
   FXPixPrmm := FXPixPrInch / 25.4;
   FYPixPrmm := FYPixPrInch / 25.4;
 end;

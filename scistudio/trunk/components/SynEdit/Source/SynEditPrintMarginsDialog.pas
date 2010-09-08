@@ -26,7 +26,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditPrintMarginsDialog.pas,v 1.3 2001/08/01 17:07:34 jrx Exp $
+$Id: SynEditPrintMarginsDialog.pas,v 1.1.1.1 2000/07/08 15:54:06 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -46,15 +46,9 @@ unit SynEditPrintMarginsDialog;
 interface
 
 uses
-  SysUtils, Classes,
-  {$IFDEF LINUX}
-  Qt, QGraphics, QForms, QControls, QStdCtrls,
-  QButtons, QExtCtrls, QDialogs,
-  {$ELSE}
-  Windows, Graphics, Forms, Controls, StdCtrls,
-  Buttons, ExtCtrls, Dialogs,
-  {$ENDIF}
-  SynEditPrint, SynEditPrintTypes, SynEditPrintMargins;
+  Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls,
+  Buttons, ExtCtrls, Dialogs, DsgnIntf, SynEditPrint, SynEditPrintTypes,
+  SynEditPrintMargins;
 
 type
   TSynEditPrintMarginsDlg = class(TForm)
@@ -99,7 +93,7 @@ type
 
 implementation
 
-{$R *.dfm}
+{$R *.DFM}
 
 { TSynEditPrintMarginsDlg }
 

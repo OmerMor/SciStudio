@@ -25,7 +25,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditPythonBehaviour.pas,v 1.2 2001/05/31 12:07:07 claplace Exp $
+$Id: SynEditPythonBehaviour.pas,v 1.1.1.1 2000/07/08 15:54:06 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -48,12 +48,7 @@ unit SynEditPythonBehaviour;
 interface
 
 uses
-  SysUtils, Classes,
-  {$IFDEF SYN_KYLIX}
-  Qt, QGraphics, QControls, QForms, QDialogs,
-  {$ELSE}
-  Windows, Messages, Graphics, Controls, Forms, Dialogs,
-  {$ENDIF}
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   SynEdit, SynEditKeyCmds;
 
 const

@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditTextBuffer.pas,v 1.19 2001/10/17 12:52:04 harmeister Exp $
+$Id: SynEditTextBuffer.pas,v 1.15 2000/11/21 18:48:04 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -42,13 +42,7 @@ unit SynEditTextBuffer;
 interface
 
 uses
-  Classes, SysUtils,
-{$IFDEF SYN_KYLIX}
-  kTextDrawer, Types,
-{$ELSE}
-  Windows,
-{$ENDIF}
-  SynEditTypes, SynEditMiscProcs;                   //mh 2000-10-19
+  Classes, SysUtils, Windows, SynEditTypes, SynEditMiscProcs;                   //mh 2000-10-19
 
 type
 {begin}                                                                         //mh 2000-10-10
@@ -164,31 +158,19 @@ type
     crDeleteAfterCursor, crDelete, {crSelDelete, crDragDropDelete, }            //mh 2000-11-20
     crLineBreak, crIndent, crUnindent,
     crSilentDelete, crSilentDeleteAfterCursor,                                  //mh 2000-10-30
-    crAutoCompleteBegin, crAutoCompleteEnd,                                     //DDH 10/16/01 for AutoComplete
-    crSpecial1Begin, crSpecial1End,                                             //DDH 10/16/01 for Special1
-    crSpecial2Begin, crSpecial2End,                                             //DDH 10/16/01 for Special2
     crNothing);
 
-  TSynEditUndoItem = class(TPersistent)
-  protected
+  TSynEditUndoItem = class(TObject)
+  public
     fChangeReason: TSynChangeReason;
     fChangeSelMode: TSynSelectionMode;
     fChangeStartPos: TPoint;
     fChangeEndPos: TPoint;
     fChangeStr: string;
     fChangeNumber: integer;                                                     //sbs 2000-11-19
-  public
-    procedure Assign(Source: TPersistent); override;
-  { public properties }
-    property ChangeReason: TSynChangeReason read fChangeReason;
-    property ChangeSelMode: TSynSelectionMode read fChangeSelMode;
-    property ChangeStartPos: TPoint read fChangeStartPos;
-    property ChangeEndPos: TPoint read fChangeEndPos;
-    property ChangeStr: string read fChangeStr;
-    property ChangeNumber: integer read fChangeNumber;
   end;
 
-  TSynEditUndoList = class(TPersistent)
+  TSynEditUndoList = class(TObject)
   private
     fBlockChangeNumber: integer;                                                //sbs 2000-11-19
     fBlockCount: integer;                                                       //sbs 2000-11-19
@@ -197,7 +179,7 @@ type
     fLockCount: integer;
     fMaxUndoActions: integer;
     fNextChangeNumber: integer;                                                 //sbs 2000-11-19
-    fOnAddedUndo: TNotifyEvent;
+    fOnAdded: TNotifyEvent;
     procedure EnsureMaxEntries;
     function GetCanUndo: boolean;
     function GetItemCount: integer;
@@ -215,9 +197,7 @@ type
     function PopItem: TSynEditUndoItem;
     procedure PushItem(Item: TSynEditUndoItem);
     procedure Unlock;
-    function GetChangeReason: TSynChangeReason;
   public
-    procedure Assign(Source: TPersistent); override;
     property BlockChangeNumber: integer read fBlockChangeNumber                 //sbs 2000-11-19
       write fBlockChangeNumber;
     property CanUndo: boolean read GetCanUndo;
@@ -225,7 +205,7 @@ type
     property ItemCount: integer read GetItemCount;
     property MaxUndoActions: integer read fMaxUndoActions
       write SetMaxUndoActions;
-    property OnAddedUndo: TNotifyEvent read fOnAddedUndo write fOnAddedUndo;
+    property OnAddedUndo: TNotifyEvent read fOnAdded write fOnAdded;
   end;
 
 implementation
@@ -879,25 +859,6 @@ begin
 end;
 {end}                                                                           //mh 2000-10-10
 
-
-{ TSynEditUndoItem }
-
-procedure TSynEditUndoItem.Assign(Source: TPersistent);
-begin
-  if (Source is TSynEditUndoItem) then
-  begin
-    fChangeReason:=TSynEditUndoItem(Source).fChangeReason;
-    fChangeSelMode:=TSynEditUndoItem(Source).fChangeSelMode;
-    fChangeStartPos:=TSynEditUndoItem(Source).fChangeStartPos;
-    fChangeEndPos:=TSynEditUndoItem(Source).fChangeEndPos;
-    fChangeStr:=TSynEditUndoItem(Source).fChangeStr;
-    fChangeNumber:=TSynEditUndoItem(Source).fChangeNumber;
-  end
-  else
-    inherited Assign(Source);
-end;
-
-
 { TSynEditUndoList }
 
 constructor TSynEditUndoList.Create;
@@ -913,31 +874,6 @@ begin
   Clear;
   fItems.Free;
   inherited Destroy;
-end;
-
-procedure TSynEditUndoList.Assign(Source: TPersistent);
-var
-  i: Integer;
-  UndoItem: TSynEditUndoItem;
-begin
-  if (Source is TSynEditUndoList) then
-  begin
-    fItems.Clear;
-    for i:=0 to TSynEditUndoList(Source).fItems.Count-1 do
-    begin
-      UndoItem:=TSynEditUndoItem.Create;
-      UndoItem.Assign(TSynEditUndoList(Source).fItems[i]);
-      fItems.Add(UndoItem);
-    end;
-    fBlockChangeNumber:=TSynEditUndoList(Source).fBlockChangeNumber;
-    fBlockCount:=TSynEditUndoList(Source).fBlockCount;
-    fFullUndoImposible:=TSynEditUndoList(Source).fFullUndoImposible;
-    fLockCount:=TSynEditUndoList(Source).fLockCount;
-    fMaxUndoActions:=TSynEditUndoList(Source).fMaxUndoActions;
-    fNextChangeNumber:=TSynEditUndoList(Source).fNextChangeNumber;
-  end
-  else
-    inherited Assign(Source);
 end;
 
 procedure TSynEditUndoList.AddChange(AReason: TSynChangeReason; AStart,
@@ -1064,8 +1000,8 @@ begin
   if Assigned(Item) then begin
     fItems.Add(Item);
     EnsureMaxEntries;
-    if Assigned(OnAddedUndo) then
-      OnAddedUndo(Self);
+    if Assigned(fOnAdded) then
+      fOnAdded(Self);
   end;
 end;
 
@@ -1084,15 +1020,6 @@ begin
   if fLockCount > 0 then
     Dec(fLockCount);
 end;
-
-function TSynEditUndoList.GetChangeReason: TSynChangeReason;
-begin
-  if fItems.Count = 0 then
-    result := crNothing
-  else
-    result := TSynEditUndoItem(fItems[fItems.Count - 1]).fChangeReason;
-end;
-
 
 end.
 

@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEdit.pas,v 1.49 2001/10/24 18:47:02 harmeister Exp $
+$Id: SynEdit.pas,v 1.28 2000/11/21 18:48:04 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -42,24 +42,13 @@ unit SynEdit;
 interface
 
 uses
-  SysUtils, Classes,
-{$IFDEF SYN_KYLIX}
-  Qt, Types, QControls, QGraphics, QForms, QStdCtrls, QExtCtrls, Math,
-{$ELSE}
-  Windows, Messages, Controls, Graphics, Forms, StdCtrls,
+  Windows, Messages, SysUtils, Classes, Controls, Graphics, Forms, StdCtrls,
   ExtCtrls,
-{$ENDIF}
 {$IFDEF SYN_MBCSSUPPORT}
   Imm,
 {$ENDIF}
   SynEditTypes, SynEditMiscProcs, SynEditMiscClasses, SynEditTextBuffer,
-  SynEditKeyCmds, SynEditSearch, SynEditHighlighter, SynEditKbdHandler,
-{$IFDEF SYN_KYLIX}
-  kTextDrawer
-{$ELSE}
-  SynTextDrawer
-{$ENDIF}
-  ;
+  SynEditKeyCmds, SynEditSearch, SynEditHighlighter, SynTextDrawer;
 
 const
   DIGIT = ['0'..'9'];
@@ -132,10 +121,6 @@ type
   TSpecialLineColorsEvent = procedure(Sender: TObject; Line: integer;
     var Special: boolean; var FG, BG: TColor) of object;
 
-  TTransientType=(ttBefore,ttAfter);                                            //GBN 2001-10-23
-  TPaintTransient = procedure(Sender: TObject; Canvas: TCanvas;
-    TransientType: TTransientType) of object;
-
   TSynEditCaretType = (ctVerticalLine, ctHorizontalLine, ctHalfBlock, ctBlock);
 
   TSynStateFlag = (sfCaretChanged, sfScrollbarChanged, sfLinesChanging,
@@ -143,43 +128,21 @@ type
     sfWaitForDragging, sfInsideRedo);                                           //mh 2000-10-30
   TSynStateFlags = set of TSynStateFlag;
 
-  TSynEditorOption = (eoAltSetsColumnMode,       //Holding down the Alt Key will put the selection mode into columnar format
-                      eoAutoIndent,              //Will indent the caret on new lines with the same amount of leading white space as the preceding line
-                      eoDragDropEditing,         //Allows you to select a block of text and drag it within the document to another location
-                      eoDropFiles,               //Allows the editor accept OLE file drops
-                      eoHalfPageScroll,          //When scrolling with page-up and page-down commands, only scroll a half page at a time
-                      eoKeepCaretX,              //When moving through lines w/o Cursor Past EOL, keeps the X position of the cursor
-                      eoNoCaret,                 //Makes it so the caret is never visible
-                      eoNoSelection,             //Disables selecting text
-                      eoScrollByOneLess,         //Forces scrolling to be one less
-                      eoScrollPastEof,           //Allows the cursor to go past the end of file marker
-                      eoScrollPastEol,           //Allows the cursor to go past the last character into the white space at the end of a line
-                      eoShowScrollHint,          //Shows a hint of the visible line numbers when scrolling vertically
-                      eoSmartTabs,               //When tabbing, the cursor will go to the next non-white space character of the previous line
-                      eoTabsToSpaces,            //Converts a tab character to a specified number of space characters
-                      eoTrimTrailingSpaces,      //Spaces at the end of lines will be trimmed and not saved
-                      eoScrollHintFollows,       //The scroll hint follows the mouse when scrolling vertically
-                      eoSmartTabDelete,          //similar to Smart Tabs, but when you delete characters
-                      eoEnhanceHomeKey,          //enhances home key positioning, similar to visual studio
-                      eoSpecialLineDefaultFg,    //disables the foreground text color override when using the OnSpecialLineColor event
-                      eoGroupUndo,               //When undoing/redoing actions, handle all continous changes of the same kind in one call instead undoing/redoing each command separately
-                      eoRightMouseMovesCursor);  //When clicking with the right mouse for a popup menu, move the cursor to that location
-
+  TSynEditorOption = (eoAltSetsColumnMode, eoAutoIndent, eoDragDropEditing,     //mh 2000-11-20
+    eoDropFiles, eoHalfPageScroll, eoKeepCaretX, eoNoCaret, eoNoSelection,
+    eoScrollByOneLess, eoScrollPastEof, eoScrollPastEol, eoShowScrollHint,
+    eoSmartTabs, eoTabsToSpaces, eoTrimTrailingSpaces);
   TSynEditorOptions = set of TSynEditorOption;
 
 const
   SYNEDIT_DEFAULT_OPTIONS = [eoAutoIndent, eoDragDropEditing, eoScrollPastEol,
-    eoShowScrollHint, eoSmartTabs, eoTabsToSpaces, eoTrimTrailingSpaces,
-    eoSmartTabDelete, eoGroupUndo];
+    eoShowScrollHint, eoSmartTabs, eoTabsToSpaces, eoTrimTrailingSpaces];
 
 type
 // use scAll to update a statusbar when another TCustomSynEdit got the focus
   TSynStatusChange = (scAll, scCaretX, scCaretY, scLeftChar, scTopLine,
     scInsertMode, scModified, scSelection, scReadOnly);
   TSynStatusChanges = set of TSynStatusChange;
-
-  TContextHelpEvent = procedure(Sender: TObject; word : string)
-    of object;
 
   TStatusChangeEvent = procedure(Sender: TObject; Changes: TSynStatusChanges)
     of object;
@@ -262,15 +225,10 @@ type
 
   TCustomSynEdit = class(TCustomControl)
   private
-{$IFDEF SYN_WIN32}
-    procedure WMCaptureChanged(var Msg: TMessage); message WM_CAPTURECHANGED;   //jr 2001-01-06
-    procedure WMCopy(var Message: TMessage); message WM_COPY;                   //pp 2001-08-28
-    procedure WMCut(var Message: TMessage); message WM_CUT;                     //pp 2001-08-28
     procedure WMDropFiles(var Msg: TMessage); message WM_DROPFILES;
     procedure WMEraseBkgnd(var Msg: TMessage); message WM_ERASEBKGND;
     procedure WMGetDlgCode(var Msg: TWMGetDlgCode); message WM_GETDLGCODE;
     procedure WMHScroll(var Msg: TWMScroll); message WM_HSCROLL;
-    procedure WMPaste(var Message: TMessage); message WM_PASTE;                 //pp 2001-08-28
 {$IFDEF SYN_MBCSSUPPORT}
     procedure WMImeComposition(var Msg: TMessage); message WM_IME_COMPOSITION;
     procedure WMImeNotify(var Msg: TMessage); message WM_IME_NOTIFY;
@@ -281,7 +239,6 @@ type
     procedure WMSetFocus(var Msg: TWMSetFocus); message WM_SETFOCUS;
     procedure WMSize(var Msg: TWMSize); message WM_SIZE;
     procedure WMVScroll(var Msg: TWMScroll); message WM_VSCROLL;
-{$ENDIF}
   private
     fBlockBegin: TPoint;
     fBlockEnd: TPoint;
@@ -339,14 +296,12 @@ type
     fLastShiftState: TShiftState;
     fTSearch: TSynEditSearch;
     fHookedCommandHandlers: TList;
-    fKbdHandler: TSynEditKbdHandler;
-    fFocusList: TList;
     fPlugins: TList;
     fScrollTimer: TTimer;
     fScrollDeltaX, fScrollDeltaY: Integer;
     // event handlers
     fOnChange: TNotifyEvent;
-    fOnClearMark: TPlaceMarkEvent;
+    fOnClearMark: TPlaceMarkEvent;                                              // djlp 2000-08-29
     fOnCommandProcessed: TProcessCommandEvent;
     fOnDropFiles: TDropFilesEvent;
     fOnGutterClick: TGutterClickEvent;
@@ -356,18 +311,7 @@ type
     fOnProcessUserCommand: TProcessCommandEvent;
     fOnReplaceText: TReplaceTextEvent;
     fOnSpecialLineColors: TSpecialLineColorsEvent;
-    fOnContextHelp: TContextHelpEvent;
-    fOnPaintTransient: TPaintTransient;                                         //GBN 2001-10-23     
-
     fOnStatusChange: TStatusChangeEvent;
-
-{$IFDEF SYN_KYLIX}
-    FHScrollBar : TSynEditScrollBar;
-    FVScrollBar : TSynEditScrollBar;
-
-    procedure ModifyScrollBar(ScrollBar: TScrollBarKind; ScrollCode: TScrollCode; Pos: Cardinal; UseRightToLeft: Boolean);
-    procedure ScrollEvent(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer);
-{$ENDIF}
 
     procedure BookMarkOptionsChanged(Sender: TObject);
     procedure ComputeCaret(X, Y: Integer);
@@ -384,9 +328,6 @@ type
     function GetCanRedo: Boolean;
     function GetCanUndo: Boolean;
     function GetCaretXY: TPoint;
-    function GetDisplayX: Integer;                                              //GN 10/16/01
-    function GetDisplayY: Integer;                                              //GN 10/16/01 
-    function GetDisplayXY: TPoint;                                              //GN 10/16/01
     function GetFont: TFont;
     function GetHookedCommandHandlersCount: integer;
     function GetLineText: string;
@@ -394,7 +335,6 @@ type
     function GetSelAvail: Boolean;
     function GetSelText: string;
     function GetText: string;
-    function GetWordAtCursor : string;
     procedure GutterChanged(Sender: TObject);
     procedure InsertBlock(BB, BE: TPoint; ChangeStr: PChar);
     function IsPointInSelection(Value: TPoint): boolean;
@@ -409,7 +349,7 @@ type
     procedure PluginsAfterPaint(ACanvas: TCanvas; AClip: TRect;
       FirstLine, LastLine: integer);
     function ScanFrom(Index: integer): integer;
-    procedure ScrollTimerHandler(Sender: TObject);
+    procedure ScrollTimerHandler(Sender: TObject);                          
     procedure SelectedColorsChanged(Sender: TObject);
     procedure SetBlockBegin(Value: TPoint);
     procedure SetBlockEnd(Value: TPoint);
@@ -426,10 +366,6 @@ type
     procedure SetInsertCaret(const Value: TSynEditCaretType);
     procedure SetInsertMode(const Value: boolean);
     procedure SetKeystrokes(const Value: TSynEditKeyStrokes);
-    procedure SetOnKeyDown(const Value : TKeyEvent);
-    function GetOnKeyDown : TKeyEvent;
-    procedure SetOnKeyPress(const Value : TKeyPressEvent);
-    function GetOnKeyPress : TKeyPressEvent;
     procedure SetLeftChar(Value: Integer);
     procedure SetLines(Value: TStrings);
     procedure SetLineText(Value: string);
@@ -454,24 +390,17 @@ type
     procedure TrimmedSetLine(ALine: integer; ALineText: string);
     procedure UndoRedoAdded(Sender: TObject);
     procedure UnlockUndo;
-//    procedure UpdateCaret;                                                    //DDH 10/16/01 moved to public
+    procedure UpdateCaret;
     procedure UpdateScrollBars;
-    procedure DoShiftTabKey;                                                    //shift-tab key handling
-    procedure DoHomeKey(Selection:boolean);                                     //home key enhancement
   protected
-{$IFDEF SYN_WIN32}
     procedure CreateParams(var Params: TCreateParams); override;
     procedure CreateWnd; override;
-    procedure DestroyWnd; override;
-{$ELSE}
-    procedure Resize; override;
-    function GetClientRect: TRect; override;
-{$ENDIF}
     procedure DblClick; override;
     procedure DecPaintLock;
+    procedure DestroyWnd; override;
     procedure DragOver(Source: TObject; X, Y: Integer;
       State: TDragState; var Accept: Boolean); override;
-//    procedure FindMatchingBracket; virtual;                                   //GBN 2001-10-23 Moved to public
+    procedure FindMatchingBracket; virtual;
     function GetReadOnly: boolean; virtual;
     procedure HideCaret;
     procedure HighlighterAttrChanged(Sender: TObject);
@@ -508,7 +437,6 @@ type
     procedure RecalcCharExtent;
     procedure RedoItem;                                                         //sbs 2000-11-19
     procedure SetCaretXY(Value: TPoint); virtual;
-    procedure SetCaretXYEx(CallEnsureCursorPos: Boolean; Value: TPoint); virtual;
     procedure SetName(const Value: TComponentName); override;
     procedure SetReadOnly(Value: boolean); virtual;
     procedure SetSelTextPrimitive(PasteMode: TSynSelectionMode; Value: PChar;
@@ -522,15 +450,12 @@ type
   protected
     fGutterWidth: Integer;
     fInternalImage: TSynInternalImage;
-    FAlwaysShowCaret: Boolean;                                                  //DDH 10/16/01
-    procedure DoOnClearBookmark(var Mark: TSynEditMark); virtual;
+    procedure DoOnClearBookmark(var Mark: TSynEditMark); virtual;               // djlp - 2000-08-29
     procedure DoOnCommandProcessed(Command: TSynEditorCommand; AChar: char;
       Data: pointer); virtual;
     // no method DoOnDropFiles, intercept the WM_DROPFILES instead
     procedure DoOnGutterClick(X, Y: integer); virtual;
     procedure DoOnPaint; virtual;
-    procedure DoOnPaintTransient(TransientType: TTransientType); virtual;       //GBN 2001-10-23
-
     procedure DoOnPlaceMark(var Mark: TSynEditMark); virtual;
     procedure DoOnProcessCommand(var Command: TSynEditorCommand;
       var AChar: char; Data: pointer); virtual;
@@ -539,32 +464,16 @@ type
     function DoOnSpecialLineColors(Line: integer;
       var Foreground, Background: TColor): boolean; virtual;
     procedure DoOnStatusChange(Changes: TSynStatusChanges); virtual;
-    function GetSelEnd: integer;                                                //DDH 10/16/01
-    function GetSelStart: integer;                                              //DDH 10/16/01
-    procedure SetSelEnd(const Value: integer);                                  //DDH 10/16/01
-    procedure SetSelStart(const Value: integer);                                //DDH 10/16/01
-    procedure SetAlwaysShowCaret(const Value: Boolean);                         //DDH 10/16/01
   public
-    property Canvas;                                                            //DDH 10/16/01
-    property SelStart: Integer read GetSelStart write SetSelStart;              //DDH 10/16/01
-    property SelEnd: Integer read GetSelEnd write SetSelEnd;                    //DDH 10/16/01
-    property AlwaysShowCaret: Boolean read FAlwaysShowCaret                     //DDH 10/16/01
-                                      write SetAlwaysShowCaret;
-    procedure UpdateCaret;                                                      //DDH 10/16/01 moved from protected to public (needed in Completion Proposal)
-{$IFDEF SYN_COMPILER_4_UP}                                                      //DDH 10/17/01 change from Flávio Etrusco
-    procedure AddKey(Command: TSynEditorCommand; Key1: word; SS1: TShiftState;
-      Key2: word = 0; SS2: TShiftState = []);
-{$ELSE}
     procedure AddKey(Command: TSynEditorCommand; Key1: word; SS1: TShiftState;
       Key2: word; SS2: TShiftState);
-{$ENDIF}
     procedure BeginUndoBlock;                                                   //sbs 2000-11-19
     procedure BeginUpdate;
     function CaretXPix: Integer;
     function CaretYPix: Integer;
     procedure ClearAll;
     procedure ClearBookMark(BookMark: Integer);
-    procedure ClearSelection;
+    procedure ClearSelection;                                         
     procedure CommandProcessor(Command: TSynEditorCommand; AChar: char;
       Data: pointer); virtual;
     procedure ClearUndo;
@@ -577,10 +486,6 @@ type
     procedure EndUndoBlock;                                                     //sbs 2000-11-19
     procedure EndUpdate;
     procedure EnsureCursorPosVisible;
-    procedure EnsureCursorPosVisibleEx(ForceToMiddle: Boolean);
-    procedure FindMatchingBracket; virtual;                                     //GBN 2001-10-23 Moved to public
-    function GetMatchingBracket: TPoint; virtual;                               //GBN 2001-10-23
-    function GetMatchingBracketEx(APoint: TPoint): TPoint; virtual;             //DDH 2001-10-23
 {$IFDEF SYN_COMPILER_4_UP}
     function ExecuteAction(Action: TBasicAction): boolean; override;
 {$ENDIF}
@@ -589,13 +494,9 @@ type
     function GetBookMark(BookMark: integer; var X, Y: integer): boolean;
     function GetHighlighterAttriAtRowCol(XY: TPoint; var Token: string;
       var Attri: TSynHighlighterAttributes): boolean;
-    function GetHighlighterAttriAtRowColEx(XY: TPoint; var Token: string;
-      var TokenType, Start: Integer;
-      var Attri: TSynHighlighterAttributes): boolean;                           //DDH 10/16/01
     function GetWordAtRowCol(XY: TPoint): string;
     procedure GotoBookMark(BookMark: Integer);
-    function IdentChars: TSynIdentChars;                                        //DDH 10/17/01 from Flávio Etrusco
-    procedure InvalidateGutter;
+    procedure InvalidateGutter;                                           
     procedure InvalidateLine(Line: integer);
     function IsBookmark(BookMark: integer): boolean;
     function LogicalToPhysicalPos(p: TPoint): TPoint;
@@ -603,8 +504,6 @@ type
     procedure Notification(AComponent: TComponent;
       Operation: TOperation); override;
     procedure PasteFromClipboard;
-    function WordStart: TPoint; virtual;
-    function WordEnd: TPoint; virtual;
     function PrevWordPos: TPoint; virtual;
     function PixelsToRowColumn(Pixels: TPoint): TPoint;
     procedure Redo;
@@ -623,22 +522,7 @@ type
 {$IFDEF SYN_COMPILER_4_UP}
     function UpdateAction(Action: TBasicAction): boolean; override;
 {$ENDIF}
-
-    procedure SetFocus; override;
-
-    procedure AddKeyDownHandler (aHandler : TKeyDownProc);
-    procedure RemoveKeyDownHandler (aHandler : TKeyDownProc);
-    procedure AddKeyPressHandler (aHandler : TKeyPressProc);
-    procedure RemoveKeyPressHandler (aHandler : TKeyPressProc);
-    procedure AddFocusControl (aControl: TWinControl);
-    procedure RemoveFocusControl (aControl: TWinControl);
-
-{$IFDEF SYN_WIN32}
     procedure WndProc(var Msg: TMessage); override;
-{$ENDIF}
-{$IFDEF SYN_KYLIX}
-    function EventFilter(Sender: QObjectH; Event: QEventH): Boolean; override;
-{$ENDIF}
   public
     property BlockBegin: TPoint read GetBlockBegin write SetBlockBegin;
     property BlockEnd: TPoint read GetBlockEnd write SetBlockEnd;
@@ -648,16 +532,13 @@ type
     property CaretX: Integer read fCaretX write SetCaretX;
     property CaretY: Integer read fCaretY write SetCaretY;
     property CaretXY: TPoint read GetCaretXY write SetCaretXY;
-    property DisplayX: Integer read GetDisplayX;                                //GN 10/16/01 
-    property DisplayY: Integer read GetDisplayY;                                //GN 10/16/01
-    property DisplayXY: TPoint read GetDisplayXY;                               //GN 10/16/01
     property CharsInWindow: Integer read fCharsInWindow;
     property CharWidth: integer read fCharWidth;
     property Color;
     property Font: TFont read GetFont write SetFont;
     property Highlighter: TSynCustomHighlighter
       read fHighlighter write SetHighlighter;
-    property LeftChar: Integer read fLeftChar write SetLeftChar;
+    property LeftChar: Integer read fLeftChar write SetLeftChar;               
     property LineHeight: integer read fTextHeight;
     property LinesInWindow: Integer read fLinesInWindow;
     property LineText: string read GetLineText write SetLineText;
@@ -671,18 +552,12 @@ type
     property SelAvail: Boolean read GetSelAvail;
     property SelText: string read GetSelText write SetSelTextExternal;
     property Text: string read GetText write SetText;
-    property TopLine: Integer read fTopLine write SetTopLine;
-    property WordAtCursor: string read GetWordAtCursor;
-    property UndoList: TSynEditUndoList read fUndoList;
-    property RedoList: TSynEditUndoList read fRedoList;
+    property TopLine: Integer read fTopLine write SetTopLine;                   
   public
-    property OnKeyDown: TKeyEvent read GetOnKeyDown write SetOnKeyDown;
-    property OnKeyPress: TKeyPressEvent read GetOnKeyPress write SetOnKeyPress;
+    property OnKeyDown;
+    property OnKeyPress;
     property OnProcessCommand: TProcessCommandEvent
       read FOnProcessCommand write FOnProcessCommand;
-    property Options: TSynEditorOptions read fOptions write SetOptions        //DDH 10/16/01 Moved to public from protected for SynAutoComplete
-      default SYNEDIT_DEFAULT_OPTIONS;
-
   protected
     property BookMarkOptions: TSynBookMarkOpt
       read fBookMarkOpt write fBookMarkOpt;
@@ -700,8 +575,8 @@ type
     property Keystrokes: TSynEditKeyStrokes
       read FKeystrokes write SetKeystrokes;
     property MaxUndo: Integer read GetMaxUndo write SetMaxUndo default 1024;
-//    property Options: TSynEditorOptions read fOptions write SetOptions        //DDH 10/16/01 Moved to public from protected for SynAutoComplete
-//      default SYNEDIT_DEFAULT_OPTIONS;
+    property Options: TSynEditorOptions read fOptions write SetOptions
+      default SYNEDIT_DEFAULT_OPTIONS;
     property OverwriteCaret: TSynEditCaretType read FOverwriteCaret
       write SetOverwriteCaret default ctBlock;
     property RightEdge: Integer read fRightEdge write SetRightEdge default 80;
@@ -716,12 +591,10 @@ type
     property TabWidth: integer read fTabWidth write SetTabWidth default 8;
     property WantTabs: boolean read fWantTabs write SetWantTabs default FALSE;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property OnClearBookmark: TPlaceMarkEvent read fOnClearMark
+    property OnClearBookmark: TPlaceMarkEvent read fOnClearMark                
       write fOnClearMark;
     property OnCommandProcessed: TProcessCommandEvent
       read fOnCommandProcessed write fOnCommandProcessed;
-    property OnContextHelp: TContextHelpEvent
-      read fOnContextHelp write fOnContextHelp;
     property OnDropFiles: TDropFilesEvent read fOnDropFiles write fOnDropFiles;
     property OnGutterClick: TGutterClickEvent
       read fOnGutterClick write fOnGutterClick;
@@ -736,8 +609,6 @@ type
       read fOnSpecialLineColors write fOnSpecialLineColors;
     property OnStatusChange: TStatusChangeEvent
       read fOnStatusChange write fOnStatusChange;
-    property OnPaintTransient: TPaintTransient
-      read fOnPaintTransient write fOnPaintTransient;                           //GBN 2001-10-23
   end;
 
   TSynEdit = class(TCustomSynEdit)
@@ -749,15 +620,13 @@ type
     property Constraints;
 {$ENDIF}
     property Color;
-{$IFDEF SYN_WIN32}
     property Ctl3D;
-    property ParentCtl3D;
-{$ENDIF}
     property Enabled;
     property Font;
     property Height;
     property Name;
     property ParentColor;
+    property ParentCtl3D;
     property ParentFont;
     property ParentShowHint;
     property PopupMenu;
@@ -772,11 +641,8 @@ type
     property OnDblClick;
     property OnDragDrop;
     property OnDragOver;
-{$IFDEF SYN_WIN32}
 {$IFDEF SYN_COMPILER_4_UP}
     property OnEndDock;
-    property OnStartDock;
-{$ENDIF}
 {$ENDIF}
     property OnEndDrag;
     property OnEnter;
@@ -787,6 +653,9 @@ type
     property OnMouseDown;
     property OnMouseMove;
     property OnMouseUp;
+{$IFDEF SYN_COMPILER_4_UP}
+    property OnStartDock;
+{$ENDIF}
     property OnStartDrag;
     // TCustomSynEdit properties
     property BookMarkOptions;
@@ -813,9 +682,8 @@ type
     property WantTabs;
     // TCustomSynEdit events
     property OnChange;
-    property OnClearBookmark;
+    property OnClearBookmark;                                                   // djlp 2000-08-29
     property OnCommandProcessed;
-    property OnContextHelp;
     property OnDropFiles;
     property OnGutterClick;
     property OnPaint;
@@ -825,7 +693,6 @@ type
     property OnReplaceText;
     property OnSpecialLineColors;
     property OnStatusChange;
-    property OnPaintTransient;
   end;
 
 implementation
@@ -833,14 +700,10 @@ implementation
 {$R SynEdit.res}
 
 uses
-{$IFDEF SYN_KYLIX}
-  QStdActns, QClipbrd,
-{$ELSE}
 {$IFDEF SYN_COMPILER_4_UP}
   StdActns,
 {$ENDIF}
   Clipbrd, ShellAPI,
-{$ENDIF}
   SynEditStrConst;
 
 function Roundoff(X: Extended): Longint;
@@ -894,24 +757,6 @@ begin
     if Pixels.Y < 0 then Pixels.Y := 0;
   end;
   Result := Point(Roundoff(f), Pixels.Y div fTextHeight + TopLine);
-
-  // now fix up for any TAB characters in the line
-  if Result.Y <= lines.Count then begin
-    s := Lines[Result.Y - 1];
-    l := Length(s);
-    x := 0;
-    i := 1;
-
-    while x < Result.X do begin
-      if (i <= l) and (s[i] = #9) then
-        inc(x, TabWidth - (x mod TabWidth))                                     //GN 10/16/01 (fixes spacing with tabs)
-      else
-        inc(x);
-      inc(i);
-    end;
-    Result.X := i;
-  end;
-
 {$IFDEF SYN_MBCSSUPPORT}
   if (Result.Y >= 1) and (Result.Y <= Lines.Count) then begin
     s := Lines[Result.Y - 1];
@@ -923,6 +768,23 @@ begin
   end;
   fMBCSStepAside := False;
 {$ENDIF}
+
+  // now fix up for any TAB characters in the line
+  if Result.Y <= lines.Count then begin
+    s := Lines[Result.Y - 1];
+    l := Length(s);
+    x := 0;
+    i := 1;
+
+    while x < Result.X do begin
+      if (i <= l) and (s[i] = #9) then
+        inc(x, TabWidth - (x mod TabWidth) + 1)
+      else
+        inc(x);
+      inc(i);
+    end;
+    Result.X := i;
+  end;
 end;
 
 function TCustomSynEdit.RowColumnToPixels(rowcol: TPoint): TPoint;
@@ -933,15 +795,10 @@ end;
 
 procedure TCustomSynEdit.ComputeCaret(X, Y: Integer);
 begin
-  CaretXY := PixelsToRowColumn(Point(X, Y));
+  CaretXY := PixelsToRowColumn(Point(X,Y));
 end;
 
 procedure TCustomSynEdit.DoCopyToClipboard(const SText: string);
-{$IFDEF SYN_KYLIX}
-begin
-  Clipboard.AsText := SText;
-end;
-{$ELSE}
 var
   Mem: HGLOBAL;
   P: PChar;
@@ -1002,7 +859,6 @@ begin
     end;
   end;
 end;
-{$ENDIF}
 
 procedure TCustomSynEdit.CopyToClipboard;
 var
@@ -1018,7 +874,7 @@ procedure TCustomSynEdit.CutToClipboard;
 var
   SText: string;
 begin
-  if not ReadOnly and SelAvail then begin                                       //jcr 2001-01-16
+  if SelAvail then begin
     SText := SelText;
     DoCopyToClipboard(SText);
     fUndoList.AddChange(crDelete, fBlockBegin, fBlockEnd, SText, SelectionMode);
@@ -1043,7 +899,7 @@ begin
     OnDeleted := ListDeleted;
     OnInserted := ListInserted;
     OnPutted := ListPutted;
-//    OnScanRanges := ListScanRanges;
+//    OnScanRanges := ListScanRanges;                                     
   end;
 {end}                                                                           //mh 2000-10-10
   fFontDummy := TFont.Create;
@@ -1052,9 +908,7 @@ begin
   fRedoList := TSynEditUndoList.Create;
   fRedoList.OnAddedUndo := UndoRedoAdded;
 {$IFDEF SYN_COMPILER_4_UP}
-{$IFDEF SYN_WIN32}
   DoubleBuffered := false;
-{$ENDIF}          
 {$ENDIF}
   fSelectedColor := TSynSelectedColor.Create;
   fSelectedColor.OnChange := SelectedColorsChanged;
@@ -1070,20 +924,9 @@ begin
   Height := 150;
   Width := 200;
   Cursor := crIBeam;
-{$IFDEF SYN_WIN32}
   Color := clWindow;
-{$ENDIF}
-{$IFDEF SYN_KYLIX}
-  Color := clNormalLight;
-{$ENDIF}
-{$IFDEF SYN_WIN32}
   fFontDummy.Name := 'Courier New';
   fFontDummy.Size := 10;
-{$ENDIF}
-{$IFDEF SYN_KYLIX}
-  fFontDummy.Name := 'terminal';
-  fFontDummy.Size := 14;
-{$ENDIF}
 {$IFDEF SYN_COMPILER_3_UP}
   fFontDummy.CharSet := DEFAULT_CHARSET;
 {$ENDIF}
@@ -1101,8 +944,6 @@ begin
   fInsertCaret := ctVerticalLine;
   fOverwriteCaret := ctBlock;
   FSelectionMode := smNormal;
-  fFocusList := TList.Create;
-  fKbdHandler := TSynEditKbdHandler.Create(Self);
   fKeystrokes := TSynEditKeyStrokes.Create(Self);
   fMarkList := TSynEditMarkList.Create(self);
   fMarkList.OnChange := MarkListChange;
@@ -1128,29 +969,8 @@ begin
   fScrollTimer.Enabled := False;
   fScrollTimer.Interval := 100;
   fScrollTimer.OnTimer := ScrollTimerHandler;
-
-{$IFDEF SYN_KYLIX}
-  InputKeys := [ikAll];
-
-  FHScrollBar := TSynEditScrollbar.Create(self);
-  FHScrollBar.Kind := sbHorizontal;
-  FHScrollBar.Height := CYHSCROLL;
-  FHScrollBar.OnScroll := ScrollEvent;
-  FVScrollBar := TSynEditScrollbar.Create(self);
-  FVScrollBar.Kind := sbVertical;
-  FVScrollBar.Width := CXVSCROLL;
-  FVScrollBar.OnScroll := ScrollEvent;
-
-  // Set parent after BOTH scrollbars are created.
-  FHScrollBar.Parent := Self;
-  FHScrollBar.Color := clScrollBar;
-  FVScrollBar.Parent := Self;
-  FVScrollBar.Color := clScrollBar;
-{$ENDIF}
-
 end;
 
-{$IFDEF SYN_WIN32}
 procedure TCustomSynEdit.CreateParams(var Params: TCreateParams);
 const
   ScrollBar: array[TScrollStyle] of DWORD = (0, WS_HSCROLL, WS_VSCROLL,
@@ -1169,7 +989,6 @@ begin
     end;
   end;
 end;
-{$ENDIF}
 
 procedure TCustomSynEdit.DecPaintLock;
 begin
@@ -1193,21 +1012,19 @@ begin
   if Assigned(fHookedCommandHandlers) then begin
     for i := 0 to fHookedCommandHandlers.Count - 1 do
       THookedCommandHandlerEntry(fHookedCommandHandlers[i]).Free;
-    FreeAndNil(fHookedCommandHandlers);
+    fHookedCommandHandlers.Free;
   end;
   if fPlugins <> nil then begin
     for i := fPlugins.Count - 1 downto 0 do
       TSynEditPlugin(fPlugins[i]).Free;
     fPlugins.Free;
   end;
-  fScrollTimer.Free;
+  fScrollTimer.Free;                                                      
   fTSearch.Free;
   fMarkList.Free;
   fBookMarkOpt.Free;
   fBookMarkOpt := nil;
   fKeyStrokes.Free;
-  fKbdHandler.Free;
-  fFocusList.Free;
   fSelectedColor.Free;
   fUndoList.Free;
   fRedoList.Free;
@@ -1449,22 +1266,10 @@ begin
   Result := Lines.Text;
 end;
 
-function TCustomSynEdit.GetWordAtCursor : string;
-begin
-  SetBlockBegin (WordStart);
-  SetBlockEnd (WordEnd);
-  Result := SelText;
-  SetBlockBegin (CaretXY);
-  SetBlockend (CaretXY);
-end;
-
 procedure TCustomSynEdit.HideCaret;
 begin
   if sfCaretVisible in fStateFlags then
-{$IFDEF SYN_KYLIX}
-{$ELSE}
     if Windows.HideCaret(Handle) then Exclude(fStateFlags, sfCaretVisible);
-{$ENDIF}
 end;
 
 {$IFDEF SYN_MBCSSUPPORT}
@@ -1535,11 +1340,7 @@ begin
       if sfLinesChanging in fStateFlags then
         UnionRect(fInvalidateRect, fInvalidateRect, rcInval)
       else
-{$IFDEF SYN_KYLIX}
-        InvalidateRect(rcInval, FALSE);
-{$ELSE}
         InvalidateRect(Handle, @rcInval, FALSE);
-{$ENDIF}
     end else begin
       { find the visible lines first }
       if (LastLine < FirstLine) then SwapInt(LastLine, FirstLine);
@@ -1552,11 +1353,7 @@ begin
         if sfLinesChanging in fStateFlags then
           UnionRect(fInvalidateRect, fInvalidateRect, rcInval)
         else
-{$IFDEF SYN_KYLIX}
-          InvalidateRect(rcInval, FALSE);
-{$ELSE}
           InvalidateRect(Handle, @rcInval, FALSE);
-{$ENDIF}
       end;
     end;
 end;
@@ -1572,11 +1369,7 @@ begin
       if sfLinesChanging in fStateFlags then
         UnionRect(fInvalidateRect, fInvalidateRect, rcInval)
       else
-{$IFDEF SYN_KYLIX}
-        InvalidateRect(rcInval, FALSE);
-{$ELSE}
         InvalidateRect(Handle, @rcInval, FALSE);
-{$ENDIF}
     end else begin
       { find the visible lines first }
       if (LastLine < FirstLine) then SwapInt(LastLine, FirstLine);
@@ -1589,11 +1382,7 @@ begin
         if sfLinesChanging in fStateFlags then
           UnionRect(fInvalidateRect, fInvalidateRect, rcInval)
         else
-{$IFDEF SYN_KYLIX}
-          InvalidateRect(rcInval, FALSE);
-{$ELSE}
           InvalidateRect(Handle, @rcInval, FALSE);
-{$ENDIF}
       end;
     end;
 end;
@@ -1637,7 +1426,8 @@ begin
 {$ENDIF}
   // don't fire the event if key is to be ignored
   if not (sfIgnoreNextChar in fStateFlags) then begin
-    fKbdHandler.ExecuteKeyPress (Self,Key);
+    if Assigned(OnKeyPress) then
+      OnKeyPress(Self, Key);
     CommandProcessor(ecChar, Key, nil);
   end else
     // don't ignore further keys
@@ -1670,11 +1460,7 @@ begin
   if HandleAllocated then begin
     UpdateScrollBars;
     SetBlockBegin(CaretXY);
-{$IFDEF SYN_KYLIX}
-    InvalidateRect(fInvalidateRect, False);
-{$ELSE}
     InvalidateRect(Handle, @fInvalidateRect, False);
-{$ENDIF}
     FillChar(fInvalidateRect, SizeOf(TRect), 0);
     if fGutter.ShowLineNumbers and fGutter.AutoSize then
       fGutter.AutoSizeDigitCount(Lines.Count);
@@ -1688,14 +1474,8 @@ procedure TCustomSynEdit.MouseDown(Button: TMouseButton; Shift: TShiftState;
 var
   bWasSel: boolean;
   bStartDrag: boolean;
-  iPoint: TPoint;
 begin
-  if SelAvail and (Button = mbRight) and                                        //DDH 10/16/01 Begin
-    (eoRightMouseMovesCursor in Options) then
-  begin
-    FBlockEnd := FBlockBegin;
-  end;                                                                          //DDH 10/16/01 End
-
+//  if (Button = mbRight) and (Shift = [ssRight]) and Assigned(PopupMenu) and SelAvail
   if (Button = mbRight) and SelAvail then                                       //lt 2000-10-12
     exit;
   bWasSel := false;
@@ -1710,27 +1490,16 @@ begin
     end;
   end;
   inherited MouseDown(Button, Shift, X, Y);
-
-  if (Button <> mbRight) or (eoRightMouseMovesCursor in Options) then begin     //DDH 10/16/01
-    ComputeCaret(X, Y);
-    fLastCaretX := fCaretX;                                                       //mh 2000-10-19
-  end;
-
+  ComputeCaret(X, Y);
+  fLastCaretX := fCaretX;                                                       //mh 2000-10-19
   if Button = mbLeft then begin
     MouseCapture := True;
       //if mousedown occured in selected block then begin drag operation
     Exclude(fStateFlags, sfWaitForDragging);
     if bWasSel and (eoDragDropEditing in fOptions) and (X >= fGutterWidth + 2)
-      and (SelectionMode = smNormal) and IsPointInSelection(CaretXY)
+      and (SelectionMode = smNormal) and IsPointInSelection(CaretXY)          
     then
-      bStartDrag := TRUE                                                        //DDH 10/17/01 begin from Flávio Etrusco
-    else begin
-      { should be called _instead_ of ComputeCaret, just works as notification
-      for the plugins right now }
-      iPoint := CaretXY;
-      CommandProcessor( ecGotoXY, #0, @iPoint );
-    end;                                                                        //DDH 10/17/01 end from Flávio Etrusco
-
+      bStartDrag := TRUE;
   end;
   if (Button = mbLeft) and bStartDrag then
     Include(fStateFlags, sfWaitForDragging)
@@ -1754,16 +1523,11 @@ begin
   end;
   if (fMouseDownX < fGutterWidth) then
     Include(fStateFlags, sfPossibleGutterClick);
-{$IFDEF SYN_KYLIX}
-  SetFocus;
-{$ELSE}
   Windows.SetFocus(Handle);
-{$ENDIF}
 end;
 
 procedure TCustomSynEdit.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
-  P: TPoint;                                                                    //jr 2001-01-06
   Z: integer;
 begin
   inherited MouseMove(Shift, x, y);
@@ -1775,20 +1539,10 @@ begin
       BeginDrag(false);
     end;
   end else if (ssLeft in Shift) and MouseCapture then begin
-{begin}                                                                         //jr 2001-01-06
-(*
     if (X >= fGutterWidth) and (X < ClientWidth)
       and (Y >= 0) and (Y < ClientHeight)
     then
       ComputeCaret(X, Y);
-*)
-    P := PixelsToRowColumn(Point(X, Y));
-    if (X < fGutterWidth) or (X >= ClientWidth) then
-      P.X := fCaretX;
-    if (Y < 0) or (Y >= ClientHeight) then
-      P.Y := fCaretY;
-    CaretXY := P;
-{end}                                                                           //jr 2001-01-06
     SetBlockEnd(CaretXY);
     // should we begin scrolling?
     Dec(X, fGutterWidth);
@@ -1839,11 +1593,9 @@ begin
       SetBlockEnd(CaretXY);
     end;
     if fScrollDeltaY <> 0 then begin
-{$IFDEF SYN_WIN32}
       if GetKeyState(VK_SHIFT) < 0 then
         TopLine := TopLine + fScrollDeltaY * LinesInWindow
       else
-{$ENDIF}
         TopLine := TopLine + fScrollDeltaY;
       Y := TopLine;
       if fScrollDeltaY > 0 then  // scrolling down?
@@ -1938,11 +1690,9 @@ begin
       rcDraw.Left := Max(rcDraw.Left, fGutterWidth);
       PaintTextLines(rcDraw, nL1, nL2, nC1, nC2);
     end;
-    PluginsAfterPaint(Canvas, rcDraw, nL1, nL2);
+    PluginsAfterPaint(Canvas, rcDraw, nL1, nL2);                          
     // If there is a custom paint handler call it.
     DoOnPaint;
-    DoOnPaintTransient(ttAfter);                                                //GBN 2001-10-23
-
   finally
     UpdateCaret;
   end;
@@ -1955,10 +1705,7 @@ var
   bHasOtherMarks: boolean;
   aGutterOffs: PIntArray;
   s: string;
-{$IFDEF SYN_WIN32}
   dc: HDC;
-{$ENDIF}
-  pSize: TSize;                                                                 //DDH 10/16/01
 
   procedure DrawMark(iMark: integer);
   var
@@ -2004,33 +1751,16 @@ begin
   // If we have to draw the line numbers then we don't want to erase
   // the background first. Do it line by line with TextRect instead
   // and fill only the area after the last visible line.
-{$IFDEF SYN_WIN32}
   dc := Canvas.Handle;
-{$ENDIF}
   if fGutter.ShowLineNumbers then begin
-{$IFDEF SYN_WIN32}
     fTextDrawer.BeginDrawing(dc);
-{$ELSE}
-    fTextDrawer.BeginDrawing(canvas);
-{$ENDIF}
     try
-      //DDH 10/16/01 Start
-//      fTextDrawer.SetBackColor(fGutter.Color);
-//      fTextDrawer.SetForeColor(Self.Font.Color);
-//      if fGutter.UseFontStyle then
-//        fTextDrawer.Style := Font.Style
-//      else
-//        fTextDrawer.Style := [];
-      if fGutter.UseFontStyle then
-      begin
-        fTextDrawer.SetBaseFont(fGutter.Font);
-        fTextDrawer.SetForeColor(fGutter.Font.Color)
-      end else begin
-        fTextDrawer.SetForeColor(self.Font.Color);
-        fTextDrawer.Style := [];
-      end;
       fTextDrawer.SetBackColor(fGutter.Color);
-
+      fTextDrawer.SetForeColor(Self.Font.Color);
+      if fGutter.UseFontStyle then
+        fTextDrawer.Style := Font.Style
+      else
+        fTextDrawer.Style := [];
       // prepare the rect initially
       rcLine := AClip;
       rcLine.Right := Max(rcLine.Right, fGutterWidth - 2);
@@ -2041,19 +1771,8 @@ begin
         Inc(rcLine.Bottom, fTextHeight);
         // erase the background and draw the line number string in one go
         s := fGutter.FormatLineNumber(iLine);
-{$IFDEF SYN_WIN32}
-//        Windows.ExtTextOut(DC, fGutter.LeftOffset, rcLine.Top, ETO_OPAQUE,
-//          @rcLine, PChar(s), Length(s), nil);
-        GetTextExtentPoint32(DC, PChar(s), Length(s), pSize);
-        Windows.ExtTextOut(DC, (fGutterWidth - fGutter.RightOffset - 2) - pSize.cx,
-          rcLine.Top + ((fTextHeight - pSize.cy) shr 1), ETO_OPAQUE,
+        Windows.ExtTextOut(DC, fGutter.LeftOffset, rcLine.Top, ETO_OPAQUE,
           @rcLine, PChar(s), Length(s), nil);
-        //DDH 10/16/01 End
-{$ELSE}
-        Canvas.Brush.Style := bsSolid;
-        Canvas.FillRect(rcLine);
-        Canvas.TextRect(rcLine, fGutter.LeftOffset, rcLine.Top, s);
-{$ENDIF}
       end;
       // now erase the remaining area if any
       if AClip.Bottom > rcLine.Bottom then begin
@@ -2064,27 +1783,18 @@ begin
       end;
     finally
       fTextDrawer.EndDrawing;
-      //DDH 10/16/01 Begin
-      if fGutter.UseFontStyle then
-        fTextDrawer.SetBaseFont(Self.Font);
-      //DDH 10/16/01 End
     end;
   end else
-{$IFDEF SYN_WIN32}
     InternalFillRect(dc, AClip);
-{$ELSE}
-    InternalFillRect(canvas, AClip);
-{$ENDIF}
-
   // the gutter separator if visible
   if AClip.Right >= fGutterWidth - 2 then
     with Canvas do begin
-      Pen.Color := clWindow; //clBtnHighlight;                                  //AC 10/16/01
+      Pen.Color := clBtnHighlight;
       Pen.Width := 1;
       with AClip do begin
         MoveTo(fGutterWidth - 2, Top);
         LineTo(fGutterWidth - 2, Bottom);
-        Pen.Color := fGutter.Color;  //clBtnShadow;                             //AC 10/16/01
+        Pen.Color := clBtnShadow;
         MoveTo(fGutterWidth - 1, Top);
         LineTo(fGutterWidth - 1, Bottom);
       end;
@@ -2148,9 +1858,7 @@ var
     FG, BG: TColor;
     Style: TFontStyles;
   end;
-{$IFDEF SYN_WIN32}
   dc: HDC;
-{$ENDIF}  
 
 { local procedures }
 
@@ -2286,10 +1994,6 @@ var
         colBG := TokenAccu.BG;
         colFG := TokenAccu.FG;
       end;
-
-      if bSpecialLine and (eoSpecialLineDefaultFg in fOptions) then             //EK 10/16/01
-        colFG := TokenAccu.FG;
-
       fTextDrawer.SetStyle(TokenAccu.Style);
       // Paint the chars
       if bComplexToken then begin
@@ -2326,40 +2030,24 @@ var
         if (rcToken.Left < nX1) then begin
           SetDrawingColors(FALSE);
           rcToken.Right := nX1;
-{$IFDEF SYN_WIN32}
           InternalFillRect(dc, rcToken);
-{$ELSE}
-          InternalFillRect(Canvas, rcToken);
-{$ENDIF}
           rcToken.Left := nX1;
         end;
         if (rcToken.Left < nX2) then begin
           SetDrawingColors(TRUE);
           rcToken.Right := nX2;
-{$IFDEF SYN_WIN32}
           InternalFillRect(dc, rcToken);
-{$ELSE}
-          InternalFillRect(Canvas, rcToken);
-{$ENDIF}
           rcToken.Left := nX2;
         end;
         if (rcToken.Left < rcLine.Right) then begin
           SetDrawingColors(FALSE);
           rcToken.Right := rcLine.Right;
-{$IFDEF SYN_WIN32}
           InternalFillRect(dc, rcToken);
-{$ELSE}
-          InternalFillRect(Canvas, rcToken);
-{$ENDIF}
         end;
       end else begin
         SetDrawingColors(bLineSelected);
         rcToken.Right := rcLine.Right;
-{$IFDEF SYN_WIN32}
         InternalFillRect(dc, rcToken);
-{$ELSE}
-        InternalFillRect(Canvas, rcToken);
-{$ENDIF}
       end;
     end;
   end;
@@ -2401,15 +2089,13 @@ var
         or (not (fsUnderline in Style) and not (fsUnderline in TokenAccu.Style)
           and TokenIsSpaces)
       then
-//EK 10/16/01 Begin
       // either special colors or same colors
-        if (bSpecialLine and not (eoSpecialLineDefaultFg in fOptions)) or bLineSelected or // <- implementation
+        if bSpecialLine or bLineSelected or
         // background color must be the same and
         ((TokenAccu.BG = Background) and
           // foreground color must be the same or token is only spaces
           ((TokenAccu.FG = Foreground) or TokenIsSpaces))
           then bCanAppend := TRUE;
-//EK 10/16/01 End
       // If we can't append it, then we have to paint the old token chars first.
       if not bCanAppend then
         PaintHighlightToken(FALSE);
@@ -2523,7 +2209,7 @@ var
       // Paint the lines depending on the assigned highlighter.
       bLineSelected := not bComplexLine and (nSelStart > 0);
       rcToken := rcLine;
-      if not Assigned(fHighlighter) {or not(fHighlighter.Enabled) }then begin     //DDH 2001-10-23 Added the enabled property
+      if not Assigned(fHighlighter) then begin
         // Note: The PaintToken procedure will take care of invalid parameters
         // like empty token rect or invalid indices into sLine.
         nTokenLen := Length(sLine);
@@ -2560,7 +2246,7 @@ var
           nTokenPos := fHighlighter.GetTokenPos; // zero-based
           sToken := fHighlighter.GetToken;
           nTokenLen := Length(sToken);
-          if (nTokenPos + nTokenLen >= FirstCol) and (nTokenPos <= LastCol) then begin
+          if (nTokenPos + nTokenLen >= FirstCol) then begin
             // It's at least partially visible. Get the token attributes now.
             attr := fHighlighter.GetTokenAttribute;
             // Store the token chars with the attributes in the TokenAccu
@@ -2584,13 +2270,8 @@ var
       // the flicker. Should not cost very much anyway, compared to the many
       // calls to ExtTextOut.
       if bDoRightEdge then begin
-{$IFDEF SYN_WIN32}
         Windows.MoveToEx(dc, nRightEdge, rcLine.Top, nil);
         Windows.LineTo(dc, nRightEdge, rcLine.Bottom + 1);
-{$ELSE}
-        Canvas.MoveTo(nRightEdge, rcLine.Top);
-        Canvas.LineTo(nRightEdge, rcLine.Bottom + 1);
-{$ENDIF}
       end;
     end;
   end;
@@ -2616,23 +2297,16 @@ begin
       Canvas.Pen.Width := 1;
     end;
   end;
-{$IFDEF SYN_WIN32}
   // Do everything else with API calls. This (maybe) realizes the new pen color.
   dc := Canvas.Handle;
-{$ENDIF}
   // If anything of the two pixel space before the text area is visible, then
   // fill it with the component background color.
   if (AClip.Left < fGutterWidth + 2) then begin
     rcToken := AClip;
     rcToken.Left := Max(AClip.Left, fGutterWidth);
     rcToken.Right := fGutterWidth + 2;
-{$IFDEF SYN_WIN32}
     SetBkColor(dc, ColorToRGB(colEditorBG));
     InternalFillRect(dc, rcToken);
-{$ELSE}
-    Canvas.Brush.Color := ColorToRGB(colEditorBG);
-    InternalFillRect(Canvas, rcToken);
-{$ENDIF}
     // Adjust the invalid area to not include this area.
     AClip.Left := rcToken.Right;
   end;
@@ -2643,11 +2317,7 @@ begin
   if (LastLine >= FirstLine) then begin
     ComputeSelectionInfo;
     fTextDrawer.Style := Font.Style;
-{$IFDEF SYN_WIN32}
     fTextDrawer.BeginDrawing(dc);
-{$ELSE}
-    fTextDrawer.BeginDrawing(Canvas);
-{$ENDIF}
     try
       PaintLines;
     finally
@@ -2658,22 +2328,12 @@ begin
   rcToken := AClip;
   rcToken.Top := (LastLine - TopLine + 1) * fTextHeight;
   if (rcToken.Top < rcToken.Bottom) then begin
-{$IFDEF SYN_WIN32}
     SetBkColor(dc, ColorToRGB(colEditorBG));
     InternalFillRect(dc, rcToken);
-{$ELSE}
-    Canvas.Brush.Color := ColorToRGB(colEditorBG);
-    InternalFillRect(Canvas, rcToken);
-{$ENDIF}
     // Draw the right edge if necessary.
     if bDoRightEdge then begin
-{$IFDEF SYN_WIN32}
       Windows.MoveToEx(dc, nRightEdge, rcToken.Top, nil);
       Windows.LineTo(dc, nRightEdge, rcToken.Bottom + 1);
-{$ELSE}
-      Canvas.MoveTo(nRightEdge, rcToken.Top);
-      Canvas.LineTo(nRightEdge, rcToken.Bottom + 1);
-{$ENDIF}
     end;
   end;
 end;
@@ -2682,19 +2342,13 @@ procedure TCustomSynEdit.PasteFromClipboard;
 var
   StartOfBlock: TPoint;
   EndOfBlock: TPoint;
-{$IFDEF SYN_WIN32}
   PasteMode: TSynSelectionMode;
   Mem: HGLOBAL;
   P: PChar;
   Tag: Integer;
-{$ENDIF}
 begin
-  if ReadOnly then                                                              //jcr 2001-01-16
-    exit;
-  DoOnPaintTransient(ttBefore);                                                 //GBN 2001-10-23
   BeginUndoBlock;                                                               //mh 2000-11-20
   try
-{$IFDEF SYN_WIN32}
     // Check for our special format first.
     if Clipboard.HasFormat(SynEditClipboardFormat) then begin
       Clipboard.Open;
@@ -2747,7 +2401,6 @@ begin
       end;
     // If our special format isn't there, check for regular text format.
     end else if Clipboard.HasFormat(CF_TEXT) then begin
-{$ENDIF}
       // Normal text is much easier...
       if SelAvail then begin
 //        fUndoList.AddChange(crSelDelete, fBlockBegin, fBlockEnd, SelText,
@@ -2763,16 +2416,13 @@ begin
       SelText := Clipboard.AsText;
       UnlockUndo;
       fUndoList.AddChange(crPaste, StartOfBlock, BlockEnd, SelText, smNormal);
-{$IFDEF SYN_WIN32}
     end;
-{$ENDIF}    
   finally
     EndUndoBlock;                                                               //mh 2000-11-20
   end;
   EnsureCursorPosVisible;
   // Selection should have changed...
   StatusChanged([scSelection]);
-  DoOnPaintTransient(ttAfter);                                                  //GBN 2001-10-23  
 end;
 
 procedure TCustomSynEdit.SelectAll;
@@ -2881,46 +2531,11 @@ function TCustomSynEdit.GetCaretXY: TPoint;
 begin
   Result := Point(CaretX, CaretY);
 end;
-//GN 10/16/01 begin
-function TCustomSynEdit.GetDisplayX: Integer;
-var S: String;
-X: Integer;
-begin
-  S:=GetLineText;
-  Result:=1;
-  X:=1;
-  while (X<CaretX) and (X<Length(S)) do
-  begin
-    case S[X] of
-      #9: Result:=Result+TabWidth;
-      #10,#13: break;
-      else Result:=Result+1;
-    end;
-    X:=X+1;
-  end;
-  Result:=Result+(CaretX-X);
-end;
 
-function TCustomSynEdit.GetDisplayY: Integer;
-begin
-  Result := CaretY;
-end;
-
-Function TCustomSynEdit.GetDisplayXY: TPoint;
-begin
-  Result := Point(DisplayX, DisplayY);
-end;
-//GN 10/16/01 End
-procedure TCustomSynEdit.SetCaretXY(Value: TPoint);                             //DDH 10/16/01 begin
-begin
-  SetCaretXYEx(True, Value);
-end;
-
-procedure TCustomSynEdit.SetCaretXYEx(CallEnsureCursorPos: Boolean; Value: TPoint);
+procedure TCustomSynEdit.SetCaretXY(Value: TPoint);
 var
   nMaxX: integer;
 begin
-  DoOnPaintTransient(ttBefore);                                                 //GBN 2001-10-23
   nMaxX := fMaxLeftChar;
   if Value.Y > Lines.Count then
     Value.Y := Lines.Count;
@@ -2931,7 +2546,7 @@ begin
       nMaxX := 1;
   end else begin
     if not (eoScrollPastEol in fOptions) then
-      nMaxX := Length(Lines[Value.Y - 1]) + 1;
+      nMaxX := Length(Lines[Value.Y - 1]) + 1;                                  //abc 2000-09-30
   end;
   if Value.X > nMaxX then
     Value.X := nMaxX;
@@ -2949,27 +2564,22 @@ begin
         fCaretY := Value.Y;
         Include(fStatusChanges, scCaretY);
       end;
-      if CallEnsureCursorPos then
-        EnsureCursorPosVisible;
+      EnsureCursorPosVisible;
       Include(fStateFlags, sfCaretChanged);
       Include(fStateFlags, sfScrollbarChanged);
     finally
       DecPaintLock;
     end;
   end;
-  DoOnPaintTransient(ttAfter);                                                  //GBN 2001-10-23
-end;                                                                            //DDH 10/06/01 end
+end;
 
 procedure TCustomSynEdit.SetFont(const Value: TFont);
-{$IFDEF SYN_WIN32}
 var
   DC: HDC;
   Save: THandle;
   Metrics: TTextMetric;
   AveCW, MaxCW: Integer;
-{$ENDIF}
 begin
-{$IFDEF SYN_WIN32}
   DC := GetDC(0);
   Save := SelectObject(DC, Value.Handle);
   GetTextMetrics(DC, Metrics);
@@ -2992,9 +2602,6 @@ begin
         inherited Font := fFontDummy;
       end;
   end;
-{$ELSE}
-  inherited Font := Value;
-{$ENDIF}
   if fGutter.ShowLineNumbers then GutterChanged(Self);
 end;
 
@@ -3060,9 +2667,7 @@ procedure TCustomSynEdit.SetScrollBars(const Value: TScrollStyle);
 begin
   if (FScrollBars <> Value) then begin
     FScrollBars := Value;
-{$IFDEF SYN_WIN32}
     RecreateWnd;
-{$ENDIF}
     UpdateScrollBars;
     Invalidate;
   end;
@@ -3070,8 +2675,7 @@ end;
 
 procedure TCustomSynEdit.SetSelText(const Value: string);
 begin
-  if not ReadOnly then                                                          //jcr 2001-01-16
-    SetSelTextPrimitive(smNormal, PChar(Value), nil);
+  SetSelTextPrimitive(smNormal, PChar(Value), nil);
 end;
 
 // This is really a last minute change and I hope I did it right.
@@ -3106,8 +2710,13 @@ var
             TempString := Copy(Lines[BB.Y - 1], 1, BB.X - 1) +
               Copy(Lines[BE.Y - 1], BE.X, MaxInt);
               // Delete all lines in the selection range.
+{begin}                                                                         // djlp 2000-09-13
             TSynEditStringList(Lines).DeleteLines(BB.Y, BE.Y - BB.Y);
+//            for x := BE.Y - 1 downto BB.Y do
+//              Lines.Delete(x);
+{end}                                                                           // djlp 2000-09-13
               // Put the stuff that was outside of selection back in.
+//            if eoScrollPastEol in Options then                                //JGF 2000-09-23
             if Options * [eoScrollPastEol, eoTrimTrailingSpaces]
               = [eoScrollPastEol, eoTrimTrailingSpaces]
             then
@@ -3169,6 +2778,7 @@ var
 
   procedure InsertText;
 
+{begin}                                                                         // djlp 2000-09-07
     function CountLines(p: PChar): integer;
     begin
       Result := 0;
@@ -3181,6 +2791,7 @@ var
         p := GetEOL(p);
       end;
     end;
+{end}                                                                           // djlp 2000-09-07
 
     function InsertNormal: Integer;
     var
@@ -3202,7 +2813,7 @@ var
       P := GetEOL(Start);
       if P^ <> #0 then begin
         TrimmedSetLine(CaretY - 1, sLeftSide + Copy(Value, 1, P - Start));
-        TSynEditStringList(Lines).InsertLines(CaretY, CountLines(P));
+        TSynEditStringList(Lines).InsertLines(CaretY, CountLines(P));           // djlp 2000-09-07
       end else
         TrimmedSetLine(CaretY - 1, sLeftSide + Value + sRightSide);
       // step2: insert left lines of Value
@@ -3216,17 +2827,23 @@ var
         P := GetEOL(Start);
         if P = Start then begin
           if p^ <> #0 then
-            Lines[CaretY - 1] := ''
+//            Lines.Insert(CaretY - 1, '')
+            Lines[CaretY - 1] := ''                                             // djlp 2000-09-07
           else
-            Lines[CaretY - 1] := sRightSide;
+//            Lines.Insert(CaretY - 1, sRightSide);
+            Lines[CaretY - 1] := sRightSide;                                    // djlp 2000-09-07
         end else begin
-          SetString(Str, Start, P - Start);
+//          SetLength(Str, P - Start);
+//          Move(Start^, Str[1], P - Start);
+          SetString(Str, Start, P - Start);                                     //mh 2000-11-08
           if p^ <> #0 then
-            Lines[CaretY - 1] := Str
+//            Lines.Insert(CaretY - 1, Str)
+            Lines[CaretY - 1] := Str                                            // djlp 2000-09-07
           else
-            Lines[CaretY - 1] := Str + sRightSide                       
+//            Lines.Insert(CaretY - 1, Str + sRightSide);
+            Lines[CaretY - 1] := Str + sRightSide                               // djlp 2000-09-07
         end;
-        if eoTrimTrailingSpaces in Options then
+        if eoTrimTrailingSpaces in Options then                                 //JGF 2000-09-23
           Lines[CaretY - 1] := TrimRight(Lines[CaretY - 1]);
         Inc(Result);
       end;
@@ -3266,7 +2883,7 @@ var
 {$ENDIF}
                 Insert(Str, TempString, InsertPos);
             end;
-            TrimmedSetLine(CaretY - 1, TempString);
+            TrimmedSetLine(CaretY - 1, TempString);                             //JGF 2000-09-23
           end;
         end;
         if Tag <> nil then
@@ -3366,11 +2983,8 @@ begin
   try
     BB := BlockBegin;
     BE := BlockEnd;
-    if SelAvail then                                                            //DDH 10/16/01 (This was changed per the email of Scott Mattes)
-    begin                                                                       //
-      DeleteSelection;                                                          //
-      CaretXY := BB;                                                            //!! Modified to restore caret pos
-    end;                                                                        //
+    if SelAvail then
+      DeleteSelection;
     if (Value <> nil) and (Value[0] <> #0) then
       InsertText;
     fLastCaretX := fCaretX;                                                     //mh 2000-10-19
@@ -3390,11 +3004,6 @@ end;
 procedure TCustomSynEdit.SetTopLine(Value: Integer);
 var
   Delta: Integer;
-{$IFDEF SYN_KYLIX}
-  src,dest : TRect;
-  invalid  : TRect;
-{$ENDIF}
-
 begin
   // don't use MinMax here, it will fail in design mode (Lines.Count is zero,
   // but the painting code relies on TopLine >= 1)
@@ -3407,50 +3016,10 @@ begin
     Delta := TopLine - Value;
     fTopLine := Value;
     UpdateScrollBars;
-{$IFDEF SYN_WIN32}
     if Abs(Delta) < fLinesInWindow then
       ScrollWindow(Handle, 0, fTextHeight * Delta, nil, nil)
     else
       Invalidate;
-{$ELSE}
-{TODO: Look at making scrolling work a bit better}
-{
-    if Abs(Delta) < fLinesInWindow then
-      begin
-        src := ClientRect;
-        dest := src;
-        invalid := src;
-
-        Delta := fTextHeight * Delta;
-
-        if Delta<0 then
-          begin
-            src.Top := src.Top + Delta;
-            dest.Bottom := dest.Bottom - Delta;
-            invalid.Top := dest.Bottom + 1;
-          end
-        else
-          begin
-            src.Bottom := src.Bottom - Delta;
-            dest.Top := dest.Top + Delta;
-            invalid.Bottom := dest.Top - 1;
-          end;
-
-        if sfCaretVisible in fStateFlags then
-          kTextDrawer.HideCaret(self);
-
-        try
-          Canvas.CopyRect(dest, Canvas, src);
-          InvalidateRect(invalid, FALSE);
-        finally
-          if sfCaretVisible in fStateFlags then
-            kTextDrawer.ShowCaret(self);
-        end;
-      end
-    else
-}    
-      Invalidate;
-{$ENDIF}
     StatusChanged([scTopLine]);
   end;
 end;
@@ -3459,11 +3028,7 @@ procedure TCustomSynEdit.ShowCaret;
 begin
   if not (eoNoCaret in Options) and not (sfCaretVisible in fStateFlags) then
   begin
-{$IFDEF SYN_WIN32}
     if Windows.ShowCaret(Handle) then
-{$ELSE}
-    kTextDrawer.ShowCaret(Self);
-{$ENDIF}
       Include(fStateFlags, sfCaretVisible);
   end;
 end;
@@ -3475,7 +3040,7 @@ var
   cf: TCompositionForm;
 {$ENDIF}
 begin
-  if (PaintLock <> 0) or (not(Focused) and not(FAlwaysShowCaret)) then          //DDH 10/16/01 for AlwaysShowCaret
+  if (PaintLock <> 0) or not Focused then
     Include(fStateFlags, sfCaretChanged)
   else begin
     Exclude(fStateFlags, sfCaretChanged);
@@ -3500,58 +3065,9 @@ end;
 
 procedure TCustomSynEdit.UpdateScrollBars;
 var
-  nMaxScroll: integer;
-{$IFDEF SYN_WIN32}
   ScrollInfo: TScrollInfo;
-{$ELSE}
-
-  procedure CalcScrollbarsVisible;
-  begin
-    if not HandleAllocated or (PaintLock <> 0) then
-      Include(fStateFlags, sfScrollbarChanged)
-    else begin
-      Exclude(fStateFlags, sfScrollbarChanged);
-      if fScrollBars <> ssNone then begin
-        if fScrollBars in [ssBoth, ssHorizontal] then begin
-  {begin}                                                                         //mh 2000-10-19
-          if eoScrollPastEol in Options then
-            FHScrollBar.Max := fMaxLeftChar
-          else
-            FHScrollBar.Max := TSynEditStringList(Lines).LengthOfLongestLine;
-  {end}
-          FHScrollBar.Position := LeftChar;
-          FHScrollBar.Visible := TRUE;
-          FHScrollBar.LargeChange := CharsInWindow;
-        end
-        else
-          FHScrollBar.Visible := FALSE;
-
-        if fScrollBars in [ssBoth, ssVertical] then begin
-          nMaxScroll := Lines.Count;
-          if (eoScrollPastEof in Options) then
-            Inc(nMaxScroll, LinesInWindow - 1);
-          if nMaxScroll <= MAX_SCROLL then begin
-            FVScrollBar.Max := Max(1, nMaxScroll);
-            FVScrollBar.LargeChange := LinesInWindow;
-            FVScrollBar.Position := TopLine;
-          end else begin
-            FVScrollBar.Min := 0;
-            FVScrollBar.Max := MAX_SCROLL;
-
-            FVScrollBar.LargeChange := MulDiv(MAX_SCROLL, LinesInWindow, nMaxScroll);
-            FVScrollBar.Position := MulDiv(MAX_SCROLL, TopLine, nMaxScroll);
-          end;
-          FVScrollBar.Visible:=TRUE;
-        end
-        else
-        FVScrollBar.Visible:=FALSE;
-      end;
-    end;
-  end;
-
-{$ENDIF}
+  nMaxScroll: integer;
 begin
-{$IFDEF SYN_WIN32}
   if not HandleAllocated or (PaintLock <> 0) then
     Include(fStateFlags, sfScrollbarChanged)
   else begin
@@ -3575,7 +3091,7 @@ begin
       end;
       if fScrollBars in [ssBoth, ssVertical] then begin
         nMaxScroll := Lines.Count;
-        if (eoScrollPastEof in Options) then
+        if (eoScrollPastEof in Options) then                               
           Inc(nMaxScroll, LinesInWindow - 1);
         if nMaxScroll <= MAX_SCROLL then begin
           ScrollInfo.nMax := Max(1, nMaxScroll);
@@ -3591,175 +3107,6 @@ begin
       end;
     end;
   end;
-{$ELSE}
-  if FHScrollBar<>nil then
-    begin
-//      FHScrollBar.Visible := False;
-//      FVScrollBar.Visible := False;
-      CalcScrollBarsVisible;
-      if FHScrollBar.Visible xor FVScrollBar.Visible then
-        CalcScrollBarsVisible;
-
-      FHScrollBar.Top := Height - FHScrollBar.Height;
-      FHScrollBar.Left := 0;
-      FHScrollBar.Width := Width;
-      if FVScrollBar.Visible then
-        FHScrollBar.Width := FHScrollBar.Width - FVScrollBar.Width;
-      FVScrollBar.Top := 0;
-      FVScrollBar.Left := Width - FVScrollBar.Width;
-      FVScrollBar.Height := Height;
-      if FHScrollBar.Visible then
-        FVScrollBar.Height := FVScrollBar.Height - FHScrollBar.Height;
-    end;
-{$ENDIF}
-end;
-
-{$IFDEF SYN_KYLIX}
-procedure TCustomSynEdit.ModifyScrollBar(ScrollBar: TScrollBarKind; ScrollCode: TScrollCode; Pos: Cardinal;
-  UseRightToLeft: Boolean);
-var
-  NewTopLeft, MaxTopLeft: TPoint;
-  RTLFactor: Integer;
-
-  function Min: Longint;
-  begin
-    result := 0;
-  end;
-
-  function Max: Longint;
-  begin
-    if ScrollBar = sbHorizontal then Result := MaxTopLeft.X
-    else Result := MaxTopLeft.Y;
-  end;
-
-  function PageUp: Longint;
-  begin
-    if ScrollBar = sbHorizontal then
-      Result := LeftChar-CharsInWindow else
-      Result := TopLine-LinesInWindow;
-    if Result < 0 then Result := 0;
-  end;
-
-  function PageDown: Longint;
-  begin
-    if ScrollBar = sbHorizontal then
-      Result := LeftChar+CharsInWindow else
-      Result := TopLine+LinesInWindow;
-    if Result < 0 then Result := 0;
-  end;
-
-  function CalcScrollBar(Value, ARTLFactor: Longint): Longint;
-  begin
-    Result := Value;
-    case ScrollCode of
-      scLineUp:
-        Dec(Result, ARTLFactor);
-      scLineDown:
-        Inc(Result, ARTLFactor);
-      scPageUp:
-        Dec(Result, PageUp * ARTLFactor);
-      scPageDown:
-        Inc(Result, PageDown * ARTLFactor);
-      scPosition, scTrack:
-        if (ScrollCode = scPosition) then
-        begin
-          if (ARTLFactor = 1) then
-            Result := Min + Int64(Pos) * (Max - Min) div Int64(MaxShortInt)
-          else
-            Result := Max - Int64(Pos) * (Max - Min) div Int64(MaxShortInt);
-        end;
-      scBottom:
-        Result := Max;
-      scTop:
-        Result := Min;
-    end;
-  end;
-
-var
-  Temp: Longint;
-begin
-  RTLFactor := 1;
-  if Visible and CanFocus and TabStop and not (csDesigning in ComponentState) then
-    SetFocus;
-
-  if (ScrollBar = sbHorizontal) then
-  begin
-//    ModifyPixelScrollBar(ScrollCode, Pos);
-//    Exit;
-  end;
-
-  if MaxLeftChar>0 then
-    MaxTopLeft.X := MaxLeftChar - 1
-  else
-    MaxTopLeft.X := MaxInt-1;
-
-  MaxTopLeft.Y := Lines.Count - 1;
-
-  NewTopLeft.X := LeftChar;
-  NewTopLeft.Y := TopLine;
-
-  if ScrollBar = sbHorizontal then
-    NewTopLeft.X := CalcScrollBar(NewTopLeft.X, RTLFactor)
-  else
-    NewTopLeft.Y := CalcScrollBar(NewTopLeft.Y, 1);
-
-  NewTopLeft.X := Math.Min(MaxTopLeft.X, NewTopLeft.X);
-  NewTopLeft.Y := Math.Min(MaxTopLeft.Y, NewTopLeft.Y);
-  if (NewTopLeft.X <>  LeftChar) or (NewTopLeft.Y <> TopLine) then
-    begin
-      LeftChar := NewTopLeft.X;
-      TopLine := NewTopLeft.Y;
-    end;
-end;
-
-
-procedure TCustomSynEdit.ScrollEvent(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer);
-begin
-  if Sender = FHScrollBar then
-    ModifyScrollBar(sbHorizontal, ScrollCode, ScrollPos, True);
-  if Sender = FVScrollBar then
-    ModifyScrollBar(sbVertical, ScrollCode, ScrollPos, True);
-end;
-
-function TCustomSynEdit.GetClientRect: TRect;
-begin
-  Result := Inherited GetClientRect;
-
-  if fScrollBars in [ssBoth, ssHorizontal] then
-    Result.Bottom := Result.Bottom - CYHSCROLL;
-  if fScrollBars in [ssBoth, ssVertical] then 
-    Result.Right := Result.Right - CXVSCROLL;
-end;
-
-procedure TCustomSynEdit.Resize;
-begin
-  inherited Resize;
-
-  SizeOrFontChanged(FALSE);
-end;
-
-{$ENDIF}
-
-{$IFDEF SYN_WIN32}
-{begin}                                                                         //jr 2001-01-06
-procedure TCustomSynEdit.WMCaptureChanged(var Msg: TMessage);
-begin
-  fScrollTimer.Enabled := False;
-  inherited;
-end;
-{end}                                                                           //jr 2001-01-06
-
-procedure TCustomSynEdit.WMCopy(var Message: TMessage);
-begin
-  CopyToClipboard;
-  Message.Result := ord(True);
-end;
-
-procedure TCustomSynEdit.WMCut(var Message: TMessage);
-begin
-  if not ReadOnly then
-    CutToClipboard;
-  Message.Result := ord(True);
 end;
 
 procedure TCustomSynEdit.WMDropFiles(var Msg: TMessage);
@@ -3829,26 +3176,14 @@ end;
 procedure TCustomSynEdit.WMKillFocus(var Msg: TWMKillFocus);
 begin
   inherited;
-  CommandProcessor( ecLostFocus, #0, nil );
-
-  if FAlwaysShowCaret then exit;                                                //DDH 10/16/01
   HideCaret;
   Windows.DestroyCaret;
   if FHideSelection and SelAvail then
     Invalidate;
 end;
 
-procedure TCustomSynEdit.WMPaste(var Message: TMessage);
-begin
-  if not ReadOnly then
-    PasteFromClipboard;
-  Message.Result := ord(True);
-end;
-
 procedure TCustomSynEdit.WMSetFocus(var Msg: TWMSetFocus);
 begin
-  CommandProcessor( ecGotFocus, #0, nil );
-
   InitializeCaret;
   if FHideSelection and SelAvail then
     Invalidate;
@@ -3866,8 +3201,10 @@ var
 
 function GetScrollHint: THintWindow;
 begin
-  if ScrollHintWnd = nil then
+  if ScrollHintWnd = nil then begin
     ScrollHintWnd := HintWindowClass.Create(Application);
+    ScrollHintWnd.Visible := FALSE;
+  end;
   Result := ScrollHintWnd;
 end;
 
@@ -3877,8 +3214,6 @@ var
   rc: TRect;
   pt: TPoint;
   ScrollHint: THintWindow;
-  ButtonH: Integer;                                                             //DDH 10/16/01
-  ScrollInfo: TScrollInfo;                                                      //DDH 10/16/01
 begin
   case Msg.ScrollCode of
       // Scrolls to start / end of the text
@@ -3904,47 +3239,20 @@ begin
 
         if eoShowScrollHint in fOptions then begin
           ScrollHint := GetScrollHint;
-          //DDH 10/16/01 Start
-          ScrollHint.Color := fGutter.Color;
-          s := Format(SYNS_ScrollInfoFmt, [TopLine,
-            TopLine + Min(LinesInWindow, Lines.Count - TopLine)]);
-
-//          ScrollHint.Color := Application.HintColor;
-//          s := Format(SYNS_ScrollInfoFmt, [TopLine]);
-          //DDH 10/16/01 End
+          if not ScrollHint.Visible then begin
+            ScrollHint.Color := Application.HintColor;
+            ScrollHint.Visible := TRUE;
+          end;
+          s := Format(SYNS_ScrollInfoFmt, [TopLine]);
 {$IFDEF SYN_COMPILER_3_UP}
           rc := ScrollHint.CalcHintRect(200, s, nil);
 {$ELSE}
           rc := Rect(0, 0, ScrollHint.Canvas.TextWidth(s) + 6,
             ScrollHint.Canvas.TextHeight(s) + 4);
 {$ENDIF}
-//DDH 10/16/01 Start
-          if eoScrollHintFollows in fOptions then
-          begin
-            ButtonH := GetSystemMetrics(SM_CYVSCROLL);
-
-            FillChar(ScrollInfo, SizeOf(ScrollInfo), 0);
-            ScrollInfo.cbSize := SizeOf(ScrollInfo);
-            ScrollInfo.fMask := SIF_ALL;
-            GetScrollInfo(Handle, SB_VERT, ScrollInfo);
-
-            pt := ClientToScreen(Point(ClientWidth - rc.Right - 4,
-              ((rc.Bottom - rc.Top) shr 1) + MulDiv((ClientHeight - (ButtonH shl 1 + ButtonH)),
-              (Cardinal(ScrollInfo.nTrackPos) + (ScrollInfo.nPage shr 1)),
-              ScrollInfo.nMax) ));
-{            pt := ClientToScreen(Point(ClientWidth - rc.Right - 4,
-              MulDiv(ClientHeight - (ButtonH), Cardinal(ScrollInfo.nTrackPos),
-              ScrollInfo.nMax) ));}
-          end
-          else
-            pt := ClientToScreen(Point(ClientWidth - rc.Right - 4, 10));
-//DDH 10/16/01 End
-
+          pt := ClientToScreen(Point(ClientWidth - rc.Right - 4, 10));
           OffsetRect(rc, pt.x, pt.y);
           ScrollHint.ActivateHint(rc, s);
-{$IFDEF SYN_COMPILER_3}
-          SendMessage(ScrollHint.Handle, WM_NCPAINT, 1, 0);
-{$ENDIF}
 {$IFNDEF SYN_COMPILER_3_UP}
           ScrollHint.Invalidate;
 {$ENDIF}
@@ -3953,12 +3261,13 @@ begin
       end;
       // Ends scrolling
     SB_ENDSCROLL:
-      if eoShowScrollHint in fOptions then
-        ShowWindow(GetScrollHint.Handle, SW_HIDE);
+      if eoShowScrollHint in fOptions then with GetScrollHint do begin
+        Visible := FALSE;
+        ActivateHint(Rect(0, 0, 0, 0), '');
+      end;
   end;
   Update;
 end;
-{$ENDIF}
 
 function TCustomSynEdit.ScanFrom(Index: integer): integer;
 begin
@@ -4299,9 +3608,7 @@ begin
   if Runner.X < 1 then Runner.X := 1;
   fBlockBegin := Runner;
   Runner := Value;
-  while (Runner.X < fMaxLeftChar) and                                           //DDH 10/19/01
-        (Runner.X<=Length(TempString)) do
-  begin
+  while Runner.X < fMaxLeftChar do begin
     if not (TempString[Runner.X] in IdChars) then break;
     Inc(Runner.X);
   end;
@@ -4332,22 +3639,18 @@ end;
 
 function TCustomSynEdit.GetCanUndo: Boolean;
 begin
-  result := not ReadOnly and fUndoList.CanUndo;                                 //jcr 2001-01-16
+  result := fUndoList.CanUndo;
 end;
 
 function TCustomSynEdit.GetCanRedo: Boolean;
 begin
-  result := not ReadOnly and fRedoList.CanUndo;                                 //jcr 2001-01-16
+  result := fRedoList.CanUndo;
 end;
 
 function TCustomSynEdit.GetCanPaste;
 begin
-{$IFDEF SYN_WIN32}
-  Result := not ReadOnly and Clipboard.HasFormat(CF_TEXT)                       //jcr 2001-01-16
+  Result := Clipboard.HasFormat(CF_TEXT)
     or Clipboard.HasFormat(SynEditClipboardFormat)
-{$ELSE}
-  Result := not ReadOnly and Clipboard.Provides(CF_TEXT);
-{$ENDIF}
 end;
 
 procedure TCustomSynEdit.InsertBlock(BB, BE: TPoint; ChangeStr: PChar);
@@ -4364,57 +3667,16 @@ procedure TCustomSynEdit.Redo;
 var
   Item: TSynEditUndoItem;
   OldChangeNumber: integer;
-  FLastChange : TSynChangeReason;                                               //DDH 10/16/01 for GroupUndo
-  FAutoComplete: Boolean;                                                       //DDH 10/16/01 for AutoComplete
-  FSpecial1: Boolean;                                                           //DDH 10/16/01 for Special1
-  FSpecial2: Boolean;                                                           //DDH 10/16/01 for Special2
-  FKeepGoing: Boolean;                                                          //DDH 10/16/01 for GroupUndo and AutoComplete
 begin
-  if ReadOnly then                                                              //jcr 2001-01-16
-    exit;
-
-  FLastChange := FRedoList.GetChangeReason;
-  FAutoComplete := FLastChange = crAutoCompleteBegin;
-  FSpecial1 := FLastChange = crSpecial1Begin;
-  FSpecial2 := FLastChange = crSpecial2Begin;
-
   Item := fRedoList.PeekItem;
   if Item <> nil then begin
-    OldChangeNumber := Item.ChangeNumber;
-    fUndoList.BlockChangeNumber := Item.ChangeNumber;
+    OldChangeNumber := fUndoList.BlockChangeNumber;
+    fUndoList.BlockChangeNumber := Item.fChangeNumber;
     try
       repeat
         RedoItem;
         Item := fRedoList.PeekItem;
-        if Item <> nil then
-        begin                                                                   //DDH 10/16/01 for GroupUndo and AutoComplete
-          if FAutoComplete then
-             FKeepGoing := (FRedoList.GetChangeReason <> crAutoCompleteEnd)
-          else if FSpecial1 then
-             FKeepGoing := (FRedoList.GetChangeReason <> crSpecial1End)
-          else if FSpecial2 then
-             FKeepGoing := (FRedoList.GetChangeReason <> crSpecial2End)
-          else if Item.ChangeNumber = OldChangeNumber then
-             FKeepGoing := True
-          else FKeepGoing := ((eoGroupUndo in FOptions) and
-                              (FLastChange = FRedoList.GetChangeReason));
-        end else FKeepGoing := False;
-      until not(FKeepGoing);
-
-      if FAutoComplete then
-      begin                                                                     //we need to eat the last command since it does nothing.
-        if FUndoList.GetChangeReason = crAutoCompleteEnd then
-          UndoItem;
-      end else if FSpecial1 then
-      begin                                                                     //we need to eat the last command since it does nothing.
-        if FUndoList.GetChangeReason = crSpecial1End then
-          UndoItem;
-      end else if FSpecial2 then
-      begin                                                                     //we need to eat the last command since it does nothing.
-        if FUndoList.GetChangeReason = crSpecial2End then
-          UndoItem;
-      end;
-
+      until (Item = nil) or (Item.fChangeNumber <> fUndoList.BlockChangeNumber);
     finally
       fUndoList.BlockChangeNumber := OldChangeNumber;
     end;
@@ -4436,51 +3698,51 @@ begin
   ChangeScrollPastEol := not (eoScrollPastEol in Options);                      //mh 2000-10-30
   Item := fRedoList.PopItem;
   if Assigned(Item) then try
-    SelectionMode := Item.ChangeSelMode;
+    SelectionMode := Item.fChangeSelMode;
     IncPaintLock;
     Include(fOptions, eoScrollPastEol);                                         //mh 2000-10-30
     Include(fStateFlags, sfInsideRedo);                                         //mh 2000-10-30
-    case Item.ChangeReason of
+    case Item.fChangeReason of
       crInsert, crPaste, crDragDropInsert:
         begin
-          SetCaretAndSelection(Item.ChangeStartPos, Item.ChangeStartPos,
-            Item.ChangeStartPos);
-          SetSelTextPrimitive(Item.ChangeSelMode, PChar(Item.ChangeStr), nil);
-          CaretXY := Item.ChangeEndPos;                                         //mh 2000-10-30
-          fUndoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, GetSelText, Item.ChangeSelMode);
+          SetCaretAndSelection(Item.fChangeStartPos, Item.fChangeStartPos,
+            Item.fChangeStartPos);
+          SetSelTextPrimitive(Item.fChangeSelMode, PChar(Item.fChangeStr), nil);
+          CaretXY := Item.fChangeEndPos;                                        //mh 2000-10-30
+          fUndoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, GetSelText, Item.fChangeSelMode);
 {begin}                                                                         //mh 2000-11-20
-          if Item.ChangeReason = crDragDropInsert then begin
-            SetCaretAndSelection(Item.ChangeStartPos, Item.ChangeStartPos,
-              Item.ChangeEndPos);
+          if Item.fChangeReason = crDragDropInsert then begin
+            SetCaretAndSelection(Item.fChangeStartPos, Item.fChangeStartPos,
+              Item.fChangeEndPos);
           end;
 {end}                                                                           //mh 2000-11-20
         end;
       crDeleteAfterCursor, crSilentDeleteAfterCursor:                           //mh 2000-10-30
         begin
-          SetCaretAndSelection(Item.ChangeStartPos, Item.ChangeStartPos,
-            Item.ChangeEndPos);
-          fUndoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, GetSelText, Item.ChangeSelMode);
-          SetSelTextPrimitive(Item.ChangeSelMode, PChar(Item.ChangeStr), nil);
-          CaretXY := Item.ChangeStartPos;
+          SetCaretAndSelection(Item.fChangeStartPos, Item.fChangeStartPos,
+            Item.fChangeEndPos);
+          fUndoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, GetSelText, Item.fChangeSelMode);
+          SetSelTextPrimitive(Item.fChangeSelMode, PChar(Item.fChangeStr), nil);
+          CaretXY := Item.fChangeStartPos;
         end;
       crDelete, {crDragDropDelete, crSelDelete, }crSilentDelete:                //mh 2000-10-30, 2000-11-20
         begin
-          SetCaretAndSelection(Item.ChangeStartPos, Item.ChangeStartPos,
-            Item.ChangeEndPos);
-          fUndoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, GetSelText, Item.ChangeSelMode);
-          SetSelTextPrimitive(Item.ChangeSelMode, PChar(Item.ChangeStr), nil);
-          CaretXY := Item.ChangeStartPos;
+          SetCaretAndSelection(Item.fChangeStartPos, Item.fChangeStartPos,
+            Item.fChangeEndPos);
+          fUndoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, GetSelText, Item.fChangeSelMode);
+          SetSelTextPrimitive(Item.fChangeSelMode, PChar(Item.fChangeStr), nil);
+          CaretXY := Item.fChangeStartPos;
 {begin}                                                                         //mh 2000-11-20
 (*
           // process next entry? This is awkward, and should be replaced by
           // undoitems maintaining a single linked list of connected items...
           ItemNext := fRedoList.PeekItem;
-          if {(Item.ChangeReason = crSelDelete) or }
-            ((Item.ChangeReason = crDragDropDelete) and Assigned(ItemNext)
-              and (ItemNext.ChangeReason = crDragDropInsert))
+          if {(Item.fChangeReason = crSelDelete) or }
+            ((Item.fChangeReason = crDragDropDelete) and Assigned(ItemNext)
+              and (ItemNext.fChangeReason = crDragDropInsert))
           then
             Redo;
 *)            
@@ -4490,39 +3752,39 @@ begin
 {begin}                                                                         //sbs 2000-11-20
 //        CommandProcessor(ecLineBreak, #13, nil);
         begin
-          CaretPt := Item.ChangeStartPos;
+          CaretPt := Item.fChangeStartPos;
           SetCaretAndSelection(CaretPt, CaretPt, CaretPt);
           CommandProcessor(ecLineBreak, #13, nil);
         end;
 {end}                                                                           //sbs 2000-11-20
       crIndent:
         begin // re-insert the column
-          if (Item.ChangeEndPos.X = 1) then
+          if (Item.fChangeEndPos.X = 1) then
           begin
-            e := Item.ChangeEndPos.y - 1;
+            e := Item.fChangeEndPos.y - 1;
             x := 1;
           end else begin
-            e := Item.ChangeEndPos.y;
-            x := Item.ChangeEndPos.x + fTabWidth;
+            e := Item.fChangeEndPos.y;
+            x := Item.fChangeEndPos.x + fTabWidth;
           end;
-          InsertBlock(Point(1, Item.ChangeStartPos.y),
-            Point(1, e), PChar(Item.ChangeStr));
+          InsertBlock(Point(1, Item.fChangeStartPos.y),
+            Point(1, e), PChar(Item.fChangeStr));
           // add to undo list
-          fUndoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, Item.ChangeStr, Item.ChangeSelMode);
+          fUndoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, Item.fChangeStr, Item.fChangeSelMode);
           // restore the selection
-          SetCaretAndSelection(Point(1, Item.ChangeEndPos.Y + 1),
-            Point(Item.ChangeStartPos.x + fTabWidth, Item.ChangeStartPos.y),
-            Point(x, Item.ChangeEndPos.y));
+          SetCaretAndSelection(Point(1, Item.fChangeEndPos.Y + 1),
+            Point(Item.fChangeStartPos.x + fTabWidth, Item.fChangeStartPos.y),
+            Point(x, Item.fChangeEndPos.y));
         end;
       crUnindent :
         begin // re-delete the (raggered) column
           // add to undo list
-          fUndoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, Item.ChangeStr, smColumn);
+          fUndoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, Item.fChangeStr, smColumn);
           // Delete string
-          StrToDelete := PChar(Item.ChangeStr);
-          CaretY := Item.ChangeStartPos.Y;
+          StrToDelete := PChar(Item.fChangeStr);
+          CaretY := Item.fChangeStartPos.Y;
           repeat
             Run := GetEOL(StrToDelete);
             if Run <> StrToDelete then begin
@@ -4542,10 +3804,10 @@ begin
             StrToDelete := Run;
           until Run^ = #0;
           // restore selection
-          CaretPt := Point(Item.ChangeStartPos.x - fTabWidth,
-            Item.ChangeStartPos.y);
+          CaretPt := Point(Item.fChangeStartPos.x - fTabWidth,
+            Item.fChangeStartPos.y);
           SetCaretAndSelection(CaretPt, CaretPt,
-            Point(Item.ChangeEndPos.x - Len, Item.ChangeEndPos.y));
+            Point(Item.fChangeEndPos.x - Len, Item.fChangeEndPos.y));
         end;
     end;
   finally
@@ -4563,56 +3825,16 @@ procedure TCustomSynEdit.Undo;
 var
   Item: TSynEditUndoItem;
   OldChangeNumber: integer;
-  FLastChange : TSynChangeReason;                                               //DDH 10/16/01 for GroupUndo
-  FAutoComplete: Boolean;                                                       //DDH 10/16/01 for AutoComplete
-  FSpecial1: Boolean;                                                           //DDH 10/16/01 for Special1
-  FSpecial2: Boolean;                                                           //DDH 10/16/01 for Special2
-  FKeepGoing: Boolean;
 begin
-  if ReadOnly then                                                              //jcr 2001-01-16
-    exit;
-
-  FLastChange := FUndoList.GetChangeReason;
-  FAutoComplete := FLastChange = crAutoCompleteEnd;
-  FSpecial1 := FLastChange = crSpecial1End;
-  FSpecial2 := FLastChange = crSpecial2End;
-
   Item := fUndoList.PeekItem;
   if Item <> nil then begin
-    OldChangeNumber := Item.ChangeNumber;
-    fRedoList.BlockChangeNumber := Item.ChangeNumber;
+    OldChangeNumber := fRedoList.BlockChangeNumber;
+    fRedoList.BlockChangeNumber := Item.fChangeNumber;
     try
       repeat
         UndoItem;
         Item := fUndoList.PeekItem;
-        if Item <> nil then
-        begin                                                                   //DDH 10/16/01 for GroupUndo and AutoComplete
-          if FAutoComplete then
-             FKeepGoing := (FUndoList.GetChangeReason <> crAutoCompleteBegin)
-          else if FSpecial1 then
-             FKeepGoing := (FUndoList.GetChangeReason <> crSpecial1Begin)
-          else if FSpecial2 then
-             FKeepGoing := (FUndoList.GetChangeReason <> crSpecial2Begin)
-          else if Item.ChangeNumber = OldChangeNumber then
-             FKeepGoing := True
-          else FKeepGoing := ((eoGroupUndo in FOptions) and
-                              (FLastChange = FUndoList.GetChangeReason));
-        end else FKeepGoing := False;
-      until not(FKeepGoing);
-
-      if FAutoComplete then
-      begin                                                                     //we need to eat the last command since it does nothing.
-        if FUndoList.GetChangeReason = crAutoCompleteBegin then
-          UndoItem;
-      end else if FSpecial1 then
-      begin                                                                     //we need to eat the last command since it does nothing.
-        if FUndoList.GetChangeReason = crSpecial1Begin then
-          UndoItem;
-      end else if FSpecial2 then
-      begin                                                                     //we need to eat the last command since it does nothing.
-        if FUndoList.GetChangeReason = crSpecial2Begin then
-          UndoItem;
-      end;
+      until (Item = nil) or (Item.fChangeNumber <> fRedoList.BlockChangeNumber);
     finally
       fRedoList.BlockChangeNumber := OldChangeNumber;
     end;
@@ -4632,27 +3854,27 @@ begin
   ChangeScrollPastEol := not (eoScrollPastEol in Options);                      //mh 2000-10-30
   Item := fUndoList.PopItem;
   if Assigned(Item) then try
-    SelectionMode := Item.ChangeSelMode;
+    SelectionMode := Item.fChangeSelMode;
     IncPaintLock;
     Include(fOptions, eoScrollPastEol);                                         //mh 2000-10-30
-    case Item.ChangeReason of
+    case Item.fChangeReason of
       crInsert, crPaste, crDragDropInsert:
         begin
-          SetCaretAndSelection(Item.ChangeStartPos, Item.ChangeStartPos,
-            Item.ChangeEndPos);
-          fRedoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, GetSelText, Item.ChangeSelMode);
-          SetSelTextPrimitive(Item.ChangeSelMode, PChar(Item.ChangeStr), nil);
-          CaretXY := Item.ChangeStartPos;
+          SetCaretAndSelection(Item.fChangeStartPos, Item.fChangeStartPos,
+            Item.fChangeEndPos);
+          fRedoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, GetSelText, Item.fChangeSelMode);
+          SetSelTextPrimitive(Item.fChangeSelMode, PChar(Item.fChangeStr), nil);
+          CaretXY := Item.fChangeStartPos;
 {begin}                                                                         //mh 2000-11-20
 (*
           // process next entry? This is awkward, and should be replaced by
           // undoitems maintaining a single linked list of connected items...
           ItemNext := fUndoList.PeekItem;
           if Assigned(ItemNext) and
-            ((ItemNext.ChangeReason = crSelDelete) or
-            ((ItemNext.ChangeReason = crDragDropDelete)
-               and (Item.ChangeReason = crDragDropInsert)))
+            ((ItemNext.fChangeReason = crSelDelete) or
+            ((ItemNext.fChangeReason = crDragDropDelete)
+               and (Item.fChangeReason = crDragDropInsert)))
           then
             Undo;
 *)
@@ -4663,86 +3885,85 @@ begin
         begin
           // If there's no selection, we have to set
           // the Caret's position manualy.
-          if Item.ChangeSelMode = smColumn then
-            TmpPos := Point(Min(Item.ChangeStartPos.X, Item.ChangeEndPos.X),
-              Min(Item.ChangeStartPos.Y, Item.ChangeEndPos.Y))
+          if Item.fChangeSelMode = smColumn then
+            TmpPos := Point(Min(Item.fChangeStartPos.X, Item.fChangeEndPos.X),
+              Min(Item.fChangeStartPos.Y, Item.fChangeEndPos.Y))
           else
-            TmpPos := minPoint(Item.ChangeStartPos, Item.ChangeEndPos);
-          if (Item.ChangeReason in [crDeleteAfterCursor,
+            TmpPos := minPoint(Item.fChangeStartPos, Item.fChangeEndPos);
+          if (Item.fChangeReason in [crDeleteAfterCursor,
             crSilentDeleteAfterCursor]) and (TmpPos.Y > Lines.Count)            //mh 2000-10-30
           then begin
             CaretXY := Point(1, Lines.Count);
             // this stinks!!!
-//            CommandProcessor(ecLineBreak, #13, nil);
-            fLines.Add('');                                                     //DDH 10/16/01 bug fix by Slavek Rydval
+            CommandProcessor(ecLineBreak, #13, nil);
           end;
           SetCaretAndSelection(TmpPos, TmpPos, TmpPos);
-          SetSelTextPrimitive(Item.ChangeSelMode, PChar(Item.ChangeStr), nil);
+          SetSelTextPrimitive(Item.fChangeSelMode, PChar(Item.fChangeStr), nil);
 {begin}                                                                         //mh 2000-10-30
-          if Item.ChangeReason in [crDeleteAfterCursor,
+          if Item.fChangeReason in [crDeleteAfterCursor,
             crSilentDeleteAfterCursor]
           then
-            TmpPos := Item.ChangeStartPos
+            TmpPos := Item.fChangeStartPos
           else
-            TmpPos := Item.ChangeEndPos;
-          if Item.ChangeReason in [crSilentDelete, crSilentDeleteAfterCursor]
+            TmpPos := Item.fChangeEndPos;
+          if Item.fChangeReason in [crSilentDelete, crSilentDeleteAfterCursor]
           then
             CaretXY := TmpPos
           else begin
-            SetCaretAndSelection(TmpPos, Item.ChangeStartPos,
-              Item.ChangeEndPos);
+            SetCaretAndSelection(TmpPos, Item.fChangeStartPos,
+              Item.fChangeEndPos);
           end;
 {end}                                                                           //mh 2000-10-30
-          fRedoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, '', Item.ChangeSelMode);
+          fRedoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, '', Item.fChangeSelMode);
           EnsureCursorPosVisible;
         end;
       crLineBreak:
         begin
           // If there's no selection, we have to set
           // the Caret's position manualy.
-          CaretXY := Item.ChangeStartPos;
-          fRedoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, '', Item.ChangeSelMode);
+          CaretXY := Item.fChangeStartPos;
+          fRedoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, '', Item.fChangeSelMode);
           if CaretY > 0 then begin
             TmpStr := Lines.Strings[CaretY - 1];
             if (Length(TmpStr) < CaretX - 1)
-              and (LeftSpaces(Item.ChangeStr) = 0)
+              and (LeftSpaces(Item.fChangeStr) = 0)
             then
-              TmpStr := TmpStr + StringOfChar(' ', CaretX - 1 - Length(TmpStr));
-            Lines.Delete(Item.ChangeEndPos.y);
+              AppendStr(TmpStr, StringOfChar(' ', CaretX - 1 - Length(TmpStr)));
+            Lines.Delete(Item.fChangeEndPos.y);
           end;
-          CaretXY := Item.ChangeStartPos;
-          TrimmedSetLine(CaretY - 1, TmpStr + Item.ChangeStr);                
+          CaretXY := Item.fChangeStartPos;
+          TrimmedSetLine(CaretY - 1, TmpStr + Item.fChangeStr);                
           DoLinesDeleted(CaretY, 1);
         end;
       crIndent: // remove the column that was inserted
         begin
           // select the inserted column
-          BlockBegin := Point(1, Item.ChangeStartPos.y);
-          TmpPos := Item.ChangeEndPos;
+          BlockBegin := Point(1, Item.fChangeStartPos.y);
+          TmpPos := Item.fChangeEndPos;
           if TmpPos.x = 1 then
             Dec(TmpPos.y);
           TmpPos.x := fTabWidth + 1;
           BlockEnd := TmpPos;
           // add to redo list
-          fRedoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, GetSelText, Item.ChangeSelMode);
+          fRedoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, GetSelText, Item.fChangeSelMode);
           // remove the column
-          SetSelTextPrimitive(Item.ChangeSelMode, nil, nil);
+          SetSelTextPrimitive(Item.fChangeSelMode, nil, nil);
           // restore the selection
-          SetCaretAndSelection(Item.ChangeEndPos, Item.ChangeStartPos,
-            Item.ChangeEndPos);
+          SetCaretAndSelection(Item.fChangeEndPos, Item.fChangeStartPos,
+            Item.fChangeEndPos);
         end;
       crUnindent: // reinsert the (raggered) column that was deleted
         begin
-         fRedoList.AddChange(Item.ChangeReason, Item.ChangeStartPos,
-            Item.ChangeEndPos, Item.ChangeStr, Item.ChangeSelMode);
+         fRedoList.AddChange(Item.fChangeReason, Item.fChangeStartPos,
+            Item.fChangeEndPos, Item.fChangeStr, Item.fChangeSelMode);
           // reinsert the string
-          InsertBlock(Point(1, Item.ChangeStartPos.y),
-            Point(1, Item.ChangeEndPos.y), PChar(Item.ChangeStr));
-          SetCaretAndSelection(Item.ChangeStartPos, Item.ChangeStartPos,
-            Item.ChangeEndPos);
+          InsertBlock(Point(1, Item.fChangeStartPos.y),
+            Point(1, Item.fChangeEndPos.y), PChar(Item.fChangeStr));
+          SetCaretAndSelection(Item.fChangeStartPos, Item.fChangeStartPos,
+            Item.fChangeEndPos);
         end;
     end;
   finally
@@ -4757,7 +3978,7 @@ end;
 procedure TCustomSynEdit.ClearBookMark(BookMark: Integer);
 begin
   if (BookMark in [0..9]) and assigned(fBookMarks[BookMark]) then begin
-    DoOnClearBookmark(fBookMarks[BookMark]);
+    DoOnClearBookmark(fBookMarks[BookMark]);                                    // djlp 2000-08-29
     FMarkList.Remove(fBookMarks[Bookmark]);
     fBookMarks[BookMark].Free;
     fBookMarks[BookMark] := nil;
@@ -4766,21 +3987,11 @@ end;
 
 procedure TCustomSynEdit.GotoBookMark(BookMark: Integer);
 begin
-  if (BookMark in [0..9]) and
-     assigned(fBookMarks[BookMark]) and
-     (fBookMarks[BookMark].Line <= fLines.Count)
-  then
-  begin
-    SetCaretXYEx(False,                                                         //DDH 10/16/01 Begin
-                 Point(fBookMarks[BookMark].Column, fBookMarks[BookMark].Line));   
-
-    if SelAvail then
-    begin
-      fBlockBegin := Point(fCaretX, fCaretY);
-      fBlockEnd := fBlockBegin;
-    end;
-
-    EnsureCursorPosVisibleEx(True);                                             //DDH 10/16/01 End
+  if (BookMark in [0..9]) and assigned(fBookMarks[BookMark])
+    and (fBookMarks[BookMark].Line <= fLines.Count)
+  then begin
+    CaretXY := Point(fBookMarks[BookMark].Column, fBookMarks[BookMark].Line);
+    EnsureCursorPosVisible;                                                     // djlp 2000-08-29
   end;
 end;
 
@@ -4813,7 +4024,6 @@ begin
   end;
 end;
 
-{$IFDEF SYN_WIN32}
 procedure TCustomSynEdit.WndProc(var Msg: TMessage);
 // Prevent Alt-Backspace from beeping
 const
@@ -4826,30 +4036,6 @@ begin
   else
     inherited;
 end;
-{$ENDIF}
-
-{$IFDEF SYN_KYLIX}
-function TCustomSynEdit.EventFilter(Sender: QObjectH; Event: QEventH): Boolean;
-begin
-  case QEvent_type(Event) of
-    QEventType_FocusIn:
-      begin
-        InitializeCaret;
-        if FHideSelection and SelAvail then
-          Invalidate;
-      end;
-    QEventType_FocusOut:
-      begin
-        HideCaret;
-        kTextDrawer.DestroyCaret;
-        if FHideSelection and SelAvail then
-          Invalidate;
-      end;
-  end;
-
-  result := inherited EventFilter(Sender, Event);
-end;
-{$ENDIF}
 
 procedure TCustomSynEdit.DragOver(Source: TObject; X, Y: Integer;
   State: TDragState; var Accept: Boolean);
@@ -4859,12 +4045,10 @@ begin
   begin
     Accept := True;
     //Ctrl is pressed => change cursor to indicate copy instead of move
-{$IFDEF SYN_WIN32}
     if GetKeyState(VK_CONTROL) < 0 then
       DragCursor := crMultiDrag
     else
       DragCursor := crDrag;
-{$ENDIF}    
     if State = dsDragLeave then //restore prev caret position
       ComputeCaret(FMouseDownX, FMouseDownY)
     else //position caret under the mouse cursor
@@ -4880,7 +4064,6 @@ var
   DragDropText: string;
   Adjust: integer;
   ChangeScrollPastEOL: boolean;
-  iPoint: TPoint;                                                               //DDH 10/17/01 from Flávio Etrusco
 begin
   if not ReadOnly  and (Source is TCustomSynEdit)
     and TCustomSynEdit(Source).SelAvail
@@ -4893,19 +4076,11 @@ begin
       // if from other control then move when SHIFT, else copy
       // if from Self then copy when CTRL, else move
       if Source <> Self then begin
-{$IFDEF SYN_WIN32}
         DropMove := GetKeyState(VK_SHIFT) < 0;
-{$ELSE}
-        DropMove := FALSE;
-{$ENDIF}
         DoDrop := TRUE;
         DropAfter := FALSE;
       end else begin
-{$IFDEF SYN_WIN32}
         DropMove := GetKeyState(VK_CONTROL) >= 0;
-{$ELSE}
-        DropMove := FALSE;
-{$ENDIF}
         BB := BlockBegin;
         BE := BlockEnd;
         DropAfter := (NewCaret.Y > BE.Y)
@@ -4969,9 +4144,9 @@ begin
             fUndoList.AddChange(crInsert, NewCaret, BlockEnd,
               SelText, SelectionMode);
           end;
-          BlockEnd := CaretXY;                                                  //DDH 10/17/01 begin from Flávio Etrusco
-          iPoint := NewCaret;
-          CommandProcessor( ecSelGotoXY, #0, @iPoint );                         //DDH 10/17/01 end from Flávio Etrusco
+          BlockBegin := NewCaret;
+          BlockEnd := CaretXY;
+          CaretXY := BlockBegin;
         finally
           EndUndoBlock;
         end;
@@ -5001,11 +4176,7 @@ begin
     if HandleAllocated then begin
       nX := fTextOffset + fRightEdge * fCharWidth;
       rcInval := Rect(nX - 1, 0, nX + 1, ClientHeight);
-{$IFDEF SYN_KYLIX}
-      InvalidateRect(rcInval, FALSE);
-{$ELSE}
       InvalidateRect(Handle, @rcInval, FALSE);
-{$ENDIF}
     end;
   end;
 end;
@@ -5027,14 +4198,11 @@ procedure TCustomSynEdit.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
-  if Operation = opRemove then
-  begin
-    if AComponent = fHighlighter then
-    begin
+  if Operation = opRemove then begin
+    if AComponent = fHighlighter then begin
       fHighlighter := nil;
 {begin}                                                                         //mh 2000-10-01
-      if not (csDestroying in ComponentState) then
-      begin
+      if not (csDestroying in ComponentState) then begin
         RecalcCharExtent;
         SizeOrFontChanged(TRUE);                                                //jr 2000-10-01
         Invalidate;
@@ -5042,22 +4210,19 @@ begin
 {end}                                                                           //mh 2000-10-01
     end;
     if (fBookmarkOpt <> nil) then
-      if (AComponent = fBookmarkOpt.BookmarkImages) then
-      begin
+      if (AComponent = fBookmarkOpt.BookmarkImages) then begin
         fBookmarkOpt.BookmarkImages := nil;
-        InvalidateGutterLines(-1, -1);
+        InvalidateGutterLines(-1, -1);                                    
       end;
   end;
 end;
 
 procedure TCustomSynEdit.SetHighlighter(const Value: TSynCustomHighlighter);
 begin
-  if Value <> fHighlighter then
-  begin
+  if Value <> fHighlighter then begin
     if Assigned(fHighlighter) then
       fHighlighter.UnhookAttrChangeEvent(HighlighterAttrChanged);
-    if Assigned(Value) then
-    begin
+    if Assigned(Value) then begin
       Value.HookAttrChangeEvent(HighlighterAttrChanged);
       Value.FreeNotification(Self);
     end;
@@ -5077,11 +4242,7 @@ procedure TCustomSynEdit.SetBorderStyle(Value: TBorderStyle);
 begin
   if fBorderStyle <> Value then begin
     fBorderStyle := Value;
-{$IFDEF SYN_WIN32}
     RecreateWnd;
-{$ELSE}
-    Invalidate;
-{$ENDIF}
   end;
 end;
 
@@ -5142,11 +4303,7 @@ begin
     end;
   end;
   Exclude(fStateFlags, sfCaretVisible);
-{$IFDEF SYN_WIN32}
   CreateCaret(Handle, 0, cw, ch);
-{$ELSE}
-  CreateCaret(self, 0, cw, ch);
-{$ENDIF}
   UpdateCaret;
 end;
 
@@ -5177,67 +4334,22 @@ end;
 
 procedure TCustomSynEdit.EnsureCursorPosVisible;
 begin
-  EnsureCursorPosVisibleEx(False);
-end;
-
-procedure TCustomSynEdit.EnsureCursorPosVisibleEx(ForceToMiddle: Boolean);
-  //adjusts X position to take into account tabs
-  function AdjustForTabs(X: Integer): Integer;                                  //GBN 2001-10-24
-  var s: String;
-  i: Integer;
-  begin
-    Result:=X;
-    S:=GetLineText;
-    i:=1;
-    while (i<=length(s)) and (i<X-1) do
-      begin
-      if (s[i]=#9) then Result:=Result+Tabwidth-1;
-      inc(i);
-      end;
-  end;
-
-VAR TmpMiddle : Integer;
-    VisibleX  : Integer;                                                        //GBN 2001-10-24
-
-begin
   IncPaintLock;
   try
     // Make sure X is visible
-
-    //Changed all CaretX to VisibleX in block below
-    VisibleX:=AdjustForTabs(CaretX);                                            //GBN 2001-10-24
-
-    if VisibleX < LeftChar then
-      LeftChar := VisibleX
-    else if VisibleX > CharsInWindow + LeftChar then
-      LeftChar := VisibleX - CharsInWindow + 1
+    if CaretX < LeftChar then
+      LeftChar := CaretX
+    else if CaretX > CharsInWindow + LeftChar then
+      LeftChar := CaretX - CharsInWindow + 1
     else
       LeftChar := LeftChar;                                                     //mh 2000-10-19
-
     // Make sure Y is visible
-//DDH 10/16/01 Start
-    if ForceToMiddle then
-    begin
-      if fCaretY < (TopLine - 1) then
-      begin
-        TmpMiddle := LinesInWindow div 2;
-        if fCaretY - TmpMiddle < 0 then
-          TopLine := 1
-        else TopLine := fCaretY - TmpMiddle + 1;
-      end else if fCaretY > (TopLine + (LinesInWindow - 2)) then
-      begin
-        TmpMiddle := LinesInWindow div 2;
-        TopLine := fCaretY - (LinesInWindow - 1) + TmpMiddle;
-      end;
-    end else begin
-      if CaretY < TopLine then
-        TopLine := CaretY
-      else if CaretY > TopLine + Max(1, LinesInWindow) - 1 then                   //mh 2000-10-19
-        TopLine := CaretY - (LinesInWindow - 1)
-      else
-        TopLine := TopLine;                                                       //mh 2000-10-19
-    end;
-//DDH 10/16/01 End
+    if CaretY < TopLine then
+      TopLine := CaretY
+    else if CaretY > TopLine + Max(1, LinesInWindow) - 1 then                   //mh 2000-10-19
+      TopLine := CaretY - (LinesInWindow - 1)
+    else
+      TopLine := TopLine;                                                       //mh 2000-10-19
   finally
     DecPaintLock;
   end;
@@ -5278,11 +4390,7 @@ begin
     else
       Result := ecNone;
   end;
-{$IFDEF SYN_WIN32}
   if (Result = ecNone) and (Code >= VK_ACCEPT) and (Code <= VK_SCROLL) then
-{$ELSE}
-  if Result = ecNone then
-{$ENDIF}
   begin
     fLastKey := Code;
     fLastShiftState := Shift;
@@ -5371,9 +4479,8 @@ begin
 {begin}                                                                         //mh 2000-10-19
       ecLineStart, ecSelLineStart:
         begin
-//          MoveCaretAndSelection(CaretXY, Point(1, CaretY),
-//            Command = ecSelLineStart);
-          DoHomeKey(Command = ecSelLineStart);                                  //EK 10/16/01
+          MoveCaretAndSelection(CaretXY, Point(1, CaretY),
+            Command = ecSelLineStart);
           fLastCaretX := fCaretX;
         end;
       ecLineEnd, ecSelLineEnd:
@@ -5459,7 +4566,6 @@ begin
 {begin}                                                                         //mh 2000-10-30
       ecDeleteLastChar:
         if not ReadOnly then begin
-          DoOnPaintTransient(ttBefore);                                         //GBN 2001-10-23
           if SelAvail then
             SetSelectedTextEmpty
           else begin
@@ -5467,37 +4573,9 @@ begin
             Len := Length(Temp);
             Caret := CaretXY;
             if CaretX > Len + 1 then begin
+              // only move caret one column
               Helper := '';
-              if eoSmartTabDelete in fOptions then                              //DDH 10/16/01 begin
-              begin
-                //It's at the end of the line, move it to the length
-                if Len > 0 then
-                  CaretX := Len + 1
-                else begin
-                  //move it as if there were normal spaces there
-                  SpaceCount1 := CaretX - 1;
-                  SpaceCount2 := 0;
-                  // unindent
-                  if SpaceCount1 > 0 then begin
-                    BackCounter := CaretY - 2;
-                    while BackCounter >= 0 do begin
-                      SpaceCount2 := LeftSpaces(Lines[BackCounter]);
-                      if SpaceCount2 < SpaceCount1 then
-                        break;
-                      Dec(BackCounter);
-                    end;
-                  end;
-                  if SpaceCount2 = SpaceCount1 then
-                    SpaceCount2 := 0;
-                  fCaretX := fCaretX - (SpaceCount1 - SpaceCount2);
-                  fLastCaretX := fCaretX;
-                  fStateFlags := fStateFlags + [sfCaretChanged];
-                  StatusChanged([scCaretX]);
-                end;
-              end else begin
-                // only move caret one column
-                CaretX := CaretX - 1;
-              end;                                                              //DDH 10/16/01 end
+              CaretX := CaretX - 1;
             end else if CaretX = 1 then begin
               // join this line with the last line if possible
               if CaretY > 1 then begin
@@ -5516,32 +4594,23 @@ begin
               SpaceCount2 := 0;
               if (Temp[CaretX - 1] <= #32) and (SpaceCount1 = CaretX - 1) then
               begin
-                if eoSmartTabDelete in fOptions then                            //DDH 10/16/01 Begin
-                begin
-                  // unindent
-                  if SpaceCount1 > 0 then begin
-                    BackCounter := CaretY - 2;
-                    while BackCounter >= 0 do begin
-                      SpaceCount2 := LeftSpaces(Lines[BackCounter]);
-                      if SpaceCount2 < SpaceCount1 then
-                        break;
-                      Dec(BackCounter);
-                    end;
+                // unindent
+                if SpaceCount1 > 0 then begin
+                  BackCounter := CaretY - 2;
+                  while BackCounter >= 0 do begin
+                    SpaceCount2 := LeftSpaces(Lines[BackCounter]);
+                    if SpaceCount2 < SpaceCount1 then
+                      break;
+                    Dec(BackCounter);
                   end;
-                  if SpaceCount2 = SpaceCount1 then
-                    SpaceCount2 := 0;
-                  Helper := Copy(Temp, 1, SpaceCount1 - SpaceCount2);
-                  Delete(Temp, 1, SpaceCount1 - SpaceCount2);
-                end else begin
-                  if SpaceCount1 > fTabWidth then
-                    SpaceCount1 := fTabWidth;
-                  Helper := Copy(Temp, 1, SpaceCount1);
-                  Delete(Temp, 1, SpaceCount1);
-                end;                                                            //DDH 10/16/01 End
+                end;
+                if SpaceCount2 = SpaceCount1 then
+                  SpaceCount2 := 0;
+                Helper := Copy(Temp, 1, SpaceCount1 - SpaceCount2);
+                Delete(Temp, 1, SpaceCount1 - SpaceCount2);
                 TrimmedSetLine(CaretY - 1, Temp);
                 fCaretX := fCaretX - (SpaceCount1 - SpaceCount2);
                 fLastCaretX := fCaretX;
-                fStateFlags := fStateFlags + [sfCaretChanged];
                 StatusChanged([scCaretX]);
               end else begin
                 // delete char
@@ -5561,11 +4630,9 @@ begin
                 smNormal);
             end;
           end;
-          DoOnPaintTransient(ttAfter);                                          //GBN 2001-10-23
         end;
       ecDeleteChar:
         if not ReadOnly then begin
-          DoOnPaintTransient(ttBefore);                                         //GBN 2001-10-23
           if SelAvail then
             SetSelectedTextEmpty
           else begin
@@ -5598,11 +4665,9 @@ begin
                 Helper, smNormal);
             end;
           end;
-          DoOnPaintTransient(ttAfter);                                          //GBN 2001-10-23
         end;
       ecDeleteWord, ecDeleteEOL:
         if not ReadOnly then begin
-          DoOnPaintTransient(ttBefore);                                         //GBN 2001-10-23
           Len := Length(LineText);
           if Command = ecDeleteWord then begin
             if CaretX > Len + 1 then
@@ -5627,7 +4692,6 @@ begin
         end;
       ecDeleteLastWord, ecDeleteBOL:
         if not ReadOnly then begin
-          DoOnPaintTransient(ttBefore);                                         //GBN 2001-10-23
           if Command = ecDeleteLastWord then
             WP := PrevWordPos
           else
@@ -5646,13 +4710,11 @@ begin
             end;
             CaretXY := WP;
           end;
-          DoOnPaintTransient(ttAfter);                                          //GBN 2001-10-23
         end;
 {end}                                                                           //mh 2000-10-30
       ecDeleteLine:
         if not ReadOnly and not ((Lines.Count = 1) and (Length(Lines[0]) = 0))
         then begin
-          DoOnPaintTransient(ttBefore);                                         //GBN 2001-10-23
           if SelAvail then
             SetBlockBegin(CaretXY);
           if Lines.Count = 1 then begin
@@ -5690,6 +4752,7 @@ begin
             if Len >= CaretX then begin
               if CaretX > 1 then begin
                 SpaceCount1 := LeftSpaces(Temp);
+{begin}                                                                         //JGF 2000-09-23
                 Temp := Copy(LineText, 1, CaretX - 1);
                 TrimmedSetLine(CaretY - 1, Temp);
                 Delete(Temp2, 1, CaretX - 1);
@@ -5698,6 +4761,7 @@ begin
                 Lines.Insert(CaretY, StringOfChar(' ', SpaceCount1) + Temp2);
                 if Command = ecLineBreak then
                   CaretXY := Point(SpaceCount1 + 1, CaretY + 1);
+{end}                                                                           //JGF 2000-09-23
               end else begin
                 Lines.Insert(CaretY - 1, '');
                 fUndoList.AddChange(crLineBreak, CaretXY, CaretXY, Temp2,
@@ -5749,7 +4813,7 @@ begin
 {end}                                                                           //mh 2000-10-06
             end;
           end else begin
-            if fLines.Count = 0 then
+            if fLines.Count = 0 then                                     
               fLines.Add('');
             BackCounter := CaretY - 1;
             while BackCounter >= 0 do begin
@@ -5764,20 +4828,17 @@ begin
             if Command = ecLineBreak then
               CaretY := CaretY + 1;
           end;
-          DoLinesInserted(CaretY - InsDelta, 1);
-          BlockBegin := CaretXY;                                                //DDH 10/16/01
-          BlockEnd   := CaretXY;                                                //DDH 10/16/01
-          EnsureCursorPosVisible;
+          DoLinesInserted(CaretY - InsDelta, 1);                         
+          EnsureCursorPosVisible;                                               //JGF 2000-09-23
           fLastCaretX := fCaretX;                                               //mh 2000-10-19
         end;
       ecTab:
         if not ReadOnly then DoTabKey;
       ecShiftTab:
-        if not ReadOnly then DoShiftTabKey;                                     //EK 10/16/01
+        if not ReadOnly then { ??? };
       ecMatchBracket:
         FindMatchingBracket;
       ecChar:
-      // #127 is Ctrl + Backspace, #32 is space
         if not ReadOnly and (AChar >= #32) and (AChar <> #127) then begin
           if SelAvail then begin
             BeginUndoBlock;
@@ -5800,7 +4861,8 @@ begin
             Temp := LineText;
             Len := Length(Temp);
             if Len < CaretX then
-              Temp := Temp + StringOfChar(' ', CaretX - Len - Ord(fInserting));
+//              Temp := Temp + StringOfChar(' ', CaretX - Len);
+              Temp := Temp + StringOfChar(' ', CaretX - Len - Ord(fInserting)); //JGF 2000-09-23
 // Added the check for whether or not we're in insert mode.
 // If we are, we append one less space than we would in overwrite mode.
 // This is because in overwrite mode we have to put in a final space
@@ -5814,7 +4876,7 @@ begin
               if fInserting then begin
                 Insert(AChar, Temp, CaretX);
                 CaretX := CaretX + 1;
-                TrimmedSetLine(CaretY - 1, Temp);
+                TrimmedSetLine(CaretY - 1, Temp);                               //JGF 2000-09-23
                 fUndoList.AddChange(crInsert, StartOfBlock, CaretXY, '',
                   smNormal);
               end else begin
@@ -5833,7 +4895,7 @@ begin
                 end;
 {$ENDIF}
                 CaretNew := Point((CaretX + counter), CaretY);
-                TrimmedSetLine(CaretY - 1, Temp);
+                TrimmedSetLine(CaretY - 1, Temp);                               //JGF 2000-09-23
                 fUndoList.AddChange(crInsert, StartOfBlock, CaretNew, Helper,
                   smNormal);
                 CaretX := CaretX + 1;
@@ -5844,7 +4906,6 @@ begin
               if bChangeScroll then Exclude(fOptions, eoScrollPastEol);
             end;
           end;
-          DoOnPaintTransient(ttAfter);                                          //GBN 2001-10-23          
         end;
       ecUndo:
         begin
@@ -5935,11 +4996,6 @@ begin
         begin
           SelectionMode := SEL_MODE[Command];
         end;
-      ecContextHelp:                                                             // jj 2001-07-19
-        begin
-          if Assigned (fOnContextHelp) then
-            fOnContextHelp (self,WordAtCursor);
-        end;
 {$IFDEF SYN_MBCSSUPPORT}
       ecImeStr:
         if not ReadOnly then begin
@@ -5973,7 +5029,7 @@ begin
               end;
               Insert(s, Temp, CaretX);
               CaretX := (CaretX + Len);
-              TrimmedSetLine(CaretY - 1, Temp);                            
+              TrimmedSetLine(CaretY - 1, Temp);                                 //JGF 2000-09-23
               if fInserting then
                 Helper := '';
               fUndoList.AddChange(crInsert, StartOfBlock, CaretXY, Helper,
@@ -6024,7 +5080,7 @@ end;
 
 function TCustomSynEdit.NextWordPos: TPoint;
 var
-  CX, CY, LineLen, MultiPos: integer;
+  CX, CY, LineLen: integer;
   Line: string;
   IdentChars, WhiteChars: TSynIdentChars;
 begin
@@ -6040,40 +5096,19 @@ begin
     WhiteChars := [#1..#255] - IdentChars;
     LineLen := Length(Line);
     if CX >= LineLen then begin
-      // find first IdentChar or multibyte char in the next line
+      // find first IdentChar in the next line
       if CY < Lines.Count then begin
         Line := Lines[CY];
         Inc(CY);
-{$IFDEF SYN_MBCSSUPPORT}
-        MultiPos := StrScanForMultiByteChar(Line, 1);
-{$ELSE}
-        MultiPos := 0;
-{$ENDIF}
-        CX := StrScanForCharInSet(Line, 1, IdentChars);
-        // stop on any multibyte chars
-        if (MultiPos > 0) and ((CX = 0) or (CX > MultiPos)) then
-          CX := MultiPos;
-        if CX = 0 then
-          Inc(CX);
+        CX := Max(1, StrScanForCharInSet(Line, 1, IdentChars));
       end;
     end else begin
-{$IFDEF SYN_MBCSSUPPORT}
-      MultiPos := StrScanForMultiByteChar(Line, CX + 1);
-      // find next "whitespace" if current char is an IdentChar
-      if (Line[CX] in IdentChars) and (ByteType(Line, CX) = mbSingleByte) then
-        CX := StrScanForCharInSet(Line, CX, WhiteChars);
-{$ELSE}
-      MultiPos := 0;
-      // find next "whitespace" if current char is an IdentChar
+      // find first "whitespace" if next char is an IdentChar
       if Line[CX] in IdentChars then
         CX := StrScanForCharInSet(Line, CX, WhiteChars);
-{$ENDIF}
-      // if "whitespace" found, find the next IdentChar
+      // if "whitespace" found find the first IdentChar behind
       if CX > 0 then
         CX := StrScanForCharInSet(Line, CX, IdentChars);
-      // stop on any multibyte chars
-      if (MultiPos > 0) and ((CX = 0) or (CX > MultiPos)) then
-        CX := MultiPos;
       // if one of those failed just position at the end of the line
       if CX = 0 then
         CX := LineLen + 1;
@@ -6082,66 +5117,9 @@ begin
   Result := Point(CX, CY);
 end;
 
-function TCustomSynEdit.WordStart: TPoint;
-var
-  CX, CY: integer;
-  Line: string;
-  IdentChars, WhiteChars: TSynIdentChars;
-begin
-  CX := CaretX;
-  CY := CaretY;
-  // valid line?
-  if (CY >= 1) and (CY <= Lines.Count) then begin
-    Line := Lines[CY - 1];
-    CX := Min(CX, Length(Line) + 1);
-    if Assigned(Highlighter) then
-      IdentChars := Highlighter.IdentChars
-    else
-      IdentChars := [#33..#255];
-    WhiteChars := [#1..#255] - IdentChars;
-    if CX <= 1 then begin
-      // find last IdentChar in the previous line
-      if CY > 1 then begin
-        Dec(CY);
-        Line := Lines[CY - 1];
-        CX := Length(Line) + 1;
-      end;
-    end else begin
-      // if previous char isn't a "whitespace" search for the last IdentChar
-      if not (Line[CX - 1] in WhiteChars) then
-        CX := StrRScanForCharInSet(Line, CX - 1, WhiteChars) + 1;
-    end;
-  end;
-  Result := Point(CX, CY);
-end;
-
-function TCustomSynEdit.WordEnd: TPoint;
-var
-  CX, CY: integer;
-  Line: string;
-  IdentChars, WhiteChars: TSynIdentChars;
-begin
-  CX := CaretX;
-  CY := CaretY;
-  // valid line?
-  if (CY >= 1) and (CY <= Lines.Count) then begin
-    Line := Lines[CY - 1];
-    if Assigned(Highlighter) then
-      IdentChars := Highlighter.IdentChars
-    else
-      IdentChars := [#33..#255];
-    WhiteChars := [#1..#255] - IdentChars;
-    CX := StrScanForCharInSet(Line, CX, WhiteChars);
-    // if no "whitespace" is found just position at the end of the line
-    if CX = 0 then
-      CX := Length(Line) + 1;
-  end;
-  Result := Point(CX,CY);
-end;
-
 function TCustomSynEdit.PrevWordPos: TPoint;
 var
-  CX, CY, MultiPos: integer;
+  CX, CY: integer;
   Line: string;
   IdentChars, WhiteChars: TSynIdentChars;
 begin
@@ -6164,32 +5142,19 @@ begin
         CX := Length(Line) + 1;
       end;
     end else begin
-{$IFDEF SYN_MBCSSUPPORT}
-      MultiPos := StrRScanForMultiByteChar(Line, CX - 1);
-      // if previous char is a "whitespace" search for the last IdentChar
-      if (Line[CX - 1] in WhiteChars) and (ByteType(Line, CX - 1) = mbSingleByte) then
-        CX := StrRScanForCharInSet(Line, CX - 1, IdentChars);
-{$ELSE}
-      MultiPos := 0;
       // if previous char is a "whitespace" search for the last IdentChar
       if Line[CX - 1] in WhiteChars then
         CX := StrRScanForCharInSet(Line, CX - 1, IdentChars);
-{$ENDIF}
       if CX > 0 then
         // search for the first IdentChar of this "word"
-        CX := StrRScanForCharInSet(Line, CX - 1, WhiteChars) + 1;
-      // stop on any multibyte chars
-      if (MultiPos > 0) and ((CX = 0) or (CX < MultiPos)) then
-        CX := MultiPos;
-      if CX = 0 then begin
-        // else just position at the end of the previous line
+        CX := StrRScanForCharInSet(Line, CX - 1, WhiteChars) + 1
+      else
+        // just position at the end of the previous line
         if CY > 1 then begin
           Dec(CY);
           Line := Lines[CY - 1];
           CX := Length(Line) + 1;
-        end else
-          CX := 1;
-      end;
+        end;
     end;
   end;
   Result := Point(CX, CY);
@@ -6247,125 +5212,6 @@ procedure TCustomSynEdit.MarkListChange(Sender: TObject);
 begin
   InvalidateGutter;                                                        
 end;
-
-function TCustomSynEdit.GetSelStart: integer;                                   //DDH 10/16/01 Begin
-
-function llen(data: string): integer;
-  begin
-    result := length(Data) + 2;
-  end;
-var
-  loop: integer;
-  x, y: integer;
-begin
-  if SelAvail then
-  begin
-    x := BlockBegin.X;
-    y := BlockBegin.Y;
-  end else begin
-    x := CaretX;
-    y := CaretY;
-  end;
-
-  result := 0;
-  loop := 0;
-  while loop < (Y - 1) do begin
-    Result := result + llen(lines.strings[loop]);
-    inc(loop);
-  end;
-
-  result := result + Min(X, llen(lines.strings[loop]));
-end;
-
-procedure TCustomSynEdit.SetAlwaysShowCaret(const Value: Boolean);
-begin
-  if FAlwaysShowCaret <> Value then
-  begin
-    FAlwaysShowCaret := Value;
-    if not(csDestroying in ComponentState) and  not(focused) then
-    begin
-      if Value then
-      begin
-        InitializeCaret;
-      end else begin
-        HideCaret;
-        Windows.DestroyCaret;
-      end;
-    end;
-  end;
-end;
-
-procedure TCustomSynEdit.SetSelStart(const Value: integer);
-
-function llen(data: string): integer;
-  begin
-    result := length(Data) + 2;
-  end;
-var
-  loop: integer;
-  count: integer;
-begin
-  loop := 0;
-  count := 0;
-  while (count + llen(lines.strings[loop]) < value) do begin
-    count := count + llen(lines.strings[loop]);
-    inc(loop);
-  end;
-  CaretX := value - count;
-  CaretY := loop + 1;
-
-  fBlockBegin.X := CaretX;
-  fBlockBegin.Y := CaretY;
-end;
-
-function TCustomSynEdit.GetSelEnd: integer;
-
-function llen(data: string): integer;
-  begin
-    result := length(Data) + 2;
-  end;
-var
-  loop: integer;
-  x, y: integer;
-begin
-  if SelAvail then
-  begin
-    x := BlockEnd.x;
-    y := BlockEnd.y;
-  end else begin
-    x := CaretX;
-    y := CaretY;
-  end;
-
-  result := 0;
-  loop := 0;
-  while loop < (y - 1) do begin
-    Result := result + llen(lines.strings[loop]);
-    inc(loop);
-  end;
-  result := result + x;
-end;
-
-procedure TCustomSynEdit.SetSelEnd(const Value: integer);
-
-function llen(data: string): integer;
-  begin
-    result := length(Data) + 2;
-  end;
-var
-  p: tpoint;
-  loop: integer;
-  count: integer;
-begin
-  loop := 0;
-  count := 0;
-  while (count + llen(lines.strings[loop]) < value) do begin
-    count := count + llen(lines.strings[loop]);
-    inc(loop);
-  end;
-  p.X := value - count; p.y := loop + 1;
-  Blockend := p;
-end;                                                                            //DDH 10/16/01 End
 
 procedure TCustomSynEdit.SetSelWord;
 begin
@@ -6442,7 +5288,7 @@ var
   nW: integer;
 begin
   if not (csLoading in ComponentState) then begin
-    if fGutter.ShowLineNumbers and fGutter.AutoSize then
+    if fGutter.ShowLineNumbers and fGutter.AutoSize then                   
       fGutter.AutoSizeDigitCount(Lines.Count);
     nW := fGutter.RealGutterWidth(fCharWidth);
     if nW = fGutterWidth then
@@ -6464,7 +5310,6 @@ begin
   fRedoList.Unlock;
 end;
 
-{$IFDEF SYN_WIN32}
 procedure TCustomSynEdit.WMMouseWheel(var Msg: TMessage);
 var
   nDelta: integer;
@@ -6496,7 +5341,6 @@ begin
   TopLine := TopLine - (nDelta * nWheelClicks);
   Update;
 end;
-{$ENDIF}
 
 procedure TCustomSynEdit.SetWantTabs(const Value: boolean);
 begin
@@ -6531,7 +5375,6 @@ var
   bPrompt: boolean;
   bReplace, bReplaceAll: boolean;
   nAction: TSynReplaceAction;
-  TmpPoint : TPoint;                                                            //DDH 10/16/01
 
   function InValidSearchRange(First, Last: integer): boolean;
   begin
@@ -6540,10 +5383,8 @@ var
       smNormal:
         if ((ptCurrent.Y = ptStart.Y) and (First < ptStart.X)) or
           ((ptCurrent.Y = ptEnd.Y) and (Last > ptEnd.X)) then Result := FALSE;
-      smColumn:                                                                 //EK 10/16/01
-//        Result := (First >= ptStart.X) and (Last <= ptEnd.X);
-        // solves bug in search/replace when smColumn mode active and no selection
-        Result := (First >= ptStart.X) and (Last <= ptEnd.X) or (ptEnd.X-ptStart.X<2);
+      smColumn:
+        Result := (First >= ptStart.X) and (Last <= ptEnd.X);
     end;
   end;
 
@@ -6605,21 +5446,12 @@ begin
         Inc(Result);
         // Select the text, so the user can see it in the OnReplaceText event
         // handler or as the search result.
-
-        //ddh the caret is set twice to make sure that both sides are visible   //DDH 10/16/01 Start
-//        BlockBegin := ptCurrent;          // bug!
         ptCurrent.X := nFound;
         BlockBegin := ptCurrent;
-        TmpPoint := ptCurrent;
-        TmpPoint.x := 1;
-        //Be sure to use the Ex version of CursorPos so that it appears in the middle if necessary
-        fCaretX := TmpPoint.X;
-        fCaretY := TmpPoint.Y;
-        EnsureCursorPosVisibleEx(True);
+        if bBackward then CaretXY := ptCurrent;
         Inc(ptCurrent.X, nSearchLen);
         BlockEnd := ptCurrent;
-        CaretXY := ptCurrent;                                                   //DDH 10/16/01 End
-        if bBackward then CaretXY := BlockBegin else CaretXY := ptCurrent;
+        if not bBackward then CaretXY := ptCurrent;
         // If it's a search only we can leave the procedure now.
         if not (bReplace or bReplaceAll) then exit;
         // Prompt and replace or replace all.  If user chooses to replace
@@ -6646,11 +5478,6 @@ begin
           CaretX := nFound + nReplaceLen;
           if (nSearchLen <> nReplaceLen) and (nAction <> raSkip) then         
             fTSearch.FixResults(nFound, nSearchLen - nReplaceLen);
-
-          if (fSelectionMode<>smColumn) and (CaretY=ptEnd.Y) then begin         //EK 10/16/01 begin
-            ptEnd:=Point(ptEnd.X+nReplaceLen-nSearchLen, ptEnd.Y);
-            BlockEnd:=ptEnd;
-          end;                                                                  //EK 10/16/01 End
         end;
         if not bReplaceAll then
           exit;
@@ -6710,16 +5537,6 @@ begin
     Result := FALSE;
 end;
 
-procedure TCustomSynEdit.SetFocus;
-begin
-  if (fFocusList.Count > 0) then begin
-    TWinControl (fFocusList.Last).SetFocus;
-    exit;
-  end;
-  inherited;
-end;
-
-{$IFDEF SYN_WIN32}
 procedure TCustomSynEdit.WMSetCursor(var Msg: TWMSetCursor);
 var
   ptCursor, ptLineCol: TPoint;
@@ -6738,11 +5555,10 @@ begin
       inherited;
   end;
 end;
-{$ENDIF}
 
 procedure TCustomSynEdit.BookMarkOptionsChanged(Sender: TObject);
 begin
-  InvalidateGutter;
+  InvalidateGutter;                                                           
 end;
 
 procedure TCustomSynEdit.SetOptions(Value: TSynEditorOptions);
@@ -6755,11 +5571,9 @@ begin
     // Reset column position in case Cursor is past EOL.
     if not (eoScrollPastEol in fOptions) then
       CaretX := CaretX;
-{$IFDEF SYN_WIN32}
     // (un)register HWND as drop target
     if bSetDrag and not (csDesigning in ComponentState) and HandleAllocated then
       DragAcceptFiles(Handle, (eoDropFiles in fOptions));
-{$ENDIF}      
   end;
 end;
 
@@ -6775,19 +5589,17 @@ begin
     if not (eoScrollPastEof in Options) then
       TopLine := TopLine;
 {end}                                                                           //mh 2000-10-19
-{$IFDEF SYN_WIN32}
     if (Flag = eoDropFiles) then begin
       if not (csDesigning in ComponentState) and HandleAllocated then
         DragAcceptFiles(Handle, Value);
     end;
-{$ENDIF}        
     EnsureCursorPosVisible;
   end;
 end;
 
 procedure TCustomSynEdit.SizeOrFontChanged(bFont: boolean);
 begin
-  if HandleAllocated and (fCharWidth <> 0) then begin  // DJLP - for kylix port
+  if HandleAllocated then begin
     fCharsInWindow := (ClientWidth - fGutterWidth - 2) div fCharWidth;
     fLinesInWindow := ClientHeight div fTextHeight;
     if bFont then begin
@@ -7013,16 +5825,8 @@ begin
   end;
 {begin}                                                                         //mh 2000-10-01
   StartOfBlock := CaretXY;
-  if (i = TabWidth) and not(eoSmartTabs in options) and                         //GN 10/16/01 Begin
-     not(eoTabsToSpaces in options) then
-  begin
-    NewCaretX := StartOfBlock.X + 1;
-    SetSelText(#9);
-  end else begin
-    NewCaretX := StartOfBlock.X + i;
-    SetSelText(Spaces);
-  end;                                                                          //GN 10/16/01 End 
-
+  NewCaretX := StartOfBlock.X + i;
+  SetSelText(Spaces);
   ChangeScroll := not (eoScrollPastEol in fOptions);
   try
     Include(fOptions, eoScrollPastEol);
@@ -7031,119 +5835,17 @@ begin
     if ChangeScroll then
       Exclude(fOptions, eoScrollPastEol);
   end;
+//  i := CaretY - 1;
+//  if eoTrimTrailingSpaces in Options then                                       //JGF 2000-09-23
+//    Lines[i] := TrimRight(Lines[i]);
+//  EnsureCursorPosVisible;
+//  if Length(Lines[i]) >= StartOfBlock.X then
     fUndoList.AddChange(crInsert, StartOfBlock, CaretXY, GetSelText,
       SelectionMode);
   EnsureCursorPosVisible;
 {end}                                                                           //mh 2000-10-01
 end;
-//DDH 10/16/01 Start from Eden Kirin + Smart Tab delete from DDH
-procedure TCustomSynEdit.DoShiftTabKey;
-var
-  NewX        :integer;
-  OldSelMode  :TSynSelectionMode;
-  Line        :string;
-  LineLen     :integer;
-  DestX       :integer;
 
-  MaxLen, iLine: integer;
-  PrevLine     : string;
-  p: PChar;
-
-begin
-  NewX:=CaretX;
-
-  if (NewX <> 1) and (eoSmartTabs in fOptions) then
-  begin
-    iLine := CaretY - 1;
-    if (iLine > 0) and (iLine < Lines.Count) then begin
-      Dec(iLine);
-      MaxLen := CaretX - 1;
-      repeat
-// NOTE after throwing in real tabs we have to use:
-//      PrevLine := pConvert(Lines[iLine], TabWidth);
-        PrevLine := Lines[iLine];
-        if (Length(PrevLine) >= MaxLen) then begin
-          p := @PrevLine[MaxLen];
-          // scan over whitespaces
-          repeat
-            if p^ <> #32 then break;
-            Dec(NewX);
-            Dec(p);
-          until NewX = 1;
-          // scan over non-whitespaces
-          if NewX <> 1 then
-            repeat
-              if p^ = #32 then break;
-              Dec(NewX);
-              Dec(p);
-            until NewX = 1;
-          break;
-        end;
-        Dec(iLine);
-      until iLine < 0;
-    end;
-  end;
-
-  if NewX = CaretX then
-  begin
-    Line:=LineText;
-    LineLen:=Length(Line);
-
-    // find real un-tab position
-
-    DestX:=((CaretX-2) div TabWidth)*TabWidth+1;
-    while (NewX>DestX) and ((NewX-1>LineLen) or (Line[NewX-1]=' ')) do
-      dec(NewX);
-
-  end;
-
-  // perform un-tab
-  if (NewX<>CaretX) then begin
-    OldSelMode := fSelectionMode;
-    try
-      SetBlockBegin(Point(NewX,CaretY));
-      SetBlockEnd(CaretXY);
-
-      fUndoList.AddChange(crDeleteAfterCursor, Point(NewX,CaretY), CaretXY, SelText,
-        smNormal);
-
-      SetSelText('');
-      CaretX:=NewX;
-    finally
-      fSelectionMode := OldSelMode;
-    end;
-  end;
-end;
-
-procedure TCustomSynEdit.DoHomeKey(Selection:boolean);
-var
-  newX           :integer;
-  first_nonblank :integer;
-  s              :string;
-begin
-  if (eoEnhanceHomeKey in fOptions) then begin
-    s:=fLines[CaretXY.Y-1];
-
-    first_nonblank:=1;
-    while (first_nonblank<Length(s)) and (s[first_nonblank]=' ') do
-      inc(first_nonblank);
-    dec(first_nonblank);
-
-    newX:=CaretXY.X-1;
-
-    if (newX>first_nonblank) or (newX=0) then
-      newX:=first_nonblank+1
-    else
-      newX:=1;
-  end else
-    newX:=1;
-
-  MoveCaretAndSelection(CaretXY, Point(newX, CaretY), Selection);
-end;
-
-//DDH 10/16/01 End from Eden Kirin
-
-{$IFDEF SYN_WIN32}
 procedure TCustomSynEdit.CreateWnd;
 begin
   inherited;
@@ -7157,7 +5859,6 @@ begin
     DragAcceptFiles(Handle, FALSE);
   inherited;
 end;
-{$ENDIF}
 
 procedure TCustomSynEdit.DoBlockIndent;
 var
@@ -7325,10 +6026,8 @@ begin
 {$IFDEF SYN_COMPILER_5_UP}
     else if Action is TEditDelete then
       ClearSelection
-{$IFDEF SYN_WIN32}
     else if Action is TEditUndo then
       Undo
-{$ENDIF}
     else if Action is TEditSelectAll then
       SelectAll;
 {$ENDIF}
@@ -7350,10 +6049,8 @@ begin
 {$IFDEF SYN_COMPILER_5_UP}
       else if Action is TEditDelete then
         TEditAction(Action).Enabled := TRUE
-{$IFDEF SYN_WIN32}
       else if Action is TEditUndo then
         TEditAction(Action).Enabled := CanUndo
-{$ENDIF}        
       else if Action is TEditSelectAll then
         TEditAction(Action).Enabled := TRUE;
 {$ENDIF}
@@ -7392,11 +6089,7 @@ begin
     if sfLinesChanging in fStateFlags then
       UnionRect(fInvalidateRect, fInvalidateRect, rcInval)
     else
-{$IFDEF SYN_WIN32}
       InvalidateRect(Handle, @rcInval, FALSE);
-{$ELSE}
-      InvalidateRect(rcInval, FALSE);
-{$ENDIF}      
   end;
 end;
 
@@ -7413,36 +6106,18 @@ begin
   end;
 end;
 
-procedure TCustomSynEdit.FindMatchingBracket;                                   //GBN 2001-10-23
-var P: TPoint;
-begin
-  P := GetMatchingBracket;
-  if (P.X>0) and (P.Y>0) then CaretXY := P;
-end;
-
-function TCustomSynEdit.GetMatchingBracket: TPoint;
-begin
-  Result := GetMatchingBracketEx(Point(CaretX, CaretY));
-end;
-
-function TCustomSynEdit.GetMatchingBracketEx(APoint: TPoint): TPoint;           //DDH 2001-10-23
+procedure TCustomSynEdit.FindMatchingBracket;
 const
-  Brackets: array[0..7] of char = ('(', ')', '[', ']', '{', '}', '<', '>');     //DDH 10/17/01 from Flávio Etrusco
+  Brackets: array[0..5] of char = ('(', ')', '[', ']', '{', '}');
 var
   Line: string;
   i, PosX, PosY, Len: integer;
   Test, BracketInc, BracketDec: char;
   NumBrackets: integer;
-  dumbstr:string;
-  attr:TSynHighlighterAttributes;
-  p:TPoint;
-  isCommentOrString:boolean;
 begin
-  Result.X := 0;
-  Result.Y := 0;
   // get char at caret
-  PosX := APoint.X;
-  PosY := APoint.Y;
+  PosX := CaretX;
+  PosY := CaretY;
   Line := LineText;
   if Length(Line) >= PosX then begin
     Test := Line[PosX];
@@ -7460,19 +6135,13 @@ begin
             while PosX > 1 do begin
               Dec(PosX);
               Test := Line[PosX];
-              p.x := PosX;
-              p.y := PosY;
-              if GetHighlighterAttriAtRowCol(p,dumbstr,attr) then
-                isCommentOrString:=
-                 (attr=Highlighter.StringAttribute) or (attr=Highlighter.CommentAttribute)
-              else isCommentOrString:=false;
-              if (Test = BracketInc) and (not isCommentOrString) then
+              if Test = BracketInc then
                 Inc(NumBrackets)
-              else if (Test = BracketDec) and (not isCommentOrString) then begin
+              else if Test = BracketDec then begin
                 Dec(NumBrackets);
                 if NumBrackets = 0 then begin
                   // matching bracket found, set caret and bail out
-                  Result := Point(PosX, PosY);
+                  CaretXY := Point(PosX, PosY);
                   exit;
                 end;
               end;
@@ -7490,19 +6159,13 @@ begin
             while PosX < Len do begin
               Inc(PosX);
               Test := Line[PosX];
-              p.x:=PosX;
-              p.y:=PosY;
-              if GetHighlighterAttriAtRowCol(p,dumbstr,attr) then
-                isCommentOrString:=
-                  (attr=Highlighter.StringAttribute) or (attr=Highlighter.CommentAttribute)
-              else isCommentOrString:=false;
-              if (Test = BracketInc) and (not isCommentOrString) then
+              if Test = BracketInc then
                 Inc(NumBrackets)
-              else if (Test = BracketDec)and (not isCommentOrString) then begin
+              else if Test = BracketDec then begin
                 Dec(NumBrackets);
                 if NumBrackets = 0 then begin
                   // matching bracket found, set caret and bail out
-                  Result := Point(PosX, PosY);
+                  CaretXY := Point(PosX, PosY);
                   exit;
                 end;
               end;
@@ -7522,17 +6185,10 @@ end;
 
 function TCustomSynEdit.GetHighlighterAttriAtRowCol(XY: TPoint;
   var Token: string; var Attri: TSynHighlighterAttributes): boolean;
-VAR TmpType, TmpStart: Integer;
-begin
-  Result := GetHighlighterAttriAtRowColEx(XY, Token, TmpType, TmpStart, Attri);
-end;
-
-function TCustomSynEdit.GetHighlighterAttriAtRowColEx(XY: TPoint;
-  var Token: string; var TokenType, Start: Integer;
-  var Attri: TSynHighlighterAttributes): boolean;                               //DDH 10/16/01 (added TokenType, Start)
 var
   PosX, PosY: integer;
   Line: string;
+  Start: integer;
 begin
   PosY := XY.Y;
   if Assigned(Highlighter) and (PosY >= 1) and (PosY <= Lines.Count) then
@@ -7548,7 +6204,6 @@ begin
         Token := Highlighter.GetToken;
         if (PosX >= Start) and (PosX < Start + Length(Token)) then begin
           Attri := Highlighter.GetTokenAttribute;
-          TokenType := Highlighter.GetTokenKind;
           Result := TRUE;
           exit;
         end;
@@ -7645,25 +6300,13 @@ begin
     Command := ecNone;
 end;
 
+{begin}                                                                         // djlp - 2000-08-29
 procedure TCustomSynEdit.DoOnClearBookmark(var Mark: TSynEditMark);
 begin
   if Assigned(fOnClearMark) then
     fOnClearMark(Self, Mark);
 end;
-
-procedure TCustomSynEdit.DoOnPaintTransient(TransientType: TTransientType);     //GBN 2001-10-23
-begin
-  if Assigned(fOnPaintTransient) then begin
-    Canvas.Font.Assign(Font);
-    Canvas.Brush.Color := Color;
-    HideCaret;
-    try
-      fOnPaintTransient(Self, Canvas, TransientType);
-    finally
-      ShowCaret;
-    end;
-  end;
-end;
+{end}                                                                           // djlp - 2000-08-29
 
 procedure TCustomSynEdit.DoOnPaint;
 begin
@@ -7697,17 +6340,9 @@ begin
 end;
 
 procedure TCustomSynEdit.UndoRedoAdded(Sender: TObject);
-var FOldModified : Boolean;                                                     //FDE: Bug Fix
 begin
-                                                                                //FDE 10/16/01 Start
-  if (Sender = fUndoList) and (fUndoList.ItemCount = 1) and                     //FDE: Bug Fix
-      not(sfInsideRedo in fStateFlags) then
-  begin
-    FOldModified := Modified;
-  end else FOldModified := False;
-
-  Modified := fUndoList.CanUndo or FOldModified or fUndoList.FullUndoImpossible;//FDE 10/16/01 End;
-
+//  Modified := TRUE;
+  Modified := fUndoList.CanUndo or fUndoList.FullUndoImpossible;                //mh 2000-10-03
   // we have to clear the redo information, since adding undo info removes
   // the necessary context to undo earlier edit actions
   if (Sender = fUndoList) and not (sfInsideRedo in fStateFlags) then            //mh 2000-10-30
@@ -7811,70 +6446,12 @@ begin
     end;
 end;
 
-procedure TCustomSynEdit.TrimmedSetLine(ALine: integer; ALineText: string);
+procedure TCustomSynEdit.TrimmedSetLine(ALine: integer; ALineText: string);   
 begin
   if eoTrimTrailingSpaces in Options then
     Lines[ALine] := TrimRight(ALineText)
   else
     Lines[ALine] := ALineText;
-end;
-
-procedure TCustomSynEdit.SetOnKeyDown(const Value : TKeyEvent);
-begin
-  fKbdHandler.OnKeyDown := Value;
-end;
-
-function TCustomSynEdit.GetOnKeyDown : TKeyEvent;
-begin
-  Result := fKbdHandler.OnKeyDown;
-end;
-
-procedure TCustomSynEdit.SetOnKeyPress(const Value : TKeyPressEvent);
-begin
-  fKbdHandler.OnKeyPress := Value;
-end;
-
-function TCustomSynEdit.GetOnKeyPress : TKeyPressEvent;
-begin
-  Result := fKbdHandler.OnKeyPress;
-end;
-
-procedure TCustomSynEdit.AddKeyDownHandler (aHandler : TKeyDownProc);
-begin
-  fKbdHandler.AddKeyDownHandler(aHandler);
-end;
-
-procedure TCustomSynEdit.RemoveKeyDownHandler (aHandler : TKeyDownProc);
-begin
-  fKbdHandler.RemoveKeyDownHandler(aHandler);
-end;
-
-procedure TCustomSynEdit.AddKeyPressHandler (aHandler : TKeyPressProc);
-begin
-  fKbdHandler.AddKeyPressHandler(aHandler);
-end;
-
-procedure TCustomSynEdit.RemoveKeyPressHandler (aHandler : TKeyPressProc);
-begin
-  fKbdHandler.RemoveKeyPressHandler(aHandler);
-end;
-
-procedure TCustomSynEdit.AddFocusControl (aControl: TWinControl);
-begin
-  fFocusList.Add(aControl);
-end;
-
-procedure TCustomSynEdit.RemoveFocusControl (aControl: TWinControl);
-begin
-  fFocusList.Remove(aControl);
-end;
-
-function TCustomSynEdit.IdentChars: TSynIdentChars;                             //DDH 10/17/01 from Flávio Etrusco
-begin
-  if Highlighter <> nil then
-    Result := Highlighter.IdentChars
-  else
-    Result := [#33..#255];
 end;
 
 { TSynEditMark }
@@ -8066,8 +6643,6 @@ begin
 end;
 
 initialization
-{$IFDEF SYN_WIN32}
   SynEditClipboardFormat := RegisterClipboardFormat(SYNEDIT_CLIPBOARD_FORMAT);
-{$ENDIF}  
 end.
 

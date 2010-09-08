@@ -35,9 +35,19 @@ class PASCALIMPLEMENTATION TCustomSynMemo : public Synedit::TCustomSynEdit
 {
 	typedef Synedit::TCustomSynEdit inherited;
 	
+private:
+	int __fastcall GetSelEnd(void);
+	int __fastcall GetSelStart(void);
+	void __fastcall SetSelEnd(int Value);
+	void __fastcall SetSelStart(int Value);
+	
 public:
 	Windows::TPoint __fastcall CharIndexToRowCol(int Index);
 	int __fastcall RowColToCharIndex(const Windows::TPoint &RowCol);
+	
+protected:
+	__property int SelEnd = {read=GetSelEnd, write=SetSelEnd, nodefault};
+	__property int SelStart = {read=GetSelStart, write=SetSelStart, nodefault};
 public:
 	#pragma option push -w-inl
 	/* TCustomSynEdit.Create */ inline __fastcall virtual TCustomSynMemo(Classes::TComponent* AOwner) : 
@@ -60,6 +70,10 @@ class DELPHICLASS TSynMemo;
 class PASCALIMPLEMENTATION TSynMemo : public TCustomSynMemo 
 {
 	typedef TCustomSynMemo inherited;
+	
+public:
+	__property SelEnd ;
+	__property SelStart ;
 	
 __published:
 	__property Align ;

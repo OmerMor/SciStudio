@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditSearch.pas,v 1.3 2001/05/28 00:02:45 dparnell Exp $
+$Id: SynEditSearch.pas,v 1.2 2000/09/16 07:31:46 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -90,12 +90,7 @@ type
 implementation
 
 uses
-{$IFDEF SYN_KYLIX}
-  kTextDrawer, Types,
-{$ELSE}
-  Windows,
-{$ENDIF}
-  SysUtils;
+  Windows, SysUtils;
   
 var
   CompTableSensitive: boolean;
@@ -116,12 +111,7 @@ begin
   begin
     CompTableSensitive := Sensitive;
     for I := #0 to #255 do CompTable[I] := ord(I);
-    if not Sensitive then
-{$IFDEF SYN_KYLIX}
-      for I := #0 to #255 do CompTable[I] := ord(upcase(char(CompTable[I])));
-{$ELSE}
-      CharLowerBuff(PChar(@CompTable[#0]), 256);
-{$ENDIF}
+    if not Sensitive then CharLowerBuff(PChar(@CompTable[#0]), 256);
   end;
 end;
 
@@ -129,12 +119,7 @@ procedure MakeDelimiterTable;
 var
   c: char;
 begin
-  for c := #0 to #255 do
-{$IFDEF SYN_KYLIX}
-    DelimTable[c] := not (c in ['0'..'9', 'A'..'Z', 'a'..'z', '_']);
-{$ELSE}
-    DelimTable[c] := not IsCharAlphaNumeric(c);
-{$ENDIF}
+  for c := #0 to #255 do DelimTable[c] := not IsCharAlphaNumeric(c);
 end;
 
 function TSynEditSearch.GetFinished: Boolean;

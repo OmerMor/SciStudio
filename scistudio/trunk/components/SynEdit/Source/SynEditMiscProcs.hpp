@@ -53,8 +53,6 @@ extern PACKAGE int __fastcall StrScanForCharInSet(const AnsiString Line, int Sta
 	&AChars);
 extern PACKAGE int __fastcall StrRScanForCharInSet(const AnsiString Line, int Start, const Synedittypes::TSynIdentChars 
 	&AChars);
-extern PACKAGE int __fastcall StrScanForMultiByteChar(const AnsiString Line, int Start);
-extern PACKAGE int __fastcall StrRScanForMultiByteChar(const AnsiString Line, int Start);
 extern PACKAGE char * __fastcall GetEOL(char * Line);
 extern PACKAGE AnsiString __fastcall EncodeString(AnsiString s);
 extern PACKAGE AnsiString __fastcall DecodeString(AnsiString s);

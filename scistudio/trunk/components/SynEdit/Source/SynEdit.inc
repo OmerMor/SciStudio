@@ -28,9 +28,6 @@
 (* SYN_COMPILER_5       : Delphi 5.0x or C++B 5.0x is the compiler.           *)
 (* SYN_COMPILER_5_UP    : Delphi 5.0x or higher, or C++B 5.0x or higher is    *)
 (*                        the compiler.                                       *)
-(* SYN_COMPILER_6       : Delphi 6.0x or C++B 6.0x is the compiler.           *)
-(* SYN_COMPILER_6_UP    : Delphi 6.0x or higher, or C++B 6.0x or higher is    *)
-(*                        the compiler.                                       *)
 (* SYN_CPPB             : Any version of C++B is being used.                  *)
 (* SYN_CPPB_1           : C++B v1.0x is being used.                           *)
 (* SYN_CPPB_3           : C++B v3.0x is being used.                           *)
@@ -40,7 +37,6 @@
 (* SYN_CPPB_5           : C++B v5.0x is being used.                           *)
 (* SYN_CPPB_5_UP        : C++B v5.0x or higher is being used.                 *)
 (* SYN_DELPHI           : Any version of Delphi is being used.                *)
-(* SYN_DELPHI_PE        : The personal edition of Delphi is being used.       *)
 (* SYN_DELPHI_2         : Delphi v2.0x is being used.                         *)
 (* SYN_DELPHI_2_UP      : Delphi v2.0x or higher is being used.               *)
 (* SYN_DELPHI_3         : Delphi v3.0x is being used.                         *)
@@ -49,28 +45,12 @@
 (* SYN_DELPHI_4_UP      : Delphi v4.0x or higher is being used.               *)
 (* SYN_DELPHI_5         : Delphi v5.0x is being used.                         *)
 (* SYN_DELPHI_5_UP      : Delphi v5.0x or higher is being used.               *)
-(* SYN_DELPHI_6         : Delphi v6.0x is being used.                         *)
-(* SYN_DELPHI_6_UP      : Delphi v6.0x or higher is being used.               *)
-(* SYN_KYLIX            : Kylix 1.0 is being using                            *)
 (******************************************************************************)
 
 {$DEFINE SYNEDIT_INCLUDE}
 
 {$IFDEF WIN32}
   {$DEFINE SYN_WIN32}
-{$ENDIF}
-
-{$IFDEF LINUX}
-  {$DEFINE SYN_KYLIX}
-  {$DEFINE SYN_COMPILER_6}
-  {$DEFINE SYN_DELPHI}
-  {$DEFINE SYN_DELPHI_6}
-{$ENDIF}
-
-{$IFDEF VER140}
-  {$DEFINE SYN_COMPILER_6}
-  {$DEFINE SYN_DELPHI}
-  {$DEFINE SYN_DELPHI_6}
 {$ENDIF}
 
 {$IFDEF VER130}
@@ -141,15 +121,6 @@
   {$DEFINE SYN_COMPILER_5_UP}
 {$ENDIF}
 
-{$IFDEF SYN_COMPILER_6}
-  {$DEFINE SYN_COMPILER_1_UP}
-  {$DEFINE SYN_COMPILER_2_UP}
-  {$DEFINE SYN_COMPILER_3_UP}
-  {$DEFINE SYN_COMPILER_4_UP}
-  {$DEFINE SYN_COMPILER_5_UP}
-  {$DEFINE SYN_COMPILER_6_UP}
-{$ENDIF}
-
 {$IFDEF SYN_DELPHI_2}
   {$DEFINE SYN_DELPHI_2_UP}
 {$ENDIF}
@@ -170,14 +141,6 @@
   {$DEFINE SYN_DELPHI_3_UP}
   {$DEFINE SYN_DELPHI_4_UP}
   {$DEFINE SYN_DELPHI_5_UP}
-{$ENDIF}
-
-{$IFDEF SYN_DELPHI_6}
-  {$DEFINE SYN_DELPHI_2_UP}
-  {$DEFINE SYN_DELPHI_3_UP}
-  {$DEFINE SYN_DELPHI_4_UP}
-  {$DEFINE SYN_DELPHI_5_UP}
-  {$DEFINE SYN_DELPHI_6_UP}
 {$ENDIF}
 
 {$IFDEF SYN_CPPB_3}
@@ -208,9 +171,7 @@
 // support for multibyte character sets
 {$IFDEF SYN_COMPILER_3_UP}
 
-{$IFNDEF SYN_KYLIX}
 {$DEFINE SYN_MBCSSUPPORT}
-{$ENDIF}
 
 {$ENDIF}
 
@@ -220,10 +181,8 @@
 
 {$IFDEF SYN_DEVELOPMENT_CHECKS}
 
+{$R+,Q+,S+,T+}
+
 {$ENDIF}
 
-{$IFNDEF SYN_KYLIX}
-  {$DEFINE SYN_WIN32}
-{$ENDIF}
-
-// $Id: SynEdit.inc,v 1.6 2001/10/15 06:17:54 plpolak Exp $
+// $Id: SynEdit.inc,v 1.2 2000/11/11 21:34:50 mghie Exp $

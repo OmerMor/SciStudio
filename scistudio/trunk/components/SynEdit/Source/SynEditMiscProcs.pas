@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynEditMiscProcs.pas,v 1.8 2001/10/21 21:10:20 jrx Exp $
+$Id: SynEditMiscProcs.pas,v 1.3 2000/11/08 21:27:58 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -42,12 +42,7 @@ unit SynEditMiscProcs;
 interface
 
 uses
-{$IFDEF SYN_KYLIX}
-  kTextDrawer, Types,
-{$ELSE}
-  Windows,
-{$ENDIF}
-  Classes, SynEditTypes;
+  Windows, Classes, SynEditTypes;
 
 type
   PIntArray = ^TIntArray;
@@ -62,9 +57,7 @@ function minPoint(P1, P2: TPoint): TPoint;
 
 function GetIntArray(Count: Cardinal; InitialValue: integer): PIntArray;
 
-{$IFNDEF SYN_KYLIX}
 procedure InternalFillRect(dc: HDC; const rcPaint: TRect);
-{$ENDIF}
 
 // Converting tabs to spaces: To use the function several times it's better
 // to use a function pointer that is set to the fastest conversion function.
@@ -99,13 +92,6 @@ function StrScanForCharInSet(const Line: string; Start: integer;
 function StrRScanForCharInSet(const Line: string; Start: integer;
   AChars: TSynIdentChars): integer;
 
-{$IFDEF SYN_MBCSSUPPORT}
-// search for first multibyte char in Line, starting at index Start
-function StrScanForMultiByteChar(const Line: string; Start: Integer): Integer;
-// the same, but searching backwards
-function StrRScanForMultiByteChar(const Line: string; Start: Integer): Integer;
-{$ENDIF}
-
 function GetEOL(Line: PChar): PChar;
 
 {begin}                                                                         //gp 2000-06-24
@@ -116,14 +102,6 @@ function EncodeString(s: string): string;
 // Decodes string, encoded with EncodeString.
 function DecodeString(s: string): string;
 {end}                                                                           //gp 2000-06-24
-
-{$IFNDEF SYN_COMPILER_5_UP}
-procedure FreeAndNil(var Obj);
-{$ENDIF}
-
-{$IFNDEF SYN_COMPILER_3_UP}
-procedure Assert(Expr: Boolean);  { stub for Delphi 2 }
-{$ENDIF}
 
 implementation
 
@@ -188,12 +166,10 @@ begin
   end;
 end;
 
-{$IFNDEF SYN_KYLIX}
 procedure InternalFillRect(dc: HDC; const rcPaint: TRect);
 begin
   ExtTextOut(dc, 0, 0, ETO_OPAQUE, @rcPaint, nil, 0, nil);
 end;
-{$ENDIF}
 
 {***}
 
@@ -491,31 +467,8 @@ var
 begin
   if (Start > 0) and (Start <= Length(Line)) then
   begin
-{$IFDEF SYN_MBCSSUPPORT}
-    // don't start on a trail byte
-    if ByteType(Line, Start) = mbTrailByte then
-    begin
-      Inc(Start);
-      if Start > Length(Line) then
-      begin
-        Result := 0;
-        Exit;
-      end;
-    end;
-{$ENDIF}
     p := PChar(@Line[Start]);
     repeat
-{$IFDEF SYN_MBCSSUPPORT}
-      // skip over multibyte characters
-      if p^ in LeadBytes then
-      begin
-        Inc(p);
-        Inc(Start);
-        if p^ = #0 then
-          Break;
-      end
-      else
-{$ENDIF}
       if p^ in AChars then
       begin
         Result := Start;
@@ -531,75 +484,23 @@ end;
 function StrRScanForCharInSet(const Line: string; Start: integer;
   AChars: TSynIdentChars): integer;
 var
-  I: Integer;
+  p: PChar;
 begin
-  Result := 0;
-  if (Start > 0) and (Start <= Length(Line)) then begin
-{$IFDEF SYN_MBCSSUPPORT}
-    if not SysLocale.FarEast then begin
-{$ENDIF}
-      for I := Start downto 1 do
-        if Line[I] in AChars then begin
-          Result := I;
-          Exit;
-        end;
-{$IFDEF SYN_MBCSSUPPORT}
-    end
-    else begin
-      // it's a lot faster to start from the beginning and go forward than to go
-      // backward and call ByteType on every character
-      I := 1;
-      while I <= Start do begin
-        if Line[I] in LeadBytes then
-          Inc(I)
-        else if Line[I] in AChars then
-          Result := I;
-        Inc(I);
+  if (Start > 0) and (Start <= Length(Line)) then
+  begin
+    p := PChar(@Line[Start]);
+    repeat
+      if p^ in AChars then
+      begin
+        Result := Start;
+        exit;
       end;
-    end;
-{$ENDIF}
-  end;
-end;
-
-{$IFDEF SYN_MBCSSUPPORT}
-function StrScanForMultiByteChar(const Line: string; Start: Integer): Integer;
-var
-  I: Integer;
-begin
-  if SysLocale.FarEast and (Start > 0) and (Start <= Length(Line)) then begin
-    // don't start on a trail byte
-    if ByteType(Line, Start) = mbTrailByte then
-      Inc(Start);
-    for I := Start to Length(Line) do
-      if Line[I] in LeadBytes then begin
-        Result := I;
-        Exit;
-      end;
+      Dec(p);
+      Dec(Start);
+    until Start < 1;
   end;
   Result := 0;
 end;
-{$ENDIF}
-
-{$IFDEF SYN_MBCSSUPPORT}
-function StrRScanForMultiByteChar(const Line: string; Start: Integer): Integer;
-var
-  I: Integer;
-begin
-  Result := 0;
-  if SysLocale.FarEast and (Start > 0) and (Start <= Length(Line)) then begin
-    // it's a lot faster to start from the beginning and go forward than to go
-    // backward and call ByteType on every character
-    I := 1;
-    while I <= Start do begin
-      if Line[I] in LeadBytes then begin
-        Result := I;
-        Inc(I);
-      end;
-      Inc(I);
-    end;
-  end;
-end;
-{$ENDIF}
 
 function GetEOL(Line: PChar): PChar;
 begin
@@ -657,23 +558,6 @@ begin
 end; { DecodeString }
 {$IFDEF RestoreRangeChecking}{$R+}{$ENDIF}
 {end}                                                                           //gp 2000-06-24
-
-{$IFNDEF SYN_COMPILER_5_UP}
-procedure FreeAndNil(var Obj);
-var
-  P: TObject;
-begin
-  P := TObject(Obj);
-  TObject(Obj) := nil;
-  P.Free;
-end;
-{$ENDIF}
-
-{$IFNDEF SYN_COMPILER_3_UP}
-procedure Assert(Expr: Boolean);  { stub for Delphi 2 }
-begin
-end;
-{$ENDIF}
 
 end.
 

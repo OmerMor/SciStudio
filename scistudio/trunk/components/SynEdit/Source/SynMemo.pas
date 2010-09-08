@@ -27,7 +27,7 @@ replace them with the notice and other provisions required by the GPL.
 If you do not delete the provisions above, a recipient may use your version
 of this file under either the MPL or the GPL.
 
-$Id: SynMemo.pas,v 1.6 2001/10/17 12:52:04 harmeister Exp $
+$Id: SynMemo.pas,v 1.4 2000/11/11 18:15:00 mghie Exp $
 
 You may retrieve the latest version of this file at the SynEdit home page,
 located at http://SynEdit.SourceForge.net
@@ -44,27 +44,31 @@ unit SynMemo;
 interface
 
 uses
-  Classes,
-  {$IFDEF SYN_KYLIX}
-  Qt, Types,
-  {$ELSE}
-  Windows,
-  {$ENDIF}
-  SynEdit;
-
-//SelStart and SelEnd are now in TCustomSynEdit                                 //DDH Addition
+  Classes, Windows, SynEdit;
 
 type
   TCustomSynMemo = class(TCustomSynEdit)
+  private
+//    function CharIndexToRowCol(Index: integer): TPoint;                       //as 2000-11-09
+    function GetSelEnd: integer;
+    function GetSelStart: integer;
+//    function RowColToCharIndex(RowCol: TPoint): integer;                      //as 2000-11-09
+    procedure SetSelEnd(Value: integer);
+    procedure SetSelStart(Value: integer);
   public
     function CharIndexToRowCol(Index: integer): TPoint;                         //as 2000-11-09
     function RowColToCharIndex(RowCol: TPoint): integer;                        //as 2000-11-09
+  protected
+    property SelEnd: integer read GetSelEnd write SetSelEnd;
+    property SelStart: integer read GetSelStart write SetSelStart;
   end;
 
   TSynMemo = class(TCustomSynMemo)
 {begin}                                                                         //mh 2000-09-23
   public
     // TCustomSynMemo properties
+    property SelEnd;
+    property SelStart;
 {end}                                                                           //mh 2000-09-23
   published
     // inherited properties
@@ -74,17 +78,13 @@ type
     property Constraints;
 {$ENDIF}
     property Color;
-    {$IFNDEF SYN_KYLIX}
     property Ctl3D;
-    {$ENDIF}
     property Enabled;
     property Font;
     property Height;
     property Name;
     property ParentColor;
-    {$IFNDEF SYN_KYLIX}
     property ParentCtl3D;
-    {$ENDIF}
     property ParentFont;
     property ParentShowHint;
     property PopupMenu;
@@ -100,9 +100,7 @@ type
     property OnDragDrop;
     property OnDragOver;
 {$IFDEF SYN_COMPILER_4_UP}
-{$IFNDEF SYN_KYLIX}
     property OnEndDock;
-{$ENDIF}
 {$ENDIF}
     property OnEndDrag;
     property OnEnter;
@@ -114,9 +112,7 @@ type
     property OnMouseMove;
     property OnMouseUp;
 {$IFDEF SYN_COMPILER_4_UP}
-{$IFNDEF SYN_KYLIX}
     property OnStartDock;
-{$ENDIF}
 {$ENDIF}
     property OnStartDrag;
     // TCustomSynEdit properties
@@ -184,6 +180,16 @@ begin
   Result := Point(x + 1, y + 1);
 end;
 
+function TCustomSynMemo.GetSelEnd: integer;
+begin
+  Result := RowColToCharIndex(BlockEnd);
+end;
+
+function TCustomSynMemo.GetSelStart: integer;
+begin
+  Result := RowColToCharIndex(BlockBegin);
+end;
+
 function TCustomSynMemo.RowColToCharIndex(RowCol: TPoint): integer;
 var
   i: integer;
@@ -193,6 +199,17 @@ begin
   for i := 0 to RowCol.y - 1 do
     Result := Result + Length(Lines[i]) + 2;
   Result := Result + RowCol.x;
+end;
+
+procedure TCustomSynMemo.SetSelEnd(Value: integer);
+begin
+  BlockEnd := CharIndexToRowCol(Value);
+end;
+
+procedure TCustomSynMemo.SetSelStart(Value: integer);
+begin
+  CaretXY := CharIndexToRowCol(Value);
+  BlockBegin := CaretXY;
 end;
 
 end.
