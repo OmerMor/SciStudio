@@ -59,3 +59,4 @@ void __fastcall TDlgCheckVersion::Label2MouseDown(TObject *Sender,
 }
 //---------------------------------------------------------------------------
 
+

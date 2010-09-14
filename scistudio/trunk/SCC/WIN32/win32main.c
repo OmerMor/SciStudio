@@ -26,7 +26,7 @@
 #define PLATFORM_NAME "Win32"
 
 #include "scc.h"
-#include <conio.h>
+//#include <conio.h>
 /******************************************************************************/
 
 typedef struct {
